@@ -16,6 +16,8 @@ class PROJECTSINGULARITY_API AGameHUDSetUp : public AHUD
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
+	APlayerController* PlayerController = nullptr;
 
 	// Runtime State
 	UPROPERTY(BlueprintReadWrite)
@@ -40,4 +42,7 @@ private:
 
 	UFUNCTION()
 	void InitializeAllGameMenus();
+
+	UFUNCTION()
+	void TryBindHUDToPawn() const;
 };
