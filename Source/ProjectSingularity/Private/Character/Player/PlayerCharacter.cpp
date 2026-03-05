@@ -7,22 +7,32 @@
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
 
 
 APlayerCharacter::APlayerCharacter():
 	ABaseCharacter()
 {
-	m_camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
-	if (IsValid(m_camera))
+	m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
+	if (IsValid(m_Camera))
 	{
-		m_camera->SetupAttachment(RootComponent);
-		m_camera->bUsePawnControlRotation = true;
+		m_Camera->SetupAttachment(RootComponent);
+		m_Camera->bUsePawnControlRotation = true;
 	}
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+	if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
+	{
+		charMoveComp->MaxWalkSpeed = m_PlayerDataAsset->maxWalkSpeed;
+		charMoveComp->JumpZVelocity = m_PlayerDataAsset->jumpZVelocity;
+		charMoveComp->AirControl = m_PlayerDataAsset->airControl;
+		charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
+	}
 }
 
 
@@ -37,11 +47,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (UEnhancedInputComponent* pEnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		pEnhancedInputComponent->BindAction(m_moveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
-		pEnhancedInputComponent->BindAction(m_jumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
-		pEnhancedInputComponent->BindAction(m_lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
-		pEnhancedInputComponent->BindAction(m_runAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RunStartAction);
-		pEnhancedInputComponent->BindAction(m_runAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEndAction);
+		pEnhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
+		pEnhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
+		pEnhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
 	}
 }
 
@@ -73,21 +81,5 @@ void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
 	{
 		AddControllerYawInput(inputVector.X);
 		AddControllerPitchInput(inputVector.Y);
-	}
-}
-
-void APlayerCharacter::RunStartAction(const FInputActionValue& _inputValue)
-{
-	if (UCharacterMovementComponent* charMoveComp = GetCharacterMovement())
-	{
-		charMoveComp->MaxWalkSpeed = 1200;
-	}
-}
-
-void APlayerCharacter::RunEndAction(const FInputActionValue& _inputValue)
-{
-	if (UCharacterMovementComponent* charMoveComp = GetCharacterMovement())
-	{
-		charMoveComp->MaxWalkSpeed = 800;
 	}
 }

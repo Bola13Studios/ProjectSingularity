@@ -10,6 +10,7 @@
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
+class UPlayerConfigDataAsset;
 
 UCLASS()
 class PROJECTSINGULARITY_API APlayerCharacter : public ABaseCharacter
@@ -35,24 +36,22 @@ private:
 	void MoveAction(const FInputActionValue& _inputValue);
 	void JumpAction(const FInputActionValue& _inputValue);
 	void LookAction(const FInputActionValue& _inputValue);
-	void RunStartAction(const FInputActionValue& _inputValue);
-	void RunEndAction(const FInputActionValue& _inputValue);
 
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Camera", meta = (DisplayName = "CameraComponent"))
-	TObjectPtr<UCameraComponent> m_camera;
+	TObjectPtr<UCameraComponent> m_Camera;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (DisplayName = "Move Action"))
-	TObjectPtr<UInputAction> m_moveAction;
+	TObjectPtr<UInputAction> m_MoveAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (DisplayName = "Jump Action"))
-	TObjectPtr<UInputAction> m_jumpAction;
+	TObjectPtr<UInputAction> m_JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (DisplayName = "Look Action"))
-	TObjectPtr<UInputAction> m_lookAction;
+	TObjectPtr<UInputAction> m_LookAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (DisplayName = "Run Action"))
-	TObjectPtr<UInputAction> m_runAction;
+	UPROPERTY(EditAnywhere, Category = "Data Asset", meta = (DisplayName = "Player Config Data Asset"))
+	TObjectPtr<UPlayerConfigDataAsset> m_PlayerDataAsset;
 	
 };
