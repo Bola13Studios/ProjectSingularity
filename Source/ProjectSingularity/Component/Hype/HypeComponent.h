@@ -1,5 +1,5 @@
 /************************************************************************
- * @description: Represents the Hype Component
+ * @description: Represents the Base Hype Component
  * @author: Josephine Esposito
  * @date: 04/03/2026
  * @edited_by:
@@ -15,23 +15,20 @@
 class UBoxComponent;
 #pragma endregion
 
+/**
+ * @brief The base Hype Component
+ */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTSINGULARITY_API UHypeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:
-	/**
-	 * @brief Applyed when custom getting the final points
-	 */
-	UPROPERTY(EditAnywhere, Category = "Bola 13|Values", meta = (DisplayName = "Multiplier"))
-	float Multiplier;
-	
+protected:	
 	/**
 	 * @brief The amount of hype this component stores
 	 */
-	UPROPERTY(EditAnywhere, Category = "Bola 13|Values", meta = (DisplayName = "Points"))
-	int Points;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
+	int BaseHypeValue;
 
 public:
 	
@@ -45,29 +42,19 @@ public:
 	 * @param _Points The amount to add to
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
-	void AddPoints(const int& _Points);
+	virtual void AddHype(const int& _Points);
 
 	/**
 	 * @brief Returns the calculated points after multiplier is applied
 	 * @return a rounded int
 	 */
 	UFUNCTION(BlueprintPure, Category = "Bola 13|Hype")
-	int GetPoints() const;
+	virtual int GetHype() const;
 
-protected:
 	/**
-	 * @brief Called when the game starts
+	 * @brief Called to reset current points back to 0
 	 */
-	virtual void BeginPlay() override;
-
-public:	
-	/**
-	 * @brief Called every frame
-	 * @param DeltaTime 
-	 * @param TickType 
-	 * @param ThisTickFunction 
-	 */
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
+	void ResetHype();
 };
+//EOF
