@@ -8,6 +8,8 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
+#include "Weapons/WeaponBase.h"
+#include "Weapons/WeaponsDataAsset.h"
 
 
 APlayerCharacter::APlayerCharacter():
@@ -33,23 +35,41 @@ void APlayerCharacter::BeginPlay()
 		charMoveComp->AirControl = m_PlayerDataAsset->airControl;
 		charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
 	}
+
+	FActorSpawnParameters spawnParams;
+	spawnParams.Owner = this;
+
+	m_CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(m_WeaponClass, spawnParams);
+
+	if (IsValid(m_CurrentWeapon))
+	{
+		m_CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
+		m_CurrentWeapon->SetWeaponData(m_WeaponDataAsset->weaponsData[0]); //Just for now
+	}
 }
 
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (m_bFire && m_CurrentWeapon)
+	{
+		m_bFire = m_CurrentWeapon->Fire();
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* pEnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	if (UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		pEnhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
-		pEnhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
-		pEnhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
+		enhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
+		enhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
+		enhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
+		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
+		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
 	}
 }
 
@@ -69,7 +89,7 @@ void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 	}
 }
 
-void APlayerCharacter::JumpAction(const FInputActionValue& _inputValue)
+void APlayerCharacter::JumpAction()
 {
 	ACharacter::Jump();
 }
@@ -82,4 +102,14 @@ void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
 		AddControllerYawInput(inputVector.X);
 		AddControllerPitchInput(inputVector.Y);
 	}
+}
+
+void APlayerCharacter::StartFireAction(const FInputActionValue& Value)
+{
+	m_bFire = true;
+}
+
+void APlayerCharacter::StopFireAction()
+{
+	m_bFire = false;
 }
