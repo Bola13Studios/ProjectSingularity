@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/Player/PlayerCharacter.h"
+#include "Gameplay/Character/Player/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
-#include "Weapons/WeaponBase.h"
-#include "Weapons/WeaponsDataAsset.h"
+#include "Gameplay/Weapons/WeaponBase.h"
+#include "Gameplay/Weapons/WeaponsDataAsset.h"
 
 
 APlayerCharacter::APlayerCharacter():
