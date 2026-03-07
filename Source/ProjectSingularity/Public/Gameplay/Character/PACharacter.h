@@ -8,8 +8,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Weapons/WeaponBase.h"
-#include "Weapons/WeaponsDataAsset.h"
+#include "Gameplay/Weapons/WeaponBase.h"
+#include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include <EnhancedActionKeyMapping.h>
 #include "PACharacter.generated.h"
 
