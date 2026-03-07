@@ -1,4 +1,4 @@
-#include "Weapons/WeaponsDataAsset.h"
+#include "Gameplay/Weapons/WeaponsDataAsset.h"
 
 #if WITH_EDITOR
 void UWeaponsDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

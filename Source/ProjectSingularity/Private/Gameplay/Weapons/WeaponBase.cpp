@@ -1,4 +1,4 @@
-#include "Weapons/WeaponBase.h"
+#include "Gameplay/Weapons/WeaponBase.h"
 #include "GameFramework/Character.h"
 
 AWeaponBase::AWeaponBase()
@@ -41,7 +41,6 @@ void AWeaponBase::Tick(float DeltaTime)
 bool AWeaponBase::Fire()
 {
 	float timeBetweenShots = 60.f / m_weaponData.fireRateRPM;
-
 	if (!m_cameraComponent || m_elapsedShootTime < timeBetweenShots)
 	{
 		return true;
