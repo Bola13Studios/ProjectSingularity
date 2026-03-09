@@ -30,18 +30,24 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
 	TObjectPtr<UBoxComponent> m_spawnArea;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Spawning", meta = (DisplayName = "Enemy Type to Spawn"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Bola13|Spawning", meta = (DisplayName = "Enemy Type to Spawn"))
 	TSubclassOf<ABaseEnemy> m_enemyType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (DisplayName = "Enemies to Spawn"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola13|Spawning", meta = (DisplayName = "Enemies to Spawn"))
 	int m_enemyCount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (DisplayName = "Spawn Delay"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola13|Spawning", meta = (DisplayName = "Spawn Delay"))
 	float m_spawnDelay = 3.0f;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola13|Spawning", meta = (DisplayName = "Reload Spawner"))
+	bool m_reloadSpawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola13|Spawning", meta = (DisplayName = "Spawn Wave Delay"))
+	int m_waveCooldown;
+
+	int m_enemiesSpawned =0 ;
+
+	void ResetSpawner();
 private:
 
 	FTimerHandle SpawnTimerHandle;
