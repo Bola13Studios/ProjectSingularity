@@ -17,12 +17,6 @@ AEnemySpawner::AEnemySpawner()
 
 void AEnemySpawner::SpawnEnemy()
 {
-  if (m_enemiesSpawned >= m_enemyCount)
-  {
-    GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-    return;
-  }
-
   if (GetWorld() && m_enemyType)
   {
     UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());

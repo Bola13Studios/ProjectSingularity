@@ -18,7 +18,7 @@ class PROJECTSINGULARITY_API ABaseEnemy : public ABaseCharacter
 
 public:
 
-	ABaseEnemy();
+	//ABaseEnemy();
 
 protected:
 

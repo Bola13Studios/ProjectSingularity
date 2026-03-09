@@ -45,7 +45,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola13|Spawning", meta = (DisplayName = "Spawn Wave Delay"))
 	int m_waveCooldown;
 
-	int m_enemiesSpawned =0 ;
+	int m_enemiesSpawned = 0;
 
 	void ResetSpawner();
 private:
