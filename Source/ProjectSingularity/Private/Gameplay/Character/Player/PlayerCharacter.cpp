@@ -83,15 +83,16 @@ void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 
 		const FVector forwardDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
 		const FVector rightDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
-
 		AddMovementInput(forwardDirection, inputVector.Y);
 		AddMovementInput(rightDirection, inputVector.X);
 	}
+
+
 }
 
 void APlayerCharacter::JumpAction()
 {
-	ACharacter::Jump();
+	Jump();
 }
 
 void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
@@ -112,4 +113,25 @@ void APlayerCharacter::StartFireAction(const FInputActionValue& Value)
 void APlayerCharacter::StopFireAction()
 {
 	m_bFire = false;
+}
+
+void APlayerCharacter::DashAction()
+{
+
+	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera))
+	{
+		FVector dashDirection = GetVelocity().IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
+		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
+	}
+}
+
+void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)
+{
+	if ((_direction.IsNearlyZero()) || (_distance <= 0.f) || (_time <= 0.f))
+	{
+		return;
+	}
+
+	FVector dashVelocity = _direction.GetSafeNormal() * (_distance / _time);
+	LaunchCharacter(dashVelocity, true, false);
 }

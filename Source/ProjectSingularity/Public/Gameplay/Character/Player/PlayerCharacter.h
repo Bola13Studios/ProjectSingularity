@@ -50,12 +50,24 @@ private:
 	UFUNCTION()
 	void StopFireAction();
 
+	UFUNCTION()
+	void DashAction();
+
+	UFUNCTION(BlueprintCallable)
+	void Dash(const FVector& _Direction, float _Distance, float _Time);
+
 public:
 
 
 private:
+
+
+
+
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
 	TObjectPtr<UCameraComponent> m_Camera;
+
+#pragma region Inputs
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Move Action"))
 	TObjectPtr<UInputAction> m_MoveAction;
@@ -66,8 +78,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Look Action"))
 	TObjectPtr<UInputAction> m_LookAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Dash Action"))
+	TObjectPtr<UInputAction> m_DashAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
+
+#pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
 	TSubclassOf<AWeaponBase> m_WeaponClass;
