@@ -7,7 +7,7 @@
 
 #include "ProjectSingularity/Public/UI/UMGPalette/Button/CustomButtonWidget.h"
 
- // Components
+// Components
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 

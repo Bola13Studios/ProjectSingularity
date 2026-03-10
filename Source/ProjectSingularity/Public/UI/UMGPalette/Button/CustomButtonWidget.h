@@ -11,7 +11,7 @@
 #include "ProjectSingularity/Public/UI/ResizableUserWidget.h"
 #include "CustomButtonWidget.generated.h"
 
- // Components
+// Components
 class UButton;
 class UTextBlock;
 
@@ -51,7 +51,7 @@ protected:
   TObjectPtr<UButton> m_pButton;
 
   /**
-   * @brief Reference to the TextBlock displaying the button’s label. Must match this name in UMG to compile.
+   * @brief Reference to the TextBlock displaying the button's label. Must match this name in UMG to compile.
    */
   UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
   TObjectPtr<UTextBlock> m_pButtonText;

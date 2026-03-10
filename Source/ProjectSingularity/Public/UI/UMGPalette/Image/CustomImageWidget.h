@@ -11,7 +11,7 @@
 #include "ProjectSingularity/Public/UI/ResizableUserWidget.h"
 #include "CustomImageWidget.generated.h"
 
- // Components
+// Components
 class UImage;
 
 UCLASS()

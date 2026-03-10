@@ -7,7 +7,7 @@
 
 #include "ProjectSingularity/Public/UI/UMGPalette/Image/CustomImageWidget.h"
 
- // Components
+// Components
 #include "Components/Image.h"
 
 void UCustomImageWidget::ShowWidget() {

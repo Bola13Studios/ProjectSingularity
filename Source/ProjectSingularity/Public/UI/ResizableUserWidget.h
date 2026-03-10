@@ -11,7 +11,7 @@
 #include "ProjectSingularity/Public/UI/CustomUserWidget.h"
 #include "ResizableUserWidget.generated.h"
 
- // Components
+// Components
 class USizeBox;
 
 UCLASS()
@@ -99,6 +99,14 @@ protected:
   FVector2D m_vWidgetSize = FVector2D(100.f, 100.f);
 #pragma endregion
 
+#pragma region Flags
+  /**
+   * @brief If enabled, changing one dimension (width or height) automatically scales the other to preserve aspect ratio.
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Project Singularity|UI|Layout", meta = (DisplayName = "Preserve Aspect Ratio"))
+  bool m_bPreserveAspectRatio = false;
+#pragma endregion
+
 private:
 #pragma region Helper Functions
   /**
@@ -107,5 +115,22 @@ private:
    *        For other panel types, the SizeBox size is applied automatically.
    */
   void UpdateSizeToContent();
+
+  /**
+   * @brief Adjusts widget size to preserve aspect ratio based on which axis changed.
+   */
+  void ApplyAspectRatio();
 #pragma endregion 
+
+#pragma region Variables
+  /**
+   * @brief Stores last known size to detect which axis changed.
+   */
+  FVector2D m_vLastSize;
+
+  /**
+   * @brief Stores initial aspect ratio (Width / Height).
+   */
+  float m_fAspectRatio = 0.f;
+#pragma endregion
 };
