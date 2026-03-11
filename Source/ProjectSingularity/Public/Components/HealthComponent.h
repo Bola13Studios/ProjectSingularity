@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Health")
 	float GetMaxHealth() const { return MaxHealth; }
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void SetHealth(float _health) { CurrentHealth = _health; }
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void SetMaxHealth(float _maxHealth) { MaxHealth = _maxHealth; }
+
 	UFUNCTION(BlueprintCallable, Category="Health")
 	float GetHealthPercent() const
 	{

@@ -7,7 +7,8 @@
 #include "BaseEnemy.generated.h"
 
 
-class UCapsuleComponent;
+class UHealthComponent;
+class UEnemyConfigDataAsset;
 /**
  * 
  */
@@ -18,11 +19,24 @@ class PROJECTSINGULARITY_API ABaseEnemy : public ABaseCharacter
 
 public:
 
-	//ABaseEnemy();
+	ABaseEnemy();
+
+
 
 protected:
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
-	//TObjectPtr<UCapsuleComponent> m_capsuleComponent;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Enemy", meta = (DisplayName = "Enemy Damage"))
+	float m_damage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
+	TObjectPtr<UHealthComponent> m_healthComponent;
+
+private:
+
+	UPROPERTY(EditAnywhere, Category = "Data Asset|Enemy", meta = (DisplayName = "Enemy Config Data Asset"))
+	TObjectPtr<UEnemyConfigDataAsset> m_EnemyDataAsset;
 	
 };
