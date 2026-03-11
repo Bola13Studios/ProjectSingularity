@@ -73,3 +73,9 @@ void APACharacter::StopFire()
 {
     m_bFire = false;
 }
+
+UHealthComponent* APACharacter::GetHealthComponent() const
+{
+    // Finds the health component in the blueprint if added
+    return FindComponentByClass<UHealthComponent>();
+}
