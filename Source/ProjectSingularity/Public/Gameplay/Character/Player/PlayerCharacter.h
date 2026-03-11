@@ -56,16 +56,23 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void Dash(const FVector& _Direction, float _Distance, float _Time);
 
+	UFUNCTION(BlueprintCallable)
+	void StopDash();
+
 public:
 
 
 private:
 
-
-
-
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
 	TObjectPtr<UCameraComponent> m_Camera;
+
+	UPROPERTY()
+	FTimerHandle m_DashStopTimerHandle;
+
+	bool m_bIsDashing = false;
+
+	bool m_bCanDash = true;
 
 #pragma region Inputs
 

@@ -68,6 +68,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
 		enhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
 		enhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
+		enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
 	}
@@ -76,7 +77,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 {
 	FVector2D inputVector = _inputValue.Get<FVector2D>();
-	if (IsValid(Controller))
+	if (IsValid(Controller) && !m_bIsDashing)
 	{
 		const FRotator rotation = Controller->GetControlRotation();
 		const FRotator yawRotation(0, rotation.Yaw, 0);
@@ -86,8 +87,6 @@ void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 		AddMovementInput(forwardDirection, inputVector.Y);
 		AddMovementInput(rightDirection, inputVector.X);
 	}
-
-
 }
 
 void APlayerCharacter::JumpAction()
@@ -117,7 +116,6 @@ void APlayerCharacter::StopFireAction()
 
 void APlayerCharacter::DashAction()
 {
-
 	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera))
 	{
 		FVector dashDirection = GetVelocity().IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
@@ -133,5 +131,25 @@ void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _t
 	}
 
 	FVector dashVelocity = _direction.GetSafeNormal() * (_distance / _time);
-	LaunchCharacter(dashVelocity, true, false);
+	dashVelocity.Z = 0.;
+
+	m_bIsDashing = true;
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+
+	charMoveComp->GravityScale = 0.f;
+	charMoveComp->GroundFriction = 0.f;
+
+	LaunchCharacter(dashVelocity, true, true);
+
+	GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::StopDash, _time);
+}
+
+void APlayerCharacter::StopDash()
+{
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+
+	charMoveComp->GravityScale = 1.f;
+	charMoveComp->GroundFriction = 8.f;
+
+	m_bIsDashing = false;
 }
