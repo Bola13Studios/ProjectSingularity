@@ -116,16 +116,18 @@ void APlayerCharacter::StopFireAction()
 
 void APlayerCharacter::DashAction()
 {
-	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera))
+	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera) && m_bCanDash)
 	{
-		FVector dashDirection = GetVelocity().IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
+		FVector dashDirection = GetVelocity();
+		dashDirection.Z = 0.;
+		dashDirection = dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
 	}
 }
 
 void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)
 {
-	if ((_direction.IsNearlyZero()) || (_distance <= 0.f) || (_time <= 0.f))
+	if ((_direction.IsNearlyZero()) || (_distance <= 0.f) || (_time <= 0.f) || !m_bCanDash)
 	{
 		return;
 	}
@@ -134,6 +136,7 @@ void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _t
 	dashVelocity.Z = 0.;
 
 	m_bIsDashing = true;
+	m_bCanDash = false;
 	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 
 	charMoveComp->GravityScale = 0.f;
@@ -148,8 +151,21 @@ void APlayerCharacter::StopDash()
 {
 	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 
-	charMoveComp->GravityScale = 1.f;
-	charMoveComp->GroundFriction = 8.f;
+	if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
+	{
+		charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
+		charMoveComp->GroundFriction = m_PlayerDataAsset->groundFriction;
+		GetWorldTimerManager().SetTimer(m_DashResetTimerHandle, this, &APlayerCharacter::ResetDash, m_PlayerDataAsset->dashCooldown);
+	}
+	else
+	{
+		ResetDash();
+	}
 
 	m_bIsDashing = false;
+}
+
+void APlayerCharacter::ResetDash()
+{
+	m_bCanDash = true;
 }

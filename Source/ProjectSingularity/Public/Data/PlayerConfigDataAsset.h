@@ -29,9 +29,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Gravity Scale", ClampMin = "0"))
 	float gravityScale;
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Dash Distance", ClampMin = "0.1"))
+	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Ground Friction", ClampMin = "0"))
+	float groundFriction;
+
+	UPROPERTY(EditAnywhere, Category = "Movement|Dash", meta = (DisplayName = "Dash Distance", ClampMin = "0.1"))
 	float dashDistance;
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Dash Time", ClampMin = "0.1"))
+	UPROPERTY(EditAnywhere, Category = "Movement|Dash", meta = (DisplayName = "Dash Time", ClampMin = "0.1"))
 	float dashTime;
+
+	UPROPERTY(EditAnywhere, Category = "Movement|Dash", meta = (DisplayName = "Dash Cooldown", ClampMin = "0.1"))
+	float dashCooldown;
 };

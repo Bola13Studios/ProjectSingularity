@@ -59,6 +59,8 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void StopDash();
 
+	void ResetDash();
+
 public:
 
 
@@ -69,6 +71,9 @@ private:
 
 	UPROPERTY()
 	FTimerHandle m_DashStopTimerHandle;
+
+	UPROPERTY()
+	FTimerHandle m_DashResetTimerHandle;
 
 	bool m_bIsDashing = false;
 
