@@ -1,6 +1,6 @@
 /************************************************************************
  * @description: Base class for character
- * @author: Rubén Santos
+ * @author: Rubï¿½n Santos
  * @date: 01/03/2026
  * @edited_by:
  ************************************************************************/
@@ -11,6 +11,8 @@
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include <EnhancedActionKeyMapping.h>
+
+#include "Components/HealthComponent.h"
 #include "PACharacter.generated.h"
 
 UCLASS()                  // Primetime Asset Character - Design "name"
@@ -52,6 +54,11 @@ private:
     void StartFire(const FInputActionValue& Value);
     UFUNCTION()
     void StopFire();
+
+    // Get the Health component referenced in blueprint here
+
+    UFUNCTION(BlueprintCallable)
+    UHealthComponent* GetHealthComponent() const;
 
     UPROPERTY()
     AWeaponBase* m_currentWeapon;
