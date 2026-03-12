@@ -41,7 +41,10 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere)
-	UDataTable* HypeBalanceTable;
+	UDataTable* HypeMultiplierTable;
+
+	UPROPERTY(EditAnywhere)
+	UDataTable* HypeLevelTable;
 
 public:
 
