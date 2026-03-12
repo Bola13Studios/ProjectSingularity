@@ -34,7 +34,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
+#pragma region Inputs Functions
 	UFUNCTION()
 	void MoveAction(const FInputActionValue& _inputValue);
 
@@ -53,6 +53,10 @@ private:
 	UFUNCTION()
 	void DashAction();
 
+#pragma endregion
+
+#pragma region Dash Functions
+
 	UFUNCTION(BlueprintCallable)
 	void Dash(const FVector& _Direction, float _Distance, float _Time);
 
@@ -60,6 +64,11 @@ private:
 	void StopDash();
 
 	void ResetDash();
+
+#pragma endregion
+
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 public:
 

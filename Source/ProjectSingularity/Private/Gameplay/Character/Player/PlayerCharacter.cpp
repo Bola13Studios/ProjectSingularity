@@ -10,6 +10,8 @@
 #include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
 
 
 APlayerCharacter::APlayerCharacter():
@@ -45,6 +47,11 @@ void APlayerCharacter::BeginPlay()
 	{
 		m_CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
 		m_CurrentWeapon->SetWeaponData(m_WeaponDataAsset->weaponsData[0]); //Just for now
+	}
+
+	if (UCapsuleComponent* capsuleComp = GetCapsuleComponent())
+	{
+		capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
 	}
 }
 
@@ -118,8 +125,7 @@ void APlayerCharacter::DashAction()
 {
 	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera) && m_bCanDash)
 	{
-		FVector dashDirection = GetVelocity();
-		dashDirection.Z = 0.;
+		FVector dashDirection = GetVelocity() * FVector(1, 1, 0);
 		dashDirection = dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
 	}
@@ -150,6 +156,7 @@ void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _t
 void APlayerCharacter::StopDash()
 {
 	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+	m_bIsDashing = false;
 
 	if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
 	{
@@ -161,11 +168,18 @@ void APlayerCharacter::StopDash()
 	{
 		ResetDash();
 	}
-
-	m_bIsDashing = false;
 }
 
 void APlayerCharacter::ResetDash()
 {
 	m_bCanDash = true;
+}
+
+void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (m_bIsDashing)
+	{
+		GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
+		StopDash();
+	}
 }
