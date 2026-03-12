@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "ProjectSingularity/Public/Data/CharacterConfigDataAsset.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "Gameplay/Character/BaseCharacter.h"
 
 // Sets default values
@@ -16,6 +18,14 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+	if (IsValid(m_pCharacterDataAsset) && IsValid(charMoveComp))
+	{
+		charMoveComp->MaxWalkSpeed = m_pCharacterDataAsset->maxWalkSpeed;
+		m_healthComponent->SetHealth(m_pCharacterDataAsset->health);
+		m_healthComponent->SetMaxHealth(m_pCharacterDataAsset->maxHealth);
+
+	}
 }
 
 // Called every frame

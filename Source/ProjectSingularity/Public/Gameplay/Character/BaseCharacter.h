@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
+class UCharacterConfigDataAsset;
+class UHealthComponent;
+
 UCLASS()
 class PROJECTSINGULARITY_API ABaseCharacter : public ACharacter
 {
@@ -18,6 +21,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
+	TObjectPtr<UHealthComponent> m_healthComponent;
+
+	
+	TObjectPtr<UCharacterConfigDataAsset> m_pCharacterDataAsset;
 
 public:	
 	// Called every frame

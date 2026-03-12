@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Data/CharacterConfigDataAsset.h"
 #include "PlayerConfigDataAsset.generated.h"
 
+
+class UCharacterConfigDataAsset;
 /**
  * 
  */
 UCLASS()
-class PROJECTSINGULARITY_API UPlayerConfigDataAsset : public UDataAsset
+class PROJECTSINGULARITY_API UPlayerConfigDataAsset : public UCharacterConfigDataAsset
 {
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Max Walk Speed"))
-	float maxWalkSpeed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Jump Z Velocity"))
 	float jumpZVelocity;
