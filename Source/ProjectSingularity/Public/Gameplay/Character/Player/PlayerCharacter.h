@@ -34,7 +34,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
+#pragma region Inputs Functions
 	UFUNCTION()
 	void MoveAction(const FInputActionValue& _inputValue);
 
@@ -50,12 +50,45 @@ private:
 	UFUNCTION()
 	void StopFireAction();
 
+	UFUNCTION()
+	void DashAction();
+
+#pragma endregion
+
+#pragma region Dash Functions
+
+	UFUNCTION(BlueprintCallable)
+	void Dash(const FVector& _Direction, float _Distance, float _Time);
+
+	UFUNCTION(BlueprintCallable)
+	void StopDash();
+
+	void ResetDash();
+
+#pragma endregion
+
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 public:
 
 
 private:
+
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
 	TObjectPtr<UCameraComponent> m_Camera;
+
+	UPROPERTY()
+	FTimerHandle m_DashStopTimerHandle;
+
+	UPROPERTY()
+	FTimerHandle m_DashResetTimerHandle;
+
+	bool m_bIsDashing = false;
+
+	bool m_bCanDash = true;
+
+#pragma region Inputs
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Move Action"))
 	TObjectPtr<UInputAction> m_MoveAction;
@@ -66,8 +99,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Look Action"))
 	TObjectPtr<UInputAction> m_LookAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Dash Action"))
+	TObjectPtr<UInputAction> m_DashAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
+
+#pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
 	TSubclassOf<AWeaponBase> m_WeaponClass;
