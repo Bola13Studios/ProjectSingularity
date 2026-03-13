@@ -10,6 +10,8 @@
 #include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
 
 
 APlayerCharacter::APlayerCharacter():
@@ -46,6 +48,11 @@ void APlayerCharacter::BeginPlay()
 		m_CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
 		m_CurrentWeapon->SetWeaponData(m_WeaponDataAsset->weaponsData[0]); //Just for now
 	}
+
+	if (UCapsuleComponent* capsuleComp = GetCapsuleComponent())
+	{
+		capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
+	}
 }
 
 
@@ -68,6 +75,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
 		enhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
 		enhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
+		enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
 	}
@@ -76,14 +84,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 {
 	FVector2D inputVector = _inputValue.Get<FVector2D>();
-	if (IsValid(Controller))
+	if (IsValid(Controller) && !m_bIsDashing)
 	{
 		const FRotator rotation = Controller->GetControlRotation();
 		const FRotator yawRotation(0, rotation.Yaw, 0);
 
 		const FVector forwardDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
 		const FVector rightDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
-
 		AddMovementInput(forwardDirection, inputVector.Y);
 		AddMovementInput(rightDirection, inputVector.X);
 	}
@@ -91,7 +98,7 @@ void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 
 void APlayerCharacter::JumpAction()
 {
-	ACharacter::Jump();
+	Jump();
 }
 
 void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
@@ -112,4 +119,67 @@ void APlayerCharacter::StartFireAction(const FInputActionValue& Value)
 void APlayerCharacter::StopFireAction()
 {
 	m_bFire = false;
+}
+
+void APlayerCharacter::DashAction()
+{
+	if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera) && m_bCanDash)
+	{
+		FVector dashDirection = GetVelocity() * FVector(1, 1, 0);
+		dashDirection = dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
+		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
+	}
+}
+
+void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)
+{
+	if ((_direction.IsNearlyZero()) || (_distance <= 0.f) || (_time <= 0.f) || !m_bCanDash)
+	{
+		return;
+	}
+
+	FVector dashVelocity = _direction.GetSafeNormal() * (_distance / _time);
+	dashVelocity.Z = 0.;
+
+	m_bIsDashing = true;
+	m_bCanDash = false;
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+
+	charMoveComp->GravityScale = 0.f;
+	charMoveComp->GroundFriction = 0.f;
+
+	LaunchCharacter(dashVelocity, true, true);
+
+	GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::StopDash, _time);
+}
+
+void APlayerCharacter::StopDash()
+{
+	UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+	m_bIsDashing = false;
+
+	if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
+	{
+		charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
+		charMoveComp->GroundFriction = m_PlayerDataAsset->groundFriction;
+		GetWorldTimerManager().SetTimer(m_DashResetTimerHandle, this, &APlayerCharacter::ResetDash, m_PlayerDataAsset->dashCooldown);
+	}
+	else
+	{
+		ResetDash();
+	}
+}
+
+void APlayerCharacter::ResetDash()
+{
+	m_bCanDash = true;
+}
+
+void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (m_bIsDashing)
+	{
+		GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
+		StopDash();
+	}
 }

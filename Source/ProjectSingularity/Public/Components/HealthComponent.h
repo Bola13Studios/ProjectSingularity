@@ -6,6 +6,7 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, float, Current, float, Max, float, Delta, AActor*, InstigatorActor);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor* /*InstigatorActor*/);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class PROJECTSINGULARITY_API UHealthComponent : public UActorComponent
@@ -17,6 +18,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Health")
 	FOnHealthChanged OnHealthChanged;
+
+	FOnDeath OnDeath;
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	float GetHealth() const { return CurrentHealth; }
@@ -30,6 +33,7 @@ public:
 		return (MaxHealth > 0.0f) ? (CurrentHealth / MaxHealth) : 0.0f;
 	}
 
+	//Join these functions in a new one (ChangeHealth, for example) so we don't repeat code?
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void ApplyDamage(float Damage, AActor* InstigatorActor);
 
@@ -46,5 +50,5 @@ protected:
 	float CurrentHealth = 100.0f;
 
 private:
-	void BroadcastChanged(float OldHealth, AActor* InstigatorActor);
+	void BroadcastChanged(float OldHealth, AActor* InstigatorActor) const;
 };
