@@ -1,4 +1,4 @@
-#include "HypeSourceComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeSourceComponent.h"
 
 int UHypeSourceComponent::GetHype() const
 {

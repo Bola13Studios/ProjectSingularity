@@ -1,4 +1,4 @@
-#include "HypeComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeComponent.h"
 
 UHypeComponent::UHypeComponent() :
 	BaseHypeValue(10)
