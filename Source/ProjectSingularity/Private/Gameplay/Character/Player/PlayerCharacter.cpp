@@ -7,7 +7,7 @@
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "ProjectSingularity/Public/Data/DataAsset/PlayerConfigDataAsset.h"
+#include "ProjectSingularity/Public/Data/PlayerConfigDataAsset.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include "Kismet/GameplayStatics.h"

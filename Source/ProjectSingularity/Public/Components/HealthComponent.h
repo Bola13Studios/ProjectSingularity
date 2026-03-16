@@ -33,12 +33,9 @@ public:
 		return (MaxHealth > 0.0f) ? (CurrentHealth / MaxHealth) : 0.0f;
 	}
 
-	//Join these functions in a new one (ChangeHealth, for example) so we don't repeat code?
-	UFUNCTION(BlueprintCallable, Category="Health")
-	void ApplyDamage(float Damage, AActor* InstigatorActor);
-
-	UFUNCTION(BlueprintCallable, Category="Health")
-	void Heal(float Amount, AActor* InstigatorActor);
+	//Negative _Amount damages the character, positive _Amount heals him
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ChangeHealth(float _Amount, AActor* InstigatorActor);
 
 protected:
 	virtual void BeginPlay() override;
