@@ -29,21 +29,21 @@ public:
 	/**
 	 * @brief Holds the current hype level for this receiver
 	 */
-	UPROPERTY(BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Hype Level"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Hype Level"))
 	int CurrentHypeLevel;
 
 	/**
 	 * @brief Hold the current kill streak for this receiver
 	 */
-	UPROPERTY(BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Streak"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Streak"))
 	int CurrentKillStreak;
 
 private:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Multiplier Table"))
 	UDataTable* HypeMultiplierTable;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Level Table"))
 	UDataTable* HypeLevelTable;
 
 public:

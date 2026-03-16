@@ -27,7 +27,7 @@ protected:
 	/**
 	 * @brief The amount of hype this component stores
 	 */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
 	int BaseHypeValue;
 
 public:
