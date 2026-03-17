@@ -23,6 +23,11 @@ APlayerCharacter::APlayerCharacter():
 		m_Camera->SetupAttachment(RootComponent);
 		m_Camera->bUsePawnControlRotation = true;
 	}
+
+	m_ArmsMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmsMesh"));
+	m_ArmsMesh->SetupAttachment(GetCapsuleComponent());
+	m_ArmsMesh->CastShadow = false;
+	m_ArmsMesh->SetupAttachment(m_Camera);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -45,7 +50,7 @@ void APlayerCharacter::BeginPlay()
 
 	if (IsValid(m_CurrentWeapon))
 	{
-		m_CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
+		m_CurrentWeapon->AttachToComponent(m_ArmsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
 		m_CurrentWeapon->SetWeaponData(m_WeaponDataAsset->weaponsData[0]); //Just for now
 	}
 
@@ -182,4 +187,9 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* Othe
 		GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
 		StopDash();
 	}
+}
+
+USkeletalMeshComponent* APlayerCharacter::GetArmsMesh()
+{
+	return m_ArmsMesh;
 }

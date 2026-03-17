@@ -1,5 +1,7 @@
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "GameFramework/Character.h"
+#include <Gameplay/Character/Player/PlayerCharacter.h>
+#include <Gameplay/Animation/BaseAnimInstance.h>
 
 AWeaponBase::AWeaponBase()
 {
@@ -18,6 +20,9 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
 	if (weaponMesh && m_weaponData.skeletalMesh)
 	{
 		weaponMesh->SetSkeletalMesh(m_weaponData.skeletalMesh);
+		//weaponMesh->bOwnerNoSee = true;
+		//weaponMesh->SetHiddenInGame(true);
+		weaponMesh->CastShadow = false;
 	}
 }
 
@@ -47,6 +52,8 @@ bool AWeaponBase::Fire()
 	}
 
 	m_elapsedShootTime = 0.f;
+	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Cast<UBaseAnimInstance>(player->GetArmsMesh()->GetAnimInstance())->Fire();
 
 	for (int i = 0; i < m_weaponData.bulletsPerShot; ++i)
 	{
