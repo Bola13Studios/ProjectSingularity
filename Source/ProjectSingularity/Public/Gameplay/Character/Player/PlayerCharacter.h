@@ -72,7 +72,7 @@ private:
 
 public:
 
-
+	USkeletalMeshComponent* GetArmsMesh();
 private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
@@ -109,6 +109,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
 	TSubclassOf<AWeaponBase> m_WeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Arms")
+	USkeletalMeshComponent* m_ArmsMesh;
 
 	UPROPERTY()
 	TObjectPtr<AWeaponBase> m_CurrentWeapon;
