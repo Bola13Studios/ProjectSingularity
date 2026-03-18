@@ -22,12 +22,15 @@ class PROJECTSINGULARITY_API UGameManagerSubsystem : public UGameInstanceSubsyst
   GENERATED_BODY()
 
 public:
+#pragma region Delegates
   /**
    * @brief Delegate triggered when the game state changes.
    */
   UPROPERTY(BlueprintAssignable, Category = "Project Singularity|Game State")
   FOnGameStateChanged OnGameStateChanged;
+#pragma endregion
 
+#pragma region Getters & Setters
   /**
    * @brief Sets the current game state.
    * @param _eNewState The new state to transition to.
@@ -41,15 +44,19 @@ public:
    */
   UFUNCTION(BlueprintCallable, Category = "Project Singularity|Game State")
   EGameState GetGameState() const;
+#pragma endregion
 
 protected:
+#pragma region Native Overrides 
   /**
    * @brief Initializes the subsystem.
    * @param _rCollection Collection of subsystems available during initialization.
    */
   virtual void Initialize(FSubsystemCollectionBase& _rCollection) override;
+#pragma endregion
 
 private:
+#pragma region Transitions
   /**
    * @brief Checks whether a transition between two states is valid.
    * @param _eFrom Current state.
@@ -62,10 +69,13 @@ private:
    * @brief Defines valid transitions between game states.
    */
   TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
+#pragma endregion
 
+#pragma region State
   /**
    * @brief Current active game state.
    */
   UPROPERTY()
   EGameState m_eCurrentGameState;
+#pragma endregion
 };
