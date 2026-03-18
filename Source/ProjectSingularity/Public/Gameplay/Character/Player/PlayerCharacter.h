@@ -7,12 +7,18 @@
 #include "PlayerCharacter.generated.h"
 
 
+#pragma region | Forward Declarations
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 class UPlayerConfigDataAsset;
 class AWeaponBase;
 class UWeaponsDataAsset;
+#pragma endregion
+
+#pragma region | Delegates
+DECLARE_MULTICAST_DELEGATE(FOnInteract);
+#pragma endregion
 
 UCLASS()
 class PROJECTSINGULARITY_API APlayerCharacter : public ABaseCharacter
@@ -53,6 +59,9 @@ private:
 	UFUNCTION()
 	void DashAction();
 
+	UFUNCTION()
+	void InteractAction(const FInputActionValue& _Value);
+
 #pragma endregion
 
 #pragma region Dash Functions
@@ -71,6 +80,9 @@ private:
 	void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 public:
+
+
+	FOnInteract m_OnInteract;
 
 
 private:
@@ -104,6 +116,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
+	TObjectPtr<UInputAction> m_InteractAcion;
 
 #pragma endregion
 
