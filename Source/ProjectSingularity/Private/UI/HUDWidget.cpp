@@ -10,3 +10,11 @@ void UHUDWidget::BindToHealthComponent(UHealthComponent* InHealthComp)
 		HealthWidget->BindToHealthComponent(InHealthComp);
 	}
 }
+
+void UHUDWidget::BindToHypeComponent(UHypeComponent* InHypeComp)
+{
+	if (HypeWidget)
+	{
+		HypeWidget->BindToHypeComponent(InHypeComp);
+	}
+}

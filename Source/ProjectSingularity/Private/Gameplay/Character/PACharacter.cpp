@@ -4,6 +4,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
+#include "Components/Hype/HypeComponent.h"
 
 APACharacter::APACharacter()
 {
@@ -78,4 +79,10 @@ UHealthComponent* APACharacter::GetHealthComponent() const
 {
     // Finds the health component in the blueprint if added
     return FindComponentByClass<UHealthComponent>();
+}
+
+UHypeComponent* APACharacter::GetHypeComponent() const
+{
+    // Finds the hype component in the blueprint if added
+    return FindComponentByClass<UHypeComponent>();
 }
