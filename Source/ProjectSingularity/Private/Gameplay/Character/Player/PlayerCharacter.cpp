@@ -83,6 +83,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
+		enhancedInputComponent->BindAction(m_ChangeWeaponMode, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
 	}
 }
 
@@ -124,6 +125,11 @@ void APlayerCharacter::StartFireAction(const FInputActionValue& Value)
 void APlayerCharacter::StopFireAction()
 {
 	m_bFire = false;
+}
+
+void APlayerCharacter::ChangeWeaponMode()
+{
+	m_CurrentWeapon->ChangeWeaponMode();
 }
 
 void APlayerCharacter::DashAction()
