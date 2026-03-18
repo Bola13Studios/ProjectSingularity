@@ -9,6 +9,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Camera/CameraComponent.h"
+#include "Animation/AnimInstance.h"
 #include "WeaponBase.generated.h"
 
 UENUM(BlueprintType)
@@ -20,21 +21,23 @@ enum class EFireMode : uint8
 	Burst			UMETA(DisplayName = "Burst")
 };
 
+UENUM(BlueprintType)
+enum class EWeaponMode : uint8
+{
+	ShortDistance	UMETA(DisplayName = "Short Distance"),
+	LongDistance	UMETA(DisplayName = "Long Distance")
+};
+
 USTRUCT(BlueprintType)
-struct FWeaponData
+struct FWeaponModeData
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int ID;
 
 	UPROPERTY(EditAnywhere)
-	FString name;
+	EWeaponMode weaponMode = EWeaponMode::ShortDistance;
 
-	UPROPERTY(EditAnywhere)
-	USkeletalMesh* skeletalMesh;
-	
 	UPROPERTY(EditAnywhere)
 	EFireMode fireMode = EFireMode::None;
 
@@ -60,8 +63,39 @@ public:
 
 	//Rounds Per Minute
 	UPROPERTY(EditAnywhere)
-	float fireRateRPM = 100.f; 
+	float fireRateRPM = 100.f;
 };
+
+USTRUCT(BlueprintType)
+struct FWeaponData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int ID;
+
+	UPROPERTY(EditAnywhere)
+	FString name;
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMesh* skeletalMesh;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAnimInstance> animInstance;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* animMontage;
+
+	UPROPERTY(EditAnywhere)
+	FWeaponModeData firstMode;
+
+	UPROPERTY(EditAnywhere)
+	FWeaponModeData secondMode;
+
+};
+
+
 
 UCLASS()
 class PROJECTSINGULARITY_API AWeaponBase : public AActor
@@ -84,6 +118,8 @@ public:
 UFUNCTION()
 	virtual bool Fire();
 
+	void ChangeWeaponMode();
+
 	//UFUNCTION()
 	//virtual void Reload();
 
@@ -94,6 +130,13 @@ private:
 	UPROPERTY()
 	FWeaponData m_weaponData;
 
+	UPROPERTY()
+	FWeaponModeData m_firstMode;
+
+	UPROPERTY()
+	FWeaponModeData m_secondMode;
+
+	FWeaponModeData* m_currentWeaponMode;
 
 	float m_elapsedShootTime;
 };

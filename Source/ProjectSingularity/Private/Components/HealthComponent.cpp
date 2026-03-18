@@ -16,31 +16,23 @@ void UHealthComponent::BeginPlay()
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, 0.0f, GetOwner());
 }
 
-void UHealthComponent::ApplyDamage(float Damage, AActor* InstigatorActor)
+void UHealthComponent::ChangeHealth(float _Amount, AActor* InstigatorActor)
 {
-	if (Damage <= 0.0f || CurrentHealth <= 0.0f)
+	if ((_Amount > 0.f && CurrentHealth >= MaxHealth) || (_Amount < 0.f && CurrentHealth <= 0.f))
 	{
 		return;
 	}
 
 	const float Old = CurrentHealth;
-	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.0f, MaxHealth);
-	BroadcastChanged(Old, InstigatorActor);
-}
-
-void UHealthComponent::Heal(float Amount, AActor* InstigatorActor)
-{
-	if (Amount <= 0.0f || CurrentHealth >= MaxHealth)
+	CurrentHealth = FMath::Clamp(CurrentHealth + _Amount, 0.0f, MaxHealth);
+	if (_Amount < 0.f && FMath::IsNearlyZero(CurrentHealth))
 	{
-		return;
+		OnDeath.Broadcast(InstigatorActor);
 	}
-
-	const float Old = CurrentHealth;
-	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, MaxHealth);
 	BroadcastChanged(Old, InstigatorActor);
 }
 
-void UHealthComponent::BroadcastChanged(float OldHealth, AActor* InstigatorActor)
+void UHealthComponent::BroadcastChanged(float OldHealth, AActor* InstigatorActor) const
 {
 	const float Delta = CurrentHealth - OldHealth;
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, Delta, InstigatorActor);

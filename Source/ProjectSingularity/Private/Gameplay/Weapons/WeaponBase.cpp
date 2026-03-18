@@ -1,5 +1,7 @@
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "GameFramework/Character.h"
+#include <Gameplay/Character/Player/PlayerCharacter.h>
+#include <Gameplay/Animation/BaseAnimInstance.h>
 
 AWeaponBase::AWeaponBase()
 {
@@ -15,9 +17,15 @@ AWeaponBase::AWeaponBase()
 const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
 {
 	m_weaponData = weaponData;
+	m_currentWeaponMode = &m_weaponData.firstMode;
+
 	if (weaponMesh && m_weaponData.skeletalMesh)
 	{
 		weaponMesh->SetSkeletalMesh(m_weaponData.skeletalMesh);
+		//weaponMesh->bOwnerNoSee = true;
+		//weaponMesh->SetHiddenInGame(true);
+		weaponMesh->CastShadow = false;
+		weaponMesh->SetAnimInstanceClass(m_weaponData.animInstance);
 	}
 }
 
@@ -40,26 +48,28 @@ void AWeaponBase::Tick(float DeltaTime)
 
 bool AWeaponBase::Fire()
 {
-	float timeBetweenShots = 60.f / m_weaponData.fireRateRPM;
+	float timeBetweenShots = 60.f / m_currentWeaponMode->fireRateRPM;
 	if (!m_cameraComponent || m_elapsedShootTime < timeBetweenShots)
 	{
 		return true;
 	}
 
 	m_elapsedShootTime = 0.f;
+	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Cast<UBaseAnimInstance>(player->GetArmsMesh()->GetAnimInstance())->Fire();
 
-	for (int i = 0; i < m_weaponData.bulletsPerShot; ++i)
+	for (int i = 0; i < m_currentWeaponMode->bulletsPerShot; ++i)
 	{
 		FVector forward = m_cameraComponent->GetForwardVector();
 
-		if (m_weaponData.bulletSpreadAngle > 0.f)
+		if (m_currentWeaponMode->bulletSpreadAngle > 0.f)
 		{
-			float halfAngleRad = FMath::DegreesToRadians(m_weaponData.bulletSpreadAngle / 2.f);
+			float halfAngleRad = FMath::DegreesToRadians(m_currentWeaponMode->bulletSpreadAngle / 2.f);
 			forward = FMath::VRandCone(forward, halfAngleRad);
 		}
 
 		FVector start = m_cameraComponent->GetComponentLocation();
-		FVector end = start + forward * m_weaponData.bulletDistance;
+		FVector end = start + forward * m_currentWeaponMode->bulletDistance;
 
 		TArray<FHitResult> hits;
 		FCollisionQueryParams params;
@@ -82,7 +92,7 @@ bool AWeaponBase::Fire()
 
 				penetrationCount++;
 
-				if (penetrationCount > m_weaponData.bulletPenetration)
+				if (penetrationCount > m_currentWeaponMode->bulletPenetration)
 				{
 					break;
 				}
@@ -95,7 +105,7 @@ bool AWeaponBase::Fire()
 	}
 
 
-	switch (m_weaponData.fireMode)
+	switch (m_currentWeaponMode->fireMode)
 	{
 	case EFireMode::None:
 		return false;
@@ -112,5 +122,25 @@ bool AWeaponBase::Fire()
 		break;
 	}
 	return true;
+}
+
+void AWeaponBase::ChangeWeaponMode() 
+{
+	UAnimInstance* AnimInstance = weaponMesh->GetAnimInstance();
+
+	if (!AnimInstance) return;
+
+	AnimInstance->Montage_Play(m_weaponData.animMontage);
+
+	if (m_currentWeaponMode != &m_weaponData.firstMode)
+	{
+		m_currentWeaponMode = &m_weaponData.firstMode;
+		AnimInstance->Montage_JumpToSection(FName("Mode2_To_Mode1"), m_weaponData.animMontage);
+	}
+	else
+	{
+		m_currentWeaponMode = &m_weaponData.secondMode;
+		AnimInstance->Montage_JumpToSection(FName("Mode1_To_Mode2"), m_weaponData.animMontage);
+	}
 }
 
