@@ -2,12 +2,12 @@
 
 #include "Components/ActionStateFilter.h"
 #include "Gameplay/Character/BaseCharacter.h"
+#include "Data/DataAsset/StatesDataAsset.h"
+#include "Utils/State Machine/States.h"
 
 UActionStateFilter::UActionStateFilter()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-
 }
 
 
@@ -15,6 +15,31 @@ UActionStateFilter::UActionStateFilter()
 void UActionStateFilter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!IsValid(StatesDataAsset))
+	{
+		return;
+	}
+	m_CharacterOwner = Cast<ABaseCharacter>(GetOwner());
+
+	// Pair is of type TSubclassOf<UBaseState>, FAvailableStates>
+	for (const auto& Pair : StatesDataAsset->StatesMap)
+	{
+		if (UStates* NewStateInstance = NewObject<UStates>(this, Pair.Key))
+		{
+			m_statesInstancesMap.Add(Pair.Key, NewStateInstance);
+			NewStateInstance->SetOwner(m_CharacterOwner);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create instance of state class."));
+		}
+	}
+
+	//Initialize
+	//m_currentBaseState = *m_statesInstancesMap.Find(UGroundMovementState::StaticClass());
+	//m_currentBaseStateClass = UGroundMovementState::StaticClass();
+	//m_currentBaseState->Init();
 	
 }
 
@@ -24,5 +49,57 @@ void UActionStateFilter::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!m_currentBaseState && m_currentBaseState->CanUpdateTick)
+	{
+		m_currentBaseState->Update(DeltaTime);
+	}
+
+}
+
+bool UActionStateFilter::IsStateAvailable(const TSubclassOf<UStates> _state)
+{
+	bool StateAvailable = false;
+	if (!IsValid(StatesDataAsset))
+	{
+		return false;
+	}
+
+	for (const auto& Pair : StatesDataAsset->StatesMap)
+	{
+		if (Pair.Key == m_currentBaseStateClass)
+		{
+			for (const auto& AvailableState : Pair.Value.availableStates)
+			{
+				if (AvailableState == _state)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
+{
+	if (!m_statesInstancesMap.Contains(_newState))
+	{
+		return;
+	}
+
+	UStates* NewState = *m_statesInstancesMap.Find(_newState);
+
+	if (!m_currentBaseState && !NewState)
+	{
+		if (IsStateAvailable(_newState))
+		{
+			m_currentBaseState->Exit();
+
+			m_currentBaseState = NewState;
+			m_currentBaseStateClass = _newState;
+
+			NewState->Init();
+		}
+	}
 }
 

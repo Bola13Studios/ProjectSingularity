@@ -8,6 +8,8 @@
 
 class ABaseCharacter;
 class UStates;
+class UStatesDataAsset;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTSINGULARITY_API UActionStateFilter : public UActorComponent
@@ -19,16 +21,16 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	const UStates* GetCurrentBaseState() { return m_currentBaseState; };
+
+	const TSubclassOf<UStates> GetCurrentBaseStateClass() { return m_currentBaseStateClass; };
+
 	bool IsStateAvailable(TSubclassOf<UStates> _state);
 
 	void SetCurrentState(const TSubclassOf<UStates> _newState);
 
-	UStates* GetCurrentBaseState();
-
-	TSubclassOf<UStates> GetCurrentBaseStateClass();
-
-	/*UPROPERTY(EditAnywhere)
-	UStateActionsDataAsset* StatesDataAsset = nullptr;*/
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStatesDataAsset> StatesDataAsset = nullptr;
 
 
 	UPROPERTY()
@@ -40,7 +42,7 @@ protected:
 private:
 
 	UPROPERTY(Transient)
-	TObjectPtr<ABaseCharacter> m_Character = nullptr;
+	TObjectPtr<ABaseCharacter> m_CharacterOwner = nullptr;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UStates> m_currentBaseState = nullptr;
@@ -48,5 +50,4 @@ private:
 	UPROPERTY()
 	TSubclassOf<UStates> m_currentBaseStateClass;
 
-		
 };
