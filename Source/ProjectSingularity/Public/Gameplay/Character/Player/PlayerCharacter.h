@@ -53,6 +53,8 @@ private:
 	UFUNCTION()
 	void DashAction();
 
+	UFUNCTION()
+	void ChangeWeaponMode();
 #pragma endregion
 
 #pragma region Dash Functions
@@ -105,6 +107,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
+	TObjectPtr<UInputAction> m_ChangeWeaponMode;
 #pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
