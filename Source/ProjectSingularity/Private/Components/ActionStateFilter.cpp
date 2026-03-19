@@ -37,9 +37,9 @@ void UActionStateFilter::BeginPlay()
 	}
 
 	//Initialize
-	//m_currentBaseState = *m_statesInstancesMap.Find(UGroundMovementState::StaticClass());
-	//m_currentBaseStateClass = UGroundMovementState::StaticClass();
-	//m_currentBaseState->Init();
+	m_currentBaseState = *m_statesInstancesMap.Find(UGroundMovementState::StaticClass());
+	m_currentBaseStateClass = UGroundMovementState::StaticClass();
+	m_currentBaseState->Init();
 	
 }
 

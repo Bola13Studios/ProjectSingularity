@@ -30,3 +30,16 @@ protected:
 	TObjectPtr<ABaseCharacter> OwnerCharacter = nullptr;
 	
 };
+
+UCLASS()
+class PROJECTSINGULARITY_API UGroundMovementState : public UStates
+{
+	GENERATED_BODY()
+
+public:
+
+	virtual void Init() {};
+	virtual void Update(float _DeltaTime) {};
+	virtual void Exit() {};
+
+};
