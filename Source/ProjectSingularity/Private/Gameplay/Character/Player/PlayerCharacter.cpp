@@ -58,6 +58,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
 	}
+
 }
 
 
