@@ -9,6 +9,7 @@ UHypeComponent::UHypeComponent() :
 void UHypeComponent::AddHype(const int& _Points)
 {
 	BaseHypeValue += _Points;
+	OnHypeChanged.Broadcast(BaseHypeValue, _Points);
 }
 
 int UHypeComponent::GetHype() const
@@ -18,7 +19,10 @@ int UHypeComponent::GetHype() const
 
 void UHypeComponent::ResetHype()
 {
+	const int OldValue = BaseHypeValue;
 	BaseHypeValue = 0;
+
+	OnHypeChanged.Broadcast(BaseHypeValue, -OldValue);
 }
 
 

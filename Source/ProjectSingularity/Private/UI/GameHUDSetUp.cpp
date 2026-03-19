@@ -4,6 +4,7 @@
 #include "ProjectSingularity/Public/UI/GameHUDSetUp.h"
 
 #include "Components/HealthComponent.h"
+#include "Components/Hype/HypeComponent.h"
 
 void AGameHUDSetUp::BeginPlay()
 {
@@ -62,8 +63,13 @@ void AGameHUDSetUp::TryBindHUDToPawn() const
 		return;
 	}
 
-	if (UHealthComponent* HC = Pawn->FindComponentByClass<UHealthComponent>())
+	if (UHealthComponent* HealthComp = Pawn->FindComponentByClass<UHealthComponent>())
 	{
-		HUDWidget->BindToHealthComponent(HC);
+		HUDWidget->BindToHealthComponent(HealthComp);
+	}
+
+	if (UHypeComponent* HypeComp = Pawn->FindComponentByClass<UHypeComponent>())
+	{
+		HUDWidget->BindToHypeComponent(HypeComp);
 	}
 }

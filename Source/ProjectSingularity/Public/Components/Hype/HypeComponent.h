@@ -18,6 +18,9 @@ class UBoxComponent;
 /**
  * @brief The base Hype Component
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHypeChanged, int, CurrentHype, int, Delta);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTSINGULARITY_API UHypeComponent : public UActorComponent
 {
@@ -31,6 +34,11 @@ protected:
 	int BaseHypeValue;
 
 public:
+	/**
+	 * @brief Sets the delegate for the HypeChanged
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Bola 13|Hype")
+	FOnHypeChanged OnHypeChanged;
 	
 	/**
 	 * @brief Sets default values for this component's properties

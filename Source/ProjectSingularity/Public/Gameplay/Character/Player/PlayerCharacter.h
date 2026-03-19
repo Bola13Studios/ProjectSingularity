@@ -53,6 +53,8 @@ private:
 	UFUNCTION()
 	void DashAction();
 
+	UFUNCTION()
+	void ChangeWeaponMode();
 #pragma endregion
 
 #pragma region Dash Functions
@@ -72,7 +74,7 @@ private:
 
 public:
 
-
+	USkeletalMeshComponent* GetArmsMesh();
 private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
@@ -105,10 +107,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
+	TObjectPtr<UInputAction> m_ChangeWeaponMode;
 #pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
 	TSubclassOf<AWeaponBase> m_WeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Arms")
+	USkeletalMeshComponent* m_ArmsMesh;
 
 	UPROPERTY()
 	TObjectPtr<AWeaponBase> m_CurrentWeapon;
