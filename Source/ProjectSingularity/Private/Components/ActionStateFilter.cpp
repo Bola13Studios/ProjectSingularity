@@ -1,7 +1,4 @@
-
-
 #include "Components/ActionStateFilter.h"
-#include "Gameplay/Character/BaseCharacter.h"
 #include "Data/DataAsset/StatesDataAsset.h"
 #include "Utils/State Machine/States.h"
 
@@ -15,32 +12,6 @@ UActionStateFilter::UActionStateFilter()
 void UActionStateFilter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (!IsValid(StatesDataAsset))
-	{
-		return;
-	}
-	m_CharacterOwner = Cast<ABaseCharacter>(GetOwner());
-
-	// Pair is of type TSubclassOf<UBaseState>, FAvailableStates>
-	for (const auto& Pair : StatesDataAsset->StatesMap)
-	{
-		if (UStates* NewStateInstance = NewObject<UStates>(this, Pair.Key))
-		{
-			m_statesInstancesMap.Add(Pair.Key, NewStateInstance);
-			NewStateInstance->SetOwner(m_CharacterOwner);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create instance of state class."));
-		}
-	}
-
-	//Initialize
-	m_currentBaseState = *m_statesInstancesMap.Find(UGroundMovementState::StaticClass());
-	m_currentBaseStateClass = UGroundMovementState::StaticClass();
-	m_currentBaseState->Init();
-	
 }
 
 
@@ -48,6 +19,11 @@ void UActionStateFilter::BeginPlay()
 void UActionStateFilter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (StatesDataAsset == NULL)
+	{
+		return;
+	}
 
 	if (!m_currentBaseState && m_currentBaseState->CanUpdateTick)
 	{
@@ -89,7 +65,7 @@ void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 
 	UStates* NewState = *m_statesInstancesMap.Find(_newState);
 
-	if (!m_currentBaseState && !NewState)
+	if (m_currentBaseState != nullptr && NewState != nullptr)
 	{
 		if (IsStateAvailable(_newState))
 		{
@@ -101,5 +77,36 @@ void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 			NewState->Init();
 		}
 	}
+}
+
+void UActionStateFilter::InitializeFilter(AActor* _owner, TObjectPtr<UStatesDataAsset> _statesDataAsset, const TSubclassOf<UStates> _state)
+{
+	StatesDataAsset = _statesDataAsset;
+
+	if (!IsValid(StatesDataAsset))
+	{
+		return;
+	}
+
+	m_Owner = _owner;
+
+	// Pair is of type TSubclassOf<UBaseState>, FAvailableStates>
+	for (const auto& Pair : StatesDataAsset->StatesMap)
+	{
+		if (UStates* NewStateInstance = NewObject<UStates>(this, Pair.Key))
+		{
+			m_statesInstancesMap.Add(Pair.Key, NewStateInstance);
+			NewStateInstance->SetOwner(m_Owner);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create instance of state class."));
+		}
+	}
+
+	m_currentBaseState = *m_statesInstancesMap.Find(_state);
+	m_currentBaseStateClass = _state;
+
+	m_currentBaseState->Init();
 }
 

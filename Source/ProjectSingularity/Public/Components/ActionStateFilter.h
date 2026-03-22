@@ -29,6 +29,8 @@ public:
 
 	void SetCurrentState(const TSubclassOf<UStates> _newState);
 
+	void InitializeFilter(AActor* _owner, TObjectPtr<UStatesDataAsset> _statesDataAsset, const TSubclassOf<UStates> _state);
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStatesDataAsset> StatesDataAsset = nullptr;
 
@@ -42,7 +44,7 @@ protected:
 private:
 
 	UPROPERTY(Transient)
-	TObjectPtr<ABaseCharacter> m_CharacterOwner = nullptr;
+	TObjectPtr<AActor> m_Owner = nullptr;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UStates> m_currentBaseState = nullptr;

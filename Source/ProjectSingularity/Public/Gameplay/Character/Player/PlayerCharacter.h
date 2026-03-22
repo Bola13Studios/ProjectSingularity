@@ -61,10 +61,12 @@ private:
 
 	UFUNCTION()
 	void ChangeWeaponMode();
+
+	UFUNCTION()
+	void TryToReload();
 	
 	UFUNCTION()
 	void InteractAction(const FInputActionValue& _Value);
-
 #pragma endregion
 
 #pragma region Dash Functions
@@ -86,8 +88,12 @@ public:
 
 	USkeletalMeshComponent* GetArmsMesh();
 
-	FOnInteract m_OnInteract;
+	UFUNCTION(Exec)
+	void ShowDebugsWeapon(bool value = true);
+	
+	bool GetDebugWeapon();
 
+	FOnInteract m_OnInteract;
 
 private:
 
@@ -122,8 +128,11 @@ private:
 	TObjectPtr<UInputAction> m_FireAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
-	TObjectPtr<UInputAction> m_ChangeWeaponMode;
-	
+	TObjectPtr<UInputAction> m_ChangeWeaponModeAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Reload Action"))
+	TObjectPtr<UInputAction> m_ReloadAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
 	TObjectPtr<UInputAction> m_InteractAcion;
 
@@ -139,6 +148,9 @@ private:
 	TObjectPtr<AWeaponBase> m_CurrentWeapon;
 
 	bool m_bFire = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon debugs"))
+	bool m_bDebugWeapon = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Weapon", meta = (DisplayName = "Weapon Data Asset"))
 	TObjectPtr<UWeaponsDataAsset> m_WeaponDataAsset;

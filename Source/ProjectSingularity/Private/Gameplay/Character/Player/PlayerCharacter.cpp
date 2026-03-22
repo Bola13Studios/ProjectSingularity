@@ -9,7 +9,7 @@
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
-
+#include "Components/ActionStateFilter.h"
 
 APlayerCharacter::APlayerCharacter():
 	ABaseCharacter()
@@ -80,7 +80,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
-		enhancedInputComponent->BindAction(m_ChangeWeaponMode, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
+		enhancedInputComponent->BindAction(m_ChangeWeaponModeAction, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
+		enhancedInputComponent->BindAction(m_ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::TryToReload);
 		enhancedInputComponent->BindAction(m_InteractAcion, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractAction);
 	}
 }
@@ -127,7 +128,12 @@ void APlayerCharacter::StopFireAction()
 
 void APlayerCharacter::ChangeWeaponMode()
 {
-	m_CurrentWeapon->ChangeWeaponMode();
+	m_CurrentWeapon->TryToChangeMode();
+}
+
+void APlayerCharacter::TryToReload()
+{
+	m_CurrentWeapon->TryToReload();
 }
 
 void APlayerCharacter::DashAction()
@@ -201,4 +207,14 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* Othe
 USkeletalMeshComponent* APlayerCharacter::GetArmsMesh()
 {
 	return m_ArmsMesh;
+}
+
+void APlayerCharacter::ShowDebugsWeapon(bool value)
+{
+	m_bDebugWeapon = value;
+}
+
+bool APlayerCharacter::GetDebugWeapon()
+{
+	return m_bDebugWeapon;
 }
