@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Gameplay/Character/Player/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
@@ -61,6 +58,7 @@ void APlayerCharacter::BeginPlay()
 
 }
 
+}
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -85,6 +83,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
 		enhancedInputComponent->BindAction(m_ChangeWeaponMode, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
+		enhancedInputComponent->BindAction(m_InteractAcion, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractAction);
 	}
 }
 
@@ -141,6 +140,11 @@ void APlayerCharacter::DashAction()
 		dashDirection = dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
 	}
+}
+
+void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
+{ // only broadcasting the delegate
+	m_OnInteract.Broadcast();
 }
 
 void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)

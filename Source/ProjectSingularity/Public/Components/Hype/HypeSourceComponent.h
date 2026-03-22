@@ -25,7 +25,7 @@ public:
 	 * @brief A Custom multiplier to apply to the base value
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Custom Multiplier"))
-	float BaseMultiplier;
+	float m_BaseMultiplier;
 
 	/**
 	 * @brief Returns the calculated points after multiplier is applied

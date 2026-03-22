@@ -30,21 +30,21 @@ public:
 	 * @brief Holds the current hype level for this receiver
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Hype Level"))
-	int CurrentHypeLevel;
+	int m_CurrentHypeLevel;
 
 	/**
 	 * @brief Hold the current kill streak for this receiver
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Streak"))
-	int CurrentKillStreak;
+	int m_CurrentKillStreak;
 
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Multiplier Table"))
-	UDataTable* HypeMultiplierTable;
+	UDataTable* m_HypeMultiplierTable;
 
 	UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Level Table"))
-	UDataTable* HypeLevelTable;
+	UDataTable* m_HypeLevelTable;
 
 public:
 
@@ -57,10 +57,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RegisterKill(UHypeSourceComponent* _Source, const bool& Critical, const int& MultiKill);
 
-private:
 	/**
 	 * @brief Used to Update the Current Hype Level
 	 */
 	UFUNCTION(BlueprintCallable)
 	void UpdateHypeLevel();
+
+	/**
+	 * @brief Verifies if the current saved amount of hype is enough
+	 * @param _Amount The amount to check onto
+	 * @return A flag stating true if the amount is less or equal the current hype
+	 */
+	UFUNCTION(BlueprintCallable)
+	bool IsHypeEnough(float _Amount);
 };

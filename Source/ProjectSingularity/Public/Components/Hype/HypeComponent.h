@@ -4,7 +4,6 @@
  * @date: 04/03/2026
  * @edited_by:
  ************************************************************************/
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -31,7 +30,7 @@ protected:
 	 * @brief The amount of hype this component stores
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
-	int BaseHypeValue;
+	int m_CurrentHypeValue;
 
 public:
 	/**

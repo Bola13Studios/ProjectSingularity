@@ -7,12 +7,18 @@
 #include "PlayerCharacter.generated.h"
 
 
+#pragma region | Forward Declarations
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 class UPlayerConfigDataAsset;
 class AWeaponBase;
 class UWeaponsDataAsset;
+#pragma endregion
+
+#pragma region | Delegates
+DECLARE_MULTICAST_DELEGATE(FOnInteract);
+#pragma endregion
 
 UCLASS()
 class PROJECTSINGULARITY_API APlayerCharacter : public ABaseCharacter
@@ -55,6 +61,10 @@ private:
 
 	UFUNCTION()
 	void ChangeWeaponMode();
+	
+	UFUNCTION()
+	void InteractAction(const FInputActionValue& _Value);
+
 #pragma endregion
 
 #pragma region Dash Functions
@@ -75,6 +85,10 @@ private:
 public:
 
 	USkeletalMeshComponent* GetArmsMesh();
+
+	FOnInteract m_OnInteract;
+
+
 private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
@@ -109,6 +123,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
 	TObjectPtr<UInputAction> m_ChangeWeaponMode;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
+	TObjectPtr<UInputAction> m_InteractAcion;
+
 #pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
