@@ -29,4 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void BindToHealthComponent(UHealthComponent* InHealthComp);
+
+	UFUNCTION(BlueprintCallable)
+	void BindToHypeComponent(UHypeComponent* InHypeComp);
 };

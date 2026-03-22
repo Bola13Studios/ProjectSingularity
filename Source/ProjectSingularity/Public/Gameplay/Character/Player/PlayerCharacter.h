@@ -60,6 +60,9 @@ private:
 	void DashAction();
 
 	UFUNCTION()
+	void ChangeWeaponMode();
+	
+	UFUNCTION()
 	void InteractAction(const FInputActionValue& _Value);
 
 #pragma endregion
@@ -81,6 +84,7 @@ private:
 
 public:
 
+	USkeletalMeshComponent* GetArmsMesh();
 
 	FOnInteract m_OnInteract;
 
@@ -117,6 +121,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
 	TObjectPtr<UInputAction> m_FireAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
+	TObjectPtr<UInputAction> m_ChangeWeaponMode;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
 	TObjectPtr<UInputAction> m_InteractAcion;
 
@@ -124,6 +131,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
 	TSubclassOf<AWeaponBase> m_WeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Arms")
+	USkeletalMeshComponent* m_ArmsMesh;
 
 	UPROPERTY()
 	TObjectPtr<AWeaponBase> m_CurrentWeapon;
