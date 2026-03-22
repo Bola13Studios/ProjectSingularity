@@ -9,7 +9,9 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "WeaponBase.h"
+#include "Utils/State Machine/States.h"
 #include "WeaponsDataAsset.generated.h"
+
 
 
 UCLASS(BlueprintType)
@@ -17,6 +19,7 @@ class PROJECTSINGULARITY_API UWeaponsDataAsset : public UDataAsset
 {
     GENERATED_BODY()
 public:
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TArray<FWeaponData> weaponsData;
 

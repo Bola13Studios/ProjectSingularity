@@ -10,133 +10,225 @@
 #include "GameFramework/Actor.h"
 #include "Camera/CameraComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Utils/State Machine/States.h"
 #include "WeaponBase.generated.h"
+
+class UActionStateFilter;
+class UStatesDataAsset;
+class APlayerCharacter;
+class UBaseAnimInstance;
+
+#pragma region Enums
 
 UENUM(BlueprintType)
 enum class EFireMode : uint8
 {
-	None			UMETA(DisplayName = "None"),
-	SemiAuto		UMETA(DisplayName = "Semi Automatic"),
-	FullAuto		UMETA(DisplayName = "Full Automatic"),
-	Burst			UMETA(DisplayName = "Burst")
+    None			UMETA(DisplayName = "None"),
+    SemiAuto		UMETA(DisplayName = "Semi Automatic"),
+    FullAuto		UMETA(DisplayName = "Full Automatic"),
+    Burst			UMETA(DisplayName = "Burst")
 };
 
 UENUM(BlueprintType)
 enum class EWeaponMode : uint8
 {
-	ShortDistance	UMETA(DisplayName = "Short Distance"),
-	LongDistance	UMETA(DisplayName = "Long Distance")
+    ShortDistance	UMETA(DisplayName = "Short Distance"),
+    LongDistance	UMETA(DisplayName = "Long Distance")
 };
 
+#pragma endregion
+
+#pragma region Structs
+
+//Weapon mode settings
 USTRUCT(BlueprintType)
 struct FWeaponModeData
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
 
-	UPROPERTY(EditAnywhere)
-	EWeaponMode weaponMode = EWeaponMode::ShortDistance;
+    //For now is just a tag
+    UPROPERTY(EditAnywhere)
+    EWeaponMode weaponMode = EWeaponMode::ShortDistance;
 
-	UPROPERTY(EditAnywhere)
-	EFireMode fireMode = EFireMode::None;
+    //Fire mode
+    UPROPERTY(EditAnywhere)
+    EFireMode fireMode = EFireMode::None;
 
-	//Max bullet penetration
-	UPROPERTY(EditAnywhere)
-	int bulletPenetration = 1;
-	//Number if bullets per shot
-	UPROPERTY(EditAnywhere)
-	int bulletsPerShot = 1;
-	//Max angle of bullet spread
-	UPROPERTY(EditAnywhere)
-	float bulletSpreadAngle = 0;
-	//TO DO
-	UPROPERTY(EditAnywhere)
-	int bulletDamage = 25;
-	//Max bullet distance
-	UPROPERTY(EditAnywhere)
-	float bulletDistance = 5000.f;
+    //Max bullet penetration
+    UPROPERTY(EditAnywhere)
+    int bulletPenetration = 1;
 
-	//TO DO
-	UPROPERTY(EditAnywhere, meta = (EditCondition = "FireMode == EFireMode::Burst", EditConditionHides))
-	int burstBulletsAmount = 3;
+    //Number if bullets per shot
+    UPROPERTY(EditAnywhere)
+    int bulletsPerShot = 1;
 
-	//Rounds Per Minute
-	UPROPERTY(EditAnywhere)
-	float fireRateRPM = 100.f;
+    //Max angle of bullet spread
+    UPROPERTY(EditAnywhere)
+    float bulletSpreadAngle = 0;
+
+    //TO DO
+    UPROPERTY(EditAnywhere)
+    int bulletDamage = 25;
+
+    //Max bullet distance
+    UPROPERTY(EditAnywhere)
+    float bulletDistance = 5000.f;
+
+    //TO DO
+    UPROPERTY(EditAnywhere, meta = (EditCondition = "FireMode == EFireMode::Burst", EditConditionHides))
+    int burstBulletsAmount = 3;
+
+    //Rounds Per Minute
+    UPROPERTY(EditAnywhere)
+    float fireRateRPM = 100.f;
+
+    //Max ammo in magazines
+    UPROPERTY(EditAnywhere)
+    int maxAmmoInMag = 30;
+
+    //Max ammo in reserve
+    UPROPERTY(EditAnywhere)
+    int maxAmmoInReser = 90;
 };
 
+//Weapon general data
 USTRUCT(BlueprintType)
 struct FWeaponData
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int ID;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    int ID;
 
-	UPROPERTY(EditAnywhere)
-	FString name;
+    //The name for the weapon
+    UPROPERTY(EditAnywhere)
+    FString name;
 
-	UPROPERTY(EditAnywhere)
-	USkeletalMesh* skeletalMesh;
+    //The mesh for the weapon
+    UPROPERTY(EditAnywhere)
+    USkeletalMesh* skeletalMesh;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAnimInstance> animInstance;
+    //The animation blueprint class for the weapon
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UAnimInstance> weaponAnimInstance;
 
-	UPROPERTY(EditAnywhere)
-	UAnimMontage* animMontage;
+    //Weapon anim montage
+    UPROPERTY(EditAnywhere)
+    UAnimMontage* weaponAnimMontage;
 
-	UPROPERTY(EditAnywhere)
-	FWeaponModeData firstMode;
+    //Arms anim montage
+    UPROPERTY(EditAnywhere)
+    UAnimMontage* armsAnimMontage;
 
-	UPROPERTY(EditAnywhere)
-	FWeaponModeData secondMode;
+    //The states data for the weapon
+    UPROPERTY(EditAnywhere)
+    TObjectPtr<UStatesDataAsset> statesDataAsset = nullptr;
+
+    //First mode data
+    UPROPERTY(EditAnywhere)
+    FWeaponModeData firstMode;
+
+    //Second mode data
+    UPROPERTY(EditAnywhere)
+    FWeaponModeData secondMode;
 
 };
 
+//Weapon mode variables in the game
+USTRUCT()
+struct FWeaponModeState
+{
+    GENERATED_BODY()
 
+    void Initialize(const FWeaponModeData& InData)
+    {
+        m_modeData = InData;
+
+        currentAmmoInMag = InData.maxAmmoInMag;
+        currentAmmoInReser = InData.maxAmmoInReser;
+    }
+
+    const FWeaponModeData& GetModeData() const
+    {
+        return m_modeData;
+    }
+
+private:
+    FWeaponModeData m_modeData;
+
+public:
+    int currentAmmoInMag = 0;
+    int currentAmmoInReser = 0;
+};
+
+#pragma endregion
 
 UCLASS()
 class PROJECTSINGULARITY_API AWeaponBase : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	AWeaponBase();
+    GENERATED_BODY()
 
-	const void SetWeaponData(FWeaponData weaponData);
+public:
+    AWeaponBase();
+
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-	USkeletalMeshComponent* weaponMesh;
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+    USkeletalMeshComponent* weaponMesh;
 
-UFUNCTION()
-	virtual bool Fire();
+public:
+    virtual void Tick(float DeltaTime) override;
 
-	void ChangeWeaponMode();
+    const void SetWeaponData(FWeaponData weaponData);
 
-	//UFUNCTION()
-	//virtual void Reload();
+    UFUNCTION()
+    virtual bool Fire();
+
+    virtual void TryToReload();
+
+    virtual void Reload();
+
+    virtual void OnReloadFinished();
+
+    virtual void TryToChangeMode();
+
+    virtual void ChangeMode();
+
+    virtual void OnChangeModeFinished();
+
+    void PlayAnimation(FName name);
+
+    int GetAmmoInMagazine();
+
+    int GetAmmoInReserve();
 
 private:
-	UPROPERTY()
-	UCameraComponent* m_cameraComponent;
+    UPROPERTY()
+    TObjectPtr<UCameraComponent> m_cameraComponent;
 
-	UPROPERTY()
-	FWeaponData m_weaponData;
+    UPROPERTY()
+    FWeaponData m_weaponData;
 
-	UPROPERTY()
-	FWeaponModeData m_firstMode;
+    UPROPERTY()
+    FWeaponModeState m_firstMode;
 
-	UPROPERTY()
-	FWeaponModeData m_secondMode;
+    UPROPERTY()
+    FWeaponModeState m_secondMode;
 
-	FWeaponModeData* m_currentWeaponMode;
+    UPROPERTY()
+    UActionStateFilter* m_actionsFilterComponent;
 
-	float m_elapsedShootTime;
+    FWeaponModeState* m_currentWeaponMode;
+
+    float m_timeSinceLastShot = 0;
+
+    TObjectPtr<APlayerCharacter> m_player;
+
+    TObjectPtr<UAnimInstance> m_armsAnimInstance;
+
+    TObjectPtr<UAnimInstance> m_weaponAnimInstance;
 };

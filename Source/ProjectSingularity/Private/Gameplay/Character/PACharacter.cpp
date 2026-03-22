@@ -15,16 +15,16 @@ void APACharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    FActorSpawnParameters spawnParams;
-    spawnParams.Owner = this;
+    //FActorSpawnParameters spawnParams;
+    //spawnParams.Owner = this;
 
-    m_currentWeapon = GetWorld()->SpawnActor<AWeaponBase>(weaponClass, spawnParams);
+    //m_currentWeapon = GetWorld()->SpawnActor<AWeaponBase>(weaponClass, spawnParams);
 
-    if (m_currentWeapon)
-    {
-        m_currentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
-        m_currentWeapon->SetWeaponData(weaponDataAsset->weaponsData[0]); //Just for now
-    }
+    //if (m_currentWeapon)
+    //{
+    //    m_currentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
+    //    m_currentWeapon->SetWeaponData(weaponDataAsset->weaponsData[0]); //Just for now
+    //}
 
 }
 
