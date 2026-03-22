@@ -5,13 +5,13 @@
 
 void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _Source, const bool& _Critical, const int& _MultiKill)
 {
-  CurrentKillStreak++;
+  m_CurrentKillStreak++;
 
   // basic implementation, must be improved
   TArray<FHypeMultipliers*> HypeMultipliers;
-  if (IsValid(HypeMultiplierTable) && _Critical)
+  if (IsValid(m_HypeMultiplierTable) && _Critical)
   {
-    HypeMultiplierTable->GetAllRows(TEXT("Multipliers"), HypeMultipliers);
+    m_HypeMultiplierTable->GetAllRows(TEXT("Multipliers"), HypeMultipliers);
     if (HypeMultipliers.IsValidIndex(0))
     {
       AddHype(_Source->GetHype() * HypeMultipliers[0]->CriticalMultiplier);
@@ -25,17 +25,22 @@ void UHypeReceiverComponent::UpdateHypeLevel()
 {
   // basic implementation
   TArray<FHypeLevels*> HypeLevels;
-  if (IsValid(HypeLevelTable))
+  if (IsValid(m_HypeLevelTable))
   {
-    HypeLevelTable->GetAllRows(TEXT("Levels"), HypeLevels);
+    m_HypeLevelTable->GetAllRows(TEXT("Levels"), HypeLevels);
     for (const auto& Level : HypeLevels)
     {
-      if (BaseHypeValue >= Level->MinRequiredHype && BaseHypeValue <= Level->MaxRequiredHype)
+      if (m_CurrentHypeValue >= Level->MinRequiredHype && m_CurrentHypeValue <= Level->MaxRequiredHype)
       {
-        CurrentHypeLevel = Level->Level;
+        m_CurrentHypeLevel = Level->Level;
         break;
       }
     }
   }
+}
+bool UHypeReceiverComponent::IsHypeEnough(float _Amount)
+{
+  if (m_CurrentHypeValue >= _Amount) return true;
+  return false;
 }
 //EOF

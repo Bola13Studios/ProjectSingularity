@@ -2,5 +2,5 @@
 
 int UHypeSourceComponent::GetHype() const
 {
-  return FMath::CeilToInt(BaseHypeValue * BaseMultiplier);
+  return FMath::CeilToInt(m_CurrentHypeValue * m_BaseMultiplier);
 }
