@@ -4,7 +4,6 @@
  * @date: 17/03/2026
  * @edited_by: [Other Contributors] - [Edit Date]
  ************************************************************************/
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,7 +17,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, EGameState, eNe
 enum class EGameState : uint8;
 
 UCLASS()
-class PROJECTSINGULARITY_API UGameManagerSubsystem : public UGameInstanceSubsystem {
+class PROJECTSINGULARITY_API UGameManagerSubsystem : public UGameInstanceSubsystem
+{
   GENERATED_BODY()
 
 public:
@@ -30,6 +30,21 @@ public:
   FOnGameStateChanged OnGameStateChanged;
 #pragma endregion
 
+private:
+#pragma region State
+  /**
+   * @brief Current active game state.
+   */
+  UPROPERTY()
+  EGameState m_eCurrentGameState;
+#pragma endregion
+
+  /**
+   * @brief Defines valid transitions between game states.
+   */
+  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
+
+public:
 #pragma region Getters & Setters
   /**
    * @brief Sets the current game state.
@@ -47,7 +62,7 @@ public:
 #pragma endregion
 
 protected:
-#pragma region Native Overrides 
+#pragma region Native Overrides
   /**
    * @brief Initializes the subsystem.
    * @param _rCollection Collection of subsystems available during initialization.
@@ -64,18 +79,5 @@ private:
    * @return True if the transition is allowed, false otherwise.
    */
   bool CanTransition(EGameState _eFrom, EGameState _eTo) const;
-
-  /**
-   * @brief Defines valid transitions between game states.
-   */
-  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
-#pragma endregion
-
-#pragma region State
-  /**
-   * @brief Current active game state.
-   */
-  UPROPERTY()
-  EGameState m_eCurrentGameState;
 #pragma endregion
 };
