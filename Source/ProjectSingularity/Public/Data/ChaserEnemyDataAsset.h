@@ -3,31 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Character/Enemy/BaseEnemy.h"
-#include "ChaserEnemy.generated.h"
+#include "EnemyConfigDataAsset.h"
+#include "ChaserEnemyDataAsset.generated.h"
 
 /**
  * 
  */
-class UChaserEnemyDataAsset;
+class UEnemyConfigDataAsset;
 
 UCLASS()
-class PROJECTSINGULARITY_API AChaserEnemy : public ABaseEnemy
+class PROJECTSINGULARITY_API UChaserEnemyDataAsset : public UEnemyConfigDataAsset
 {
 	GENERATED_BODY()
-	
-protected:
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Enemy Data", meta = (DisplayName = "Data Asset"))
-	TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
+public:
 
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Stager Timer"))
-	float m_timeStager;
+	float timeStager;
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Pause Time"))
-	float m_timePause;
+	float timePause;
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Attack Range"))
-	float m_attackRange;
+	float attackRange;
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Distance Traveled"))
-	float m_distancetraveled;
+	float distancetraveled;
+
 };

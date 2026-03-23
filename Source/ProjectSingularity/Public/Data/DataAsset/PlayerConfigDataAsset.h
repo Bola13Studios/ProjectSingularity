@@ -19,9 +19,6 @@ class PROJECTSINGULARITY_API UPlayerConfigDataAsset : public UCharacterConfigDat
 
 public:
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Max Walk Speed", ClampMin = "0"))
-	float maxWalkSpeed;
-
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Jump Z Velocity", ClampMin = "0"))
 	float jumpZVelocity;
 

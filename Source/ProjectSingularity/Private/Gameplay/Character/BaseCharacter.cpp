@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Gameplay/Character/BaseCharacter.h"
 #include "ProjectSingularity/Public/Data/CharacterConfigDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
-#include "Gameplay/Character/BaseCharacter.h"
+
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
