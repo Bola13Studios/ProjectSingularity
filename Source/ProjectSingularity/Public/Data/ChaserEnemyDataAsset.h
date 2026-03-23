@@ -9,9 +9,8 @@
 /**
  * 
  */
-class UEnemyConfigDataAsset;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTSINGULARITY_API UChaserEnemyDataAsset : public UEnemyConfigDataAsset
 {
 	GENERATED_BODY()

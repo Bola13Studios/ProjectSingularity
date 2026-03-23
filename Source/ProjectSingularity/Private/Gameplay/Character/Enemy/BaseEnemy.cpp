@@ -9,11 +9,11 @@ ABaseEnemy::ABaseEnemy()
 {
   m_healthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
-
 }
 
 void ABaseEnemy::BeginPlay()
 {
+  Super::BeginPlay();
 	m_EnemyDataAsset = Cast<UEnemyConfigDataAsset>(m_pCharacterDataAsset);
 	if (IsValid(m_EnemyDataAsset))
 	{

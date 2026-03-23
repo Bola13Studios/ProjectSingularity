@@ -7,11 +7,10 @@
 #include "Data/CharacterConfigDataAsset.h"
 #include "EnemyConfigDataAsset.generated.h"
 
-class UCharacterConfigDataAsset;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTSINGULARITY_API UEnemyConfigDataAsset : public UCharacterConfigDataAsset
 {
 	GENERATED_BODY()

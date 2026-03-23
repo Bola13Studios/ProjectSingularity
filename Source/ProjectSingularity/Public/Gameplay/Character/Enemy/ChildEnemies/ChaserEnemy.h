@@ -18,9 +18,7 @@ class PROJECTSINGULARITY_API AChaserEnemy : public ABaseEnemy
 	
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Enemy Data", meta = (DisplayName = "Data Asset"))
-	TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
+	
 
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Stager Timer"))
 	float m_timeStager;
@@ -30,4 +28,7 @@ protected:
 	float m_attackRange;
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Distance Traveled"))
 	float m_distancetraveled;
+
+	private:
+  TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
 };

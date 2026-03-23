@@ -25,7 +25,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
 	TObjectPtr<UHealthComponent> m_healthComponent;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Enemy Data", meta = (DisplayName = "Data Asset"))
 	TObjectPtr<UCharacterConfigDataAsset> m_pCharacterDataAsset;
 
 public:	

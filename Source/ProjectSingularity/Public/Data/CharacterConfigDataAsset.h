@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTSINGULARITY_API UCharacterConfigDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
