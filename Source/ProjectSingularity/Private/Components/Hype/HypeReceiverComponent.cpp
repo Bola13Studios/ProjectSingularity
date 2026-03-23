@@ -17,7 +17,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _Source, const b
       AddHype(_Source->GetHype() * HypeMultipliers[0]->CriticalMultiplier);
     }
   }
-  
+
   AddHype(_Source->GetHype());
 }
 
@@ -43,4 +43,3 @@ bool UHypeReceiverComponent::IsHypeEnough(float _Amount)
   if (m_CurrentHypeValue >= _Amount) return true;
   return false;
 }
-//EOF

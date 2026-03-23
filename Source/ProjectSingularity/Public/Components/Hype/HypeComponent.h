@@ -20,48 +20,48 @@ class UBoxComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHypeChanged, int, CurrentHype, int, Delta);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTSINGULARITY_API UHypeComponent : public UActorComponent
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
-protected:	
-	/**
-	 * @brief The amount of hype this component stores
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
-	int m_CurrentHypeValue;
+protected:
+  /**
+   * @brief The amount of hype this component stores
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
+  int m_CurrentHypeValue;
 
 public:
-	/**
-	 * @brief Sets the delegate for the HypeChanged
-	 */
-	UPROPERTY(BlueprintAssignable, Category = "Bola 13|Hype")
-	FOnHypeChanged OnHypeChanged;
-	
-	/**
-	 * @brief Sets default values for this component's properties
-	 */
-	UHypeComponent();
+  /**
+   * @brief Sets the delegate for the HypeChanged
+   */
+  UPROPERTY(BlueprintAssignable, Category = "Bola 13|Hype")
+  FOnHypeChanged OnHypeChanged;
 
-	/**
-	 * @brief Add set amount of points to the existing saved ones
-	 * @param _Points The amount to add to
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
-	virtual void AddHype(const int& _Points);
+  /**
+   * @brief Sets default values for this component's properties
+   */
+  UHypeComponent();
 
-	/**
-	 * @brief Returns the calculated points after multiplier is applied
-	 * @return a rounded int
-	 */
-	UFUNCTION(BlueprintPure, Category = "Bola 13|Hype")
-	virtual int GetHype() const;
+  /**
+   * @brief Add set amount of points to the existing saved ones
+   * @param _Points The amount to add to
+   */
+  UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
+  virtual void AddHype(const int& _Points);
 
-	/**
-	 * @brief Called to reset current points back to 0
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
-	void ResetHype();
+  /**
+   * @brief Returns the calculated points after multiplier is applied
+   * @return a rounded int
+   */
+  UFUNCTION(BlueprintPure, Category = "Bola 13|Hype")
+  virtual int GetHype() const;
+
+  /**
+   * @brief Called to reset current points back to 0
+   */
+  UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
+  void ResetHype();
 };
-//EOF
+// EOF
