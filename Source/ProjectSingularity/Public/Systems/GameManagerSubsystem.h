@@ -30,21 +30,6 @@ public:
   FOnGameStateChanged OnGameStateChanged;
 #pragma endregion
 
-private:
-#pragma region State
-  /**
-   * @brief Current active game state.
-   */
-  UPROPERTY()
-  EGameState m_eCurrentGameState;
-#pragma endregion
-
-  /**
-   * @brief Defines valid transitions between game states.
-   */
-  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
-
-public:
 #pragma region Getters & Setters
   /**
    * @brief Sets the current game state.
@@ -79,5 +64,18 @@ private:
    * @return True if the transition is allowed, false otherwise.
    */
   bool CanTransition(EGameState _eFrom, EGameState _eTo) const;
+
+  /**
+   * @brief Defines valid transitions between game states.
+   */
+  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
+#pragma endregion
+
+#pragma region State
+  /**
+   * @brief Current active game state.
+   */
+  UPROPERTY()
+  EGameState m_eCurrentGameState;
 #pragma endregion
 };
