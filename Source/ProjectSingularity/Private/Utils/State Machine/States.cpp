@@ -4,6 +4,8 @@
 #include "Utils/State Machine/States.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Character/BaseCharacter.h"
+#include "Gameplay/Character/Player/PlayerCharacter.h"
+#include "InputActionValue.h"
 
 
 ABaseCharacter* UCharacterBase::GetCharacter() const
@@ -29,6 +31,12 @@ void UGroundMovementState::Update(float _DeltaTime)
 
 void UGroundMovementState::HandleInput(const FInputActionValue& _inputValue)
 {
+  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
+  if (PlayerOwner)
+  {
+    PlayerOwner->MoveInternal(_inputValue.Get<FVector2D>());
+  }
+
 }
 
 void UGroundMovementState::Exit()

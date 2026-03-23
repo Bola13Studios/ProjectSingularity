@@ -48,9 +48,10 @@ class PROJECTSINGULARITY_API UCharacterBase : public UStates
   GENERATED_BODY()
 
 public:
-  virtual void Init() {};
-  virtual void Update(float _DeltaTime) {};
-  virtual void Exit() {};
+  virtual void Init() override {};
+  virtual void Update(float _DeltaTime) override {};
+  virtual void HandleInput(const FInputActionValue& _inputValue) override {};
+  virtual void Exit() override {};
 
 protected:
   ABaseCharacter* GetCharacter() const;
