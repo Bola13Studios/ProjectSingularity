@@ -12,7 +12,7 @@
 
 class APlayerCharacter;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOverlap, bool, _IsOverlapping);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOverlap /* on interact */);
 
 /**
  * Represents the Base Interactive Component
@@ -32,7 +32,7 @@ public:
 	 * @brief Used to notify whether the player overlapped with the interactable
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnOverlap OnInteractOverlap;
+	FOnOverlap OnInteract;
 
 protected:
 

@@ -43,9 +43,12 @@ void UInteractiveStation::Interact()
 
     default:
       UE_LOG(LogTemp, Warning, TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
+      return;
       break;
     }
   }
+
+  OnInteract.Broadcast();
 }
 
 void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -53,9 +56,6 @@ void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* Overlapped
   // we check if the ovelap was with the player
   if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
   {
-    m_IsOverlapping = true;
-    OnInteractOverlap.Broadcast(m_IsOverlapping);
-
     m_Player = Player;
 
     // we bind the method to the delegate
@@ -70,9 +70,6 @@ void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedCo
   {
     // we unbind the method to the delegate
     m_Player->m_OnInteract.RemoveAll(this);
-
-    m_IsOverlapping = false;
-    OnInteractOverlap.Broadcast(m_IsOverlapping);
 
     m_Player = nullptr;
   }
