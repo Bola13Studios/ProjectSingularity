@@ -20,7 +20,7 @@ void UActionStateFilter::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (StatesDataAsset == NULL)
+	if (!IsValid(StatesDataAsset))
 	{
 		return;
 	}
@@ -77,6 +77,14 @@ void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 			NewState->Init();
 		}
 	}
+}
+
+void UActionStateFilter::StateAction(const FInputActionValue& _inputValue)
+{
+  if (IsValid(m_currentBaseState))
+  {
+    m_currentBaseState->HandleInput(_inputValue);
+  }
 }
 
 void UActionStateFilter::InitializeFilter(AActor* _owner, TObjectPtr<UStatesDataAsset> _statesDataAsset, const TSubclassOf<UStates> _state)

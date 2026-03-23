@@ -16,6 +16,27 @@ AWeaponBase* UWeaponBaseState::GetWeapon() const
     return GetOwnerAs<AWeaponBase>();
 }
 
+#pragma region MovementStates
+
+void UGroundMovementState::Init()
+{
+
+}
+
+void UGroundMovementState::Update(float _DeltaTime)
+{
+}
+
+void UGroundMovementState::HandleInput(const FInputActionValue& _inputValue)
+{
+}
+
+void UGroundMovementState::Exit()
+{
+}
+
+#pragma endregion
+
 #pragma region WeaponStates
 
 //-------------UWeaponReload-------------

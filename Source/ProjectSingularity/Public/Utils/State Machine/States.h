@@ -8,66 +8,64 @@
 
 class ABaseCharacter;
 class AWeaponBase;
+struct FInputActionValue;
 
 UCLASS()
 class PROJECTSINGULARITY_API UStates : public UObject
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-	UStates() {};
+  UStates() {};
 
-	virtual void Init() {};
-	virtual void Update(float _DeltaTime) {};
-	virtual void Exit() {};
+  virtual void Init() {};
+  virtual void Update(float _DeltaTime) {};
+  virtual void HandleInput(const FInputActionValue& _inputValue) {};
+  virtual void Exit() {};
 
-	void SetOwner(AActor* InOwner) { Owner = InOwner; }
+  void SetOwner(AActor* InOwner)
+  {
+    Owner = InOwner;
+  }
 
-	bool CanUpdateTick = false;
+  bool CanUpdateTick = false;
 
 protected:
-	UPROPERTY(Transient)
-	TObjectPtr<AActor> Owner = nullptr;
-	
-	template<typename T>
-	T* GetOwnerAs() const
-	{
-		return Cast<T>(Owner);
-	}
-};
+  UPROPERTY(Transient)
+  TObjectPtr<AActor> Owner = nullptr;
 
+  template <typename T> T* GetOwnerAs() const
+  {
+    return Cast<T>(Owner);
+  }
+};
 
 #pragma region CharacterStates
 
 UCLASS()
 class PROJECTSINGULARITY_API UCharacterBase : public UStates
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init() {};
-	virtual void Update(float _DeltaTime) {};
-	virtual void Exit() {};
-
+  virtual void Init() {};
+  virtual void Update(float _DeltaTime) {};
+  virtual void Exit() {};
 
 protected:
-	ABaseCharacter* GetCharacter() const;
+  ABaseCharacter* GetCharacter() const;
 };
-
-
 
 UCLASS()
 class PROJECTSINGULARITY_API UGroundMovementState : public UCharacterBase
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init() {};
-	virtual void Update(float _DeltaTime) {};
-	virtual void Exit() {};
-
+  virtual void Init() override;
+  virtual void Update(float _DeltaTime) override;
+  virtual void HandleInput(const FInputActionValue& _inputValue) override;
+  virtual void Exit() override;
 };
 #pragma endregion
 
@@ -76,55 +74,48 @@ public:
 UCLASS()
 class PROJECTSINGULARITY_API UWeaponBaseState : public UStates
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init() {};
-	virtual void Update(float _DeltaTime) {};
-	virtual void Exit() {};
+  virtual void Init() {};
+  virtual void Update(float _DeltaTime) {};
+  virtual void Exit() {};
 
 protected:
-	AWeaponBase* GetWeapon() const;
+  AWeaponBase* GetWeapon() const;
 };
 
 UCLASS()
 class PROJECTSINGULARITY_API UWeaponIdle : public UWeaponBaseState
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init() {};
-	virtual void Update(float _DeltaTime) {};
-	virtual void Exit() {};
-
+  virtual void Init() {};
+  virtual void Update(float _DeltaTime) {};
+  virtual void Exit() {};
 };
 
 UCLASS()
 class PROJECTSINGULARITY_API UWeaponReload : public UWeaponBaseState
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init();
-	virtual void Update(float _DeltaTime);
-	virtual void Exit();
-
+  virtual void Init();
+  virtual void Update(float _DeltaTime);
+  virtual void Exit();
 };
 
 UCLASS()
 class PROJECTSINGULARITY_API UWeaponChangeMode : public UWeaponBaseState
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-
-	virtual void Init();
-	virtual void Update(float _DeltaTime);
-	virtual void Exit();
-
+  virtual void Init();
+  virtual void Update(float _DeltaTime);
+  virtual void Exit();
 };
 
 #pragma endregion
