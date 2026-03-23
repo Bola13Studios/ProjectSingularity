@@ -4,6 +4,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
+#include "Components/Hype/HypeComponent.h"
 
 APACharacter::APACharacter()
 {
@@ -14,16 +15,16 @@ void APACharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    FActorSpawnParameters spawnParams;
-    spawnParams.Owner = this;
+    //FActorSpawnParameters spawnParams;
+    //spawnParams.Owner = this;
 
-    m_currentWeapon = GetWorld()->SpawnActor<AWeaponBase>(weaponClass, spawnParams);
+    //m_currentWeapon = GetWorld()->SpawnActor<AWeaponBase>(weaponClass, spawnParams);
 
-    if (m_currentWeapon)
-    {
-        m_currentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
-        m_currentWeapon->SetWeaponData(weaponDataAsset->weaponsData[0]); //Just for now
-    }
+    //if (m_currentWeapon)
+    //{
+    //    m_currentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandGrip_R")); //Temp bone name
+    //    m_currentWeapon->SetWeaponData(weaponDataAsset->weaponsData[0]); //Just for now
+    //}
 
 }
 
@@ -78,4 +79,10 @@ UHealthComponent* APACharacter::GetHealthComponent() const
 {
     // Finds the health component in the blueprint if added
     return FindComponentByClass<UHealthComponent>();
+}
+
+UHypeComponent* APACharacter::GetHypeComponent() const
+{
+    // Finds the hype component in the blueprint if added
+    return FindComponentByClass<UHypeComponent>();
 }

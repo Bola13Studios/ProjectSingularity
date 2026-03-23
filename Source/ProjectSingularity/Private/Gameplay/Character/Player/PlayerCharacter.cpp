@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Gameplay/Character/Player/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "InputActionValue.h"
@@ -12,7 +9,7 @@
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
-
+#include "Components/ActionStateFilter.h"
 
 APlayerCharacter::APlayerCharacter():
 	ABaseCharacter()
@@ -58,8 +55,8 @@ void APlayerCharacter::BeginPlay()
 	{
 		capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
 	}
-}
 
+}
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -83,7 +80,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
 		enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
-		enhancedInputComponent->BindAction(m_ChangeWeaponMode, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
+		enhancedInputComponent->BindAction(m_ChangeWeaponModeAction, ETriggerEvent::Started, this, &APlayerCharacter::ChangeWeaponMode);
+		enhancedInputComponent->BindAction(m_ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::TryToReload);
+		enhancedInputComponent->BindAction(m_InteractAcion, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractAction);
 	}
 }
 
@@ -129,7 +128,12 @@ void APlayerCharacter::StopFireAction()
 
 void APlayerCharacter::ChangeWeaponMode()
 {
-	m_CurrentWeapon->ChangeWeaponMode();
+	m_CurrentWeapon->TryToChangeMode();
+}
+
+void APlayerCharacter::TryToReload()
+{
+	m_CurrentWeapon->TryToReload();
 }
 
 void APlayerCharacter::DashAction()
@@ -140,6 +144,11 @@ void APlayerCharacter::DashAction()
 		dashDirection = dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 		Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
 	}
+}
+
+void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
+{ // only broadcasting the delegate
+	m_OnInteract.Broadcast();
 }
 
 void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)
@@ -198,4 +207,14 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* Othe
 USkeletalMeshComponent* APlayerCharacter::GetArmsMesh()
 {
 	return m_ArmsMesh;
+}
+
+void APlayerCharacter::ShowDebugsWeapon(bool value)
+{
+	m_bDebugWeapon = value;
+}
+
+bool APlayerCharacter::GetDebugWeapon()
+{
+	return m_bDebugWeapon;
 }

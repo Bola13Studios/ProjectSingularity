@@ -2,145 +2,260 @@
 #include "GameFramework/Character.h"
 #include <Gameplay/Character/Player/PlayerCharacter.h>
 #include <Gameplay/Animation/BaseAnimInstance.h>
+#include "Components/ActionStateFilter.h"
+#include "Utils/State Machine/States.h"
 
 AWeaponBase::AWeaponBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
 
-	weaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	RootComponent = weaponMesh;
+    weaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+    RootComponent = weaponMesh;
 
-	m_elapsedShootTime = 0.f;
-}
-
-const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
-{
-	m_weaponData = weaponData;
-	m_currentWeaponMode = &m_weaponData.firstMode;
-
-	if (weaponMesh && m_weaponData.skeletalMesh)
-	{
-		weaponMesh->SetSkeletalMesh(m_weaponData.skeletalMesh);
-		//weaponMesh->bOwnerNoSee = true;
-		//weaponMesh->SetHiddenInGame(true);
-		weaponMesh->CastShadow = false;
-		weaponMesh->SetAnimInstanceClass(m_weaponData.animInstance);
-	}
+    m_actionsFilterComponent = CreateDefaultSubobject<UActionStateFilter>(TEXT("ActionsFilter"));
 }
 
 void AWeaponBase::BeginPlay()
 {
-	Super::BeginPlay();
-
-	ACharacter* PlayerChar = Cast<ACharacter>(GetOwner());
-	if (PlayerChar)
-	{
-		m_cameraComponent = PlayerChar->FindComponentByClass<UCameraComponent>();;
-	}
+    Super::BeginPlay();
 }
 
 void AWeaponBase::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-	m_elapsedShootTime += DeltaTime;
+    Super::Tick(DeltaTime);
+
+    m_timeSinceLastShot += DeltaTime;
+
+#if WITH_EDITOR
+    if (m_player->GetDebugWeapon() && m_actionsFilterComponent->StatesDataAsset != NULL)
+    {
+        UWorld* world = GetWorld();
+        FVector actorLocation = GetActorUpVector() * 30 + GetActorForwardVector() * 30;
+        FString text = m_actionsFilterComponent->GetCurrentBaseState()->GetFName().ToString();
+        DrawDebugString(world, actorLocation, text, this, FColor::Red, 0.0f, false, 2);
+    }
+#endif
+
+}
+
+const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
+{
+    m_weaponData = weaponData;
+
+    //Initialize filter
+    m_actionsFilterComponent->InitializeFilter(this, m_weaponData.statesDataAsset, UWeaponIdle::StaticClass());
+
+    //Initialize modes
+    m_firstMode.Initialize(m_weaponData.firstMode);
+    m_secondMode.Initialize(m_weaponData.secondMode);
+    m_currentWeaponMode = &m_firstMode;
+
+    //Set weapon mesh and anim instance
+    if (weaponMesh && m_weaponData.skeletalMesh)
+    {
+        weaponMesh->SetSkeletalMesh(m_weaponData.skeletalMesh);
+        weaponMesh->SetAnimInstanceClass(m_weaponData.weaponAnimInstance);
+        weaponMesh->SetCastShadow(false);
+    }
+
+    //Get references
+    m_player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    m_weaponAnimInstance = weaponMesh->GetAnimInstance();
+    m_armsAnimInstance = m_player->GetArmsMesh()->GetAnimInstance();
+    m_cameraComponent = m_player->FindComponentByClass<UCameraComponent>();;
 }
 
 bool AWeaponBase::Fire()
 {
-	float timeBetweenShots = 60.f / m_currentWeaponMode->fireRateRPM;
-	if (!m_cameraComponent || m_elapsedShootTime < timeBetweenShots)
-	{
-		return true;
-	}
+    //Seconds in a minute divided by the fire rate (Rounds Per Minute)
+    float timeBetweenShots = 60.f / m_currentWeaponMode->GetModeData().fireRateRPM;
 
-	m_elapsedShootTime = 0.f;
-	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	Cast<UBaseAnimInstance>(player->GetArmsMesh()->GetAnimInstance())->Fire();
+    if (m_actionsFilterComponent->GetCurrentBaseStateClass() != UWeaponIdle::StaticClass() ||
+        m_timeSinceLastShot < timeBetweenShots)
+    {
+        return true;
+    }
 
-	for (int i = 0; i < m_currentWeaponMode->bulletsPerShot; ++i)
-	{
-		FVector forward = m_cameraComponent->GetForwardVector();
+    if (m_currentWeaponMode->currentAmmoInMag <= 0)
+    {
+        TryToReload();
+        return true;
+    }
 
-		if (m_currentWeaponMode->bulletSpreadAngle > 0.f)
-		{
-			float halfAngleRad = FMath::DegreesToRadians(m_currentWeaponMode->bulletSpreadAngle / 2.f);
-			forward = FMath::VRandCone(forward, halfAngleRad);
-		}
+    //Play animation
+    if (m_currentWeaponMode == &m_firstMode)
+    {
+        PlayAnimation(FName("Mode1_Shot"));
+    }
+    else
+    {
+        PlayAnimation(FName("Mode2_Shot"));
+    }
 
-		FVector start = m_cameraComponent->GetComponentLocation();
-		FVector end = start + forward * m_currentWeaponMode->bulletDistance;
+    m_timeSinceLastShot = 0.f;
+    m_currentWeaponMode->currentAmmoInMag--;
 
-		TArray<FHitResult> hits;
-		FCollisionQueryParams params;
-		params.AddIgnoredActor(this);
-		params.AddIgnoredActor(GetOwner());
+    for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
+    {
+        FVector forward = m_cameraComponent->GetForwardVector();
 
-		bool bHit = GetWorld()->LineTraceMultiByChannel(hits, start, end, ECC_Visibility, params);
-		int penetrationCount = 0;
-		if (hits.Num() > 0)
-		{
-			for (const FHitResult& hit : hits)
-			{
-				if (!hit.GetActor())
-				{
-					continue;
-				}
+        if (m_currentWeaponMode->GetModeData().bulletSpreadAngle > 0.f)
+        {
+            float halfAngleRad = FMath::DegreesToRadians(m_currentWeaponMode->GetModeData().bulletSpreadAngle / 2.f);
+            forward = FMath::VRandCone(forward, halfAngleRad);
+        }
 
-				//Dmg method - TO DO
-				DrawDebugSphere(GetWorld(), hit.ImpactPoint, 5.f, 12, FColor::Green, false, 2.f);
+        FVector start = m_cameraComponent->GetComponentLocation();
+        FVector end = start + forward * m_currentWeaponMode->GetModeData().bulletDistance;
 
-				penetrationCount++;
+        TArray<FHitResult> hits;
+        FCollisionQueryParams params;
+        params.AddIgnoredActor(this);
+        params.AddIgnoredActor(GetOwner());
 
-				if (penetrationCount > m_currentWeaponMode->bulletPenetration)
-				{
-					break;
-				}
-			}
-		}
-		else
-		{
-			DrawDebugSphere(GetWorld(), end, 5.f, 12, FColor::Red, false, 2.f);
-		}
-	}
+        bool bHit = GetWorld()->LineTraceMultiByChannel(hits, start, end, ECC_Visibility, params);
+        int penetrationCount = 0;
+
+        if (hits.Num() > 0)
+        {
+            for (const FHitResult& hit : hits)
+            {
+                if (!hit.GetActor())
+                {
+                    continue;
+                }
+
+                //Dmg method - TO DO
+                if (m_player->GetDebugWeapon())
+                {
+                    DrawDebugSphere(GetWorld(), hit.ImpactPoint, 5.f, 12, FColor::Green, false, 2.f);
+                }
+
+                penetrationCount++;
+                if (penetrationCount > m_currentWeaponMode->GetModeData().bulletPenetration)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (m_player->GetDebugWeapon())
+            {
+                DrawDebugSphere(GetWorld(), end, 5.f, 12, FColor::Red, false, 2.f);
+            }
+        }
+    }
 
 
-	switch (m_currentWeaponMode->fireMode)
-	{
-	case EFireMode::None:
-		return false;
-		break;
-	case EFireMode::SemiAuto:
-		return false;
-		break;
-	case EFireMode::FullAuto:
-		return true;
-		break;
-	case EFireMode::Burst:
-		break;
-	default:
-		break;
-	}
-	return true;
+
+
+    //To do
+    switch (m_currentWeaponMode->GetModeData().fireMode)
+    {
+    case EFireMode::None:
+        return false;
+        break;
+    case EFireMode::SemiAuto:
+        return false;
+        break;
+    case EFireMode::FullAuto:
+        return true;
+        break;
+    case EFireMode::Burst:
+        break;
+    default:
+        break;
+    }
+
+    return true;
 }
 
-void AWeaponBase::ChangeWeaponMode() 
+#pragma region ReloadFunctions
+void AWeaponBase::TryToReload()
 {
-	UAnimInstance* AnimInstance = weaponMesh->GetAnimInstance();
+    if (!m_currentWeaponMode)
+        return;
 
-	if (!AnimInstance) return;
+    if (m_currentWeaponMode->currentAmmoInMag >= m_currentWeaponMode->GetModeData().maxAmmoInMag)
+        return;
 
-	AnimInstance->Montage_Play(m_weaponData.animMontage);
+    if (m_currentWeaponMode->currentAmmoInReser <= 0)
+        return;
 
-	if (m_currentWeaponMode != &m_weaponData.firstMode)
-	{
-		m_currentWeaponMode = &m_weaponData.firstMode;
-		AnimInstance->Montage_JumpToSection(FName("Mode2_To_Mode1"), m_weaponData.animMontage);
-	}
-	else
-	{
-		m_currentWeaponMode = &m_weaponData.secondMode;
-		AnimInstance->Montage_JumpToSection(FName("Mode1_To_Mode2"), m_weaponData.animMontage);
-	}
+    m_actionsFilterComponent->SetCurrentState(UWeaponReload::StaticClass());
 }
 
+void AWeaponBase::Reload()
+{
+    if (m_currentWeaponMode == &m_firstMode)
+    {
+        PlayAnimation(FName("Mode1_Reload"));
+    }
+    else
+    {
+        PlayAnimation(FName("Mode2_Reload"));
+    }
+
+    int maxMag = m_currentWeaponMode->GetModeData().maxAmmoInMag;
+
+    int missingAmmo = maxMag - m_currentWeaponMode->currentAmmoInMag;
+
+    int ammoToReload = FMath::Min(missingAmmo, m_currentWeaponMode->currentAmmoInReser);
+
+    m_currentWeaponMode->currentAmmoInMag += ammoToReload;
+    m_currentWeaponMode->currentAmmoInReser -= ammoToReload;
+}
+
+//Called by an event in the weapon's anim instance
+void AWeaponBase::OnReloadFinished()
+{
+    m_actionsFilterComponent->SetCurrentState(UWeaponIdle::StaticClass());
+}
+#pragma endregion
+
+#pragma region ChangeModeFunctions
+void AWeaponBase::TryToChangeMode()
+{
+    m_actionsFilterComponent->SetCurrentState(UWeaponChangeMode::StaticClass());
+}
+
+void AWeaponBase::ChangeMode()
+{
+    if (m_currentWeaponMode != &m_firstMode)
+    {
+        m_currentWeaponMode = &m_firstMode;
+        PlayAnimation(FName("Mode2_To_Mode1"));
+    }
+    else
+    {
+        m_currentWeaponMode = &m_secondMode;
+        PlayAnimation(FName("Mode1_To_Mode2"));
+    }
+}
+
+//Called by an event in the weapon's anim instance
+void AWeaponBase::OnChangeModeFinished()
+{
+    m_actionsFilterComponent->SetCurrentState(UWeaponIdle::StaticClass());
+}
+#pragma endregion
+
+void AWeaponBase::PlayAnimation(FName name)
+{
+    m_weaponAnimInstance->Montage_Play(m_weaponData.weaponAnimMontage);
+    m_weaponAnimInstance->Montage_JumpToSection(name, m_weaponData.weaponAnimMontage);
+
+    m_armsAnimInstance->Montage_Play(m_weaponData.armsAnimMontage);
+    m_armsAnimInstance->Montage_JumpToSection(name, m_weaponData.armsAnimMontage);
+}
+
+int AWeaponBase::GetAmmoInMagazine()
+{
+    return m_currentWeaponMode->currentAmmoInMag;
+}
+
+int AWeaponBase::GetAmmoInReserve()
+{
+    return m_currentWeaponMode->currentAmmoInReser;
+}

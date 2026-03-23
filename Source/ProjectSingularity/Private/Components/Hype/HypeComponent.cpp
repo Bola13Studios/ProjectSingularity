@@ -1,24 +1,26 @@
 #include "ProjectSingularity/Public/Components/Hype/HypeComponent.h"
 
-UHypeComponent::UHypeComponent() :
-	BaseHypeValue(10)
+UHypeComponent::UHypeComponent()
+    : m_CurrentHypeValue(10)
 {
-	PrimaryComponentTick.bCanEverTick = true;
+  PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UHypeComponent::AddHype(const int& _Points)
 {
-	BaseHypeValue += _Points;
+  m_CurrentHypeValue += _Points;
+  OnHypeChanged.Broadcast(m_CurrentHypeValue, _Points);
 }
 
 int UHypeComponent::GetHype() const
 {
-	return BaseHypeValue;
+  return m_CurrentHypeValue;
 }
 
 void UHypeComponent::ResetHype()
 {
-	BaseHypeValue = 0;
+  const int OldValue = m_CurrentHypeValue;
+  m_CurrentHypeValue = 0;
+
+  OnHypeChanged.Broadcast(m_CurrentHypeValue, -OldValue);
 }
-
-

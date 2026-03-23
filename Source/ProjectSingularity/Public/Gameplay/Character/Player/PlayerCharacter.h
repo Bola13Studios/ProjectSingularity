@@ -7,12 +7,18 @@
 #include "PlayerCharacter.generated.h"
 
 
+#pragma region | Forward Declarations
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 class UPlayerConfigDataAsset;
 class AWeaponBase;
 class UWeaponsDataAsset;
+#pragma endregion
+
+#pragma region | Delegates
+DECLARE_MULTICAST_DELEGATE(FOnInteract);
+#pragma endregion
 
 UCLASS()
 class PROJECTSINGULARITY_API APlayerCharacter : public ABaseCharacter
@@ -55,6 +61,12 @@ private:
 
 	UFUNCTION()
 	void ChangeWeaponMode();
+
+	UFUNCTION()
+	void TryToReload();
+	
+	UFUNCTION()
+	void InteractAction(const FInputActionValue& _Value);
 #pragma endregion
 
 #pragma region Dash Functions
@@ -75,6 +87,14 @@ private:
 public:
 
 	USkeletalMeshComponent* GetArmsMesh();
+
+	UFUNCTION(Exec)
+	void ShowDebugsWeapon(bool value = true);
+	
+	bool GetDebugWeapon();
+
+	FOnInteract m_OnInteract;
+
 private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
@@ -108,7 +128,14 @@ private:
 	TObjectPtr<UInputAction> m_FireAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
-	TObjectPtr<UInputAction> m_ChangeWeaponMode;
+	TObjectPtr<UInputAction> m_ChangeWeaponModeAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Reload Action"))
+	TObjectPtr<UInputAction> m_ReloadAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
+	TObjectPtr<UInputAction> m_InteractAcion;
+
 #pragma endregion
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
@@ -121,6 +148,9 @@ private:
 	TObjectPtr<AWeaponBase> m_CurrentWeapon;
 
 	bool m_bFire = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon debugs"))
+	bool m_bDebugWeapon = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Weapon", meta = (DisplayName = "Weapon Data Asset"))
 	TObjectPtr<UWeaponsDataAsset> m_WeaponDataAsset;
