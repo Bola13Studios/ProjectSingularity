@@ -63,7 +63,6 @@ void APlayerCharacter::BeginPlay()
   {
     m_ActionsFilterComponent->InitializeFilter(this, m_CharacterStatesDataAsset, UGroundMovementState::StaticClass());
   }
-
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -102,17 +101,6 @@ void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
   {
     m_ActionsFilterComponent->StateAction(_inputValue);
   }
-  /*FVector2D inputVector = _inputValue.Get<FVector2D>();
-  if (IsValid(Controller) && !m_bIsDashing)
-  {
-    const FRotator rotation = Controller->GetControlRotation();
-    const FRotator yawRotation(0, rotation.Yaw, 0);
-
-    const FVector forwardDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
-    const FVector rightDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
-    AddMovementInput(forwardDirection, inputVector.Y);
-    AddMovementInput(rightDirection, inputVector.X);
-  }*/
 }
 
 void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
@@ -164,48 +152,60 @@ void APlayerCharacter::TryToReload()
   m_CurrentWeapon->TryToReload();
 }
 
-void APlayerCharacter::DashAction()
-{
-  if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera) && m_bCanDash)
-  {
-    FVector dashDirection = GetVelocity() * FVector(1, 1, 0);
-    dashDirection =
-        dashDirection.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
-    Dash(dashDirection, m_PlayerDataAsset->dashDistance, m_PlayerDataAsset->dashTime);
-  }
-}
-
 void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
 { // only broadcasting the delegate
   m_OnInteract.Broadcast();
 }
 
-void APlayerCharacter::Dash(const FVector& _direction, float _distance, float _time)
+void APlayerCharacter::DashAction()
 {
-  if ((_direction.IsNearlyZero()) || (_distance <= 0.f) || (_time <= 0.f) || !m_bCanDash)
+  if (IsValid(m_ActionsFilterComponent) && m_bCanDash)
+  {
+    m_ActionsFilterComponent->SetCurrentState(UDashingState::StaticClass());
+  }
+}
+
+void APlayerCharacter::DashEnd()
+{
+  GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
+  if (IsValid(m_ActionsFilterComponent))
+  {
+    m_ActionsFilterComponent->SetCurrentState(UGroundMovementState::StaticClass());
+  }
+}
+
+void APlayerCharacter::Dash()
+{
+  if ((m_PlayerDataAsset->dashDistance <= 0.f) || (m_PlayerDataAsset->dashTime <= 0.f))
   {
     return;
   }
 
-  FVector dashVelocity = _direction.GetSafeNormal() * (_distance / _time);
-  dashVelocity.Z       = 0.;
+  if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera))
+  {
+    FVector dashDir = GetVelocity() * FVector(1, 1, 0);
+    dashDir = dashDir.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 
-  m_bIsDashing                              = true;
-  m_bCanDash                                = false;
-  UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
+  
+    FVector dashVelocity = dashDir.GetSafeNormal() * (m_PlayerDataAsset->dashDistance / m_PlayerDataAsset->dashTime);
+    dashVelocity.Z = 0.;
 
-  charMoveComp->GravityScale   = 0.f;
-  charMoveComp->GroundFriction = 0.f;
+    m_bCanDash = false;
+    UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 
-  LaunchCharacter(dashVelocity, true, true);
+    charMoveComp->GravityScale   = 0.f;
+    charMoveComp->GroundFriction = 0.f;
 
-  GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::StopDash, _time);
+    LaunchCharacter(dashVelocity, true, true);
+
+    GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::DashEnd,
+                                    m_PlayerDataAsset->dashTime);
+  }
 }
 
 void APlayerCharacter::StopDash()
 {
   UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
-  m_bIsDashing                              = false;
 
   if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
   {
@@ -228,10 +228,9 @@ void APlayerCharacter::ResetDash()
 void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                       FVector NormalImpulse, const FHitResult& Hit)
 {
-  if (m_bIsDashing)
+  if (m_ActionsFilterComponent && m_ActionsFilterComponent->GetCurrentBaseStateClass() == UDashingState::StaticClass())
   {
-    GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
-    StopDash();
+    DashEnd();
   }
 }
 

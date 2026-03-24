@@ -58,7 +58,7 @@ bool UActionStateFilter::IsStateAvailable(const TSubclassOf<UStates> _state)
 
 void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 {
-	if (!m_statesInstancesMap.Contains(_newState))
+  if (!m_statesInstancesMap.Contains(_newState) || _newState == m_currentBaseStateClass)
 	{
 		return;
 	}

@@ -22,11 +22,15 @@ AWeaponBase* UWeaponBaseState::GetWeapon() const
 
 void UGroundMovementState::Init()
 {
-
+  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
+                                   5.0f,          // Tiempo en segundos
+                                   FColor::Green, // Color
+                                   TEXT("Ground Movement State"));
 }
 
 void UGroundMovementState::Update(float _DeltaTime)
 {
+
 }
 
 void UGroundMovementState::HandleInput(const FInputActionValue& _inputValue)
@@ -42,6 +46,37 @@ void UGroundMovementState::HandleInput(const FInputActionValue& _inputValue)
 void UGroundMovementState::Exit()
 {
 }
+
+//------------UDashingState
+
+void UDashingState::Init()
+{
+  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
+  if (PlayerOwner)
+  {
+    PlayerOwner->Dash();
+  }
+  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
+                                   5.0f,          // Tiempo en segundos
+                                   FColor::Green, // Color
+                                   TEXT("Dashing State"));
+}
+
+void UDashingState::Update(float _DeltaTime)
+{
+
+}
+
+void UDashingState::Exit()
+{
+  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
+  if (PlayerOwner)
+  {
+    PlayerOwner->StopDash();
+  }
+
+}
+
 
 #pragma endregion
 

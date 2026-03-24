@@ -38,6 +38,20 @@ public:
 
   void MoveInternal(const FVector2D& inputVector);
 
+  #pragma region Dash Functions
+
+  UFUNCTION(BlueprintCallable)
+  void Dash();
+
+  void DashEnd();
+
+  UFUNCTION(BlueprintCallable)
+  void StopDash();
+
+  void ResetDash();
+
+#pragma endregion
+
 protected:
   // Called when the game starts or when spawned
   virtual void BeginPlay() override;
@@ -72,18 +86,6 @@ private:
   void InteractAction(const FInputActionValue& _Value);
 #pragma endregion
 
-#pragma region Dash Functions
-
-  UFUNCTION(BlueprintCallable)
-  void Dash(const FVector& _Direction, float _Distance, float _Time);
-
-  UFUNCTION(BlueprintCallable)
-  void StopDash();
-
-  void ResetDash();
-
-#pragma endregion
-
   UFUNCTION()
   void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                       FVector NormalImpulse, const FHitResult& Hit);
@@ -110,8 +112,6 @@ private:
 
   UPROPERTY()
   FTimerHandle m_DashResetTimerHandle;
-
-  bool m_bIsDashing = false;
 
   bool m_bCanDash = true;
 
