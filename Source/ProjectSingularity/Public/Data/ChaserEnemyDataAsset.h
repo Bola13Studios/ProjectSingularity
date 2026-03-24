@@ -16,13 +16,13 @@ class PROJECTSINGULARITY_API UChaserEnemyDataAsset : public UEnemyConfigDataAsse
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Stager Timer"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Stager Timer"))
 	float timeStager;
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Pause Time"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pause Time"))
 	float timePause;
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Attack Range"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Attack Range"))
 	float attackRange;
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Distance Traveled"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance Traveled"))
 	float distancetraveled;
 
 };

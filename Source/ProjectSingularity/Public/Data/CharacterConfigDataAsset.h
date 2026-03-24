@@ -17,12 +17,12 @@ class PROJECTSINGULARITY_API UCharacterConfigDataAsset : public UDataAsset
 
 public:
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Max Walk Speed"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Max Walk Speed"))
 	float maxWalkSpeed;
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Enemy Health"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Enemy Health"))
 	float health;
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Enemy Max Health"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Enemy Max Health"))
 	float maxHealth;
 };

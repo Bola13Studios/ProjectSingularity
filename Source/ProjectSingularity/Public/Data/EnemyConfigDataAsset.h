@@ -17,7 +17,7 @@ class PROJECTSINGULARITY_API UEnemyConfigDataAsset : public UCharacterConfigData
 	
 public:
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Enemy Damage"))
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (DisplayName = "Enemy Damage"))
 	float damage;
 
 
