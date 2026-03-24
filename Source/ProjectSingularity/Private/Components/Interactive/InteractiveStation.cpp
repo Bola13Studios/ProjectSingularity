@@ -19,7 +19,8 @@ void UInteractiveStation::Interact()
   m_StationData->GetAllRows(TEXT("Station"), StationData);
   if (!StationData.IsValidIndex(0))
   {
-    UE_LOG(LogTemp, Warning, TEXT("The provided Station Data Table is empty or an error occurred while trying to access it."));
+    UE_LOG(LogTemp, Warning,
+           TEXT("The provided Station Data Table is empty or an error occurred while trying to access it."));
     return;
   }
 
@@ -27,31 +28,34 @@ void UInteractiveStation::Interact()
   {
     switch (Row->m_Type)
     {
-    case EStationStates::HEALTH:
-      if (!ChangeHealth(Row->m_TypeAmount, Row->m_TypePrice))
-      {
-        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
-      }
-      break;
+      case EStationStates::HEALTH:
+        if (!ChangeHealth(Row->m_TypeAmount, Row->m_TypePrice))
+        {
+          UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
+        }
+        break;
 
-    case EStationStates::AMMO:
-      if (!ChangeAmmo(Row->m_TypeAmount, Row->m_TypePrice))
-      {
-        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
-      }
-      break;
+      case EStationStates::AMMO:
+        if (!ChangeAmmo(Row->m_TypeAmount, Row->m_TypePrice))
+        {
+          UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
+        }
+        break;
 
-    default:
-      UE_LOG(LogTemp, Warning, TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
-      return;
-      break;
+      default:
+        UE_LOG(LogTemp, Warning,
+               TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
+        return;
+        break;
     }
   }
 
   OnInteract.Broadcast();
 }
 
-void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                 const FHitResult& SweepResult)
 {
   // we check if the ovelap was with the player
   if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
@@ -63,7 +67,8 @@ void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* Overlapped
   }
 }
 
-void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
   // we check if the overlap was with the player
   if (Cast<AActor>(m_Player) == OtherActor)
