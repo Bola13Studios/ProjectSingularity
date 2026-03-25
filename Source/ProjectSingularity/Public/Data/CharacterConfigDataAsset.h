@@ -29,9 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Max Walk Speed"))
 	float maxWalkSpeed;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Enemy Health"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Health"))
 	float health;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Enemy Max Health"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Max Health"))
 	float maxHealth;
 };
