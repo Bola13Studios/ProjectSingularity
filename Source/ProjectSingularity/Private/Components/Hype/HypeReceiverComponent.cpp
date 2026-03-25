@@ -38,6 +38,7 @@ void UHypeReceiverComponent::UpdateHypeLevel()
     }
   }
 }
+
 bool UHypeReceiverComponent::IsHypeEnough(float _Amount)
 {
   if (m_CurrentHypeValue >= _Amount) return true;

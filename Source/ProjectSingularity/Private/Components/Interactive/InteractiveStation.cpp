@@ -1,13 +1,16 @@
 #include "Components/Interactive/InteractiveStation.h"
 
+#include "Engine/World.h"
 #include "Components/Interactive/StationData.h"
 #include "Components/Interactive/StationStates.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 
 void UInteractiveStation::Interact()
 {
+  float totalSpent = 0.0f;
   // we check if the asset provided is valid
   TArray<FStationData*> StationData;
   if (!IsValid(m_StationData))
@@ -26,6 +29,8 @@ void UInteractiveStation::Interact()
 
   for (auto Row : StationData)
   {
+    totalSpent += Row->m_TypePrice;
+
     switch (Row->m_Type)
     {
       case EStationStates::HEALTH:
@@ -51,6 +56,17 @@ void UInteractiveStation::Interact()
   }
 
   OnInteract.Broadcast();
+
+  if (UWorld* World = GetWorld())
+  {
+    if (UGameInstance* gameInstance = World->GetGameInstance())
+    {
+      if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+      {
+        gameManager->AddStat("spent", totalSpent);
+      }
+    }
+  }
 }
 
 void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
