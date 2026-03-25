@@ -79,6 +79,30 @@ public:
   virtual void Update(float _DeltaTime) override;
   virtual void Exit() override;
 };
+
+UCLASS()
+class PROJECTSINGULARITY_API UJumpingState : public UCharacterBase
+{
+  GENERATED_BODY()
+
+public:
+  virtual void Init() override;
+  virtual void Update(float _DeltaTime) override;
+  virtual void HandleInput(const FInputActionValue& _inputValue) override;
+  virtual void Exit() override;
+};
+
+UCLASS()
+class PROJECTSINGULARITY_API UFallingState : public UCharacterBase
+{
+  GENERATED_BODY()
+
+public:
+  virtual void Init() override;
+  virtual void Update(float _DeltaTime) override;
+  virtual void HandleInput(const FInputActionValue& _inputValue) override;
+  virtual void Exit() override;
+};
 #pragma endregion
 
 #pragma region WeaponStates

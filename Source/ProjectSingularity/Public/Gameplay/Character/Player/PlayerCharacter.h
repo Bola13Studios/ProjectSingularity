@@ -15,6 +15,7 @@ class UPlayerConfigDataAsset;
 class AWeaponBase;
 class UWeaponsDataAsset;
 class UStatesDataAsset;
+class UStates;
 #pragma endregion
 
 #pragma region | Delegates
@@ -51,6 +52,10 @@ public:
   void ResetDash();
 
 #pragma endregion
+
+  void RequestChangeState(const TSubclassOf<UStates> _state);
+
+  virtual void Landed(const FHitResult& Hit) override;
 
 protected:
   // Called when the game starts or when spawned

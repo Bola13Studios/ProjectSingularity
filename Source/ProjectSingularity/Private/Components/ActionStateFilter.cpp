@@ -25,7 +25,7 @@ void UActionStateFilter::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		return;
 	}
 
-	if (!m_currentBaseState && m_currentBaseState->CanUpdateTick)
+	if (IsValid(m_currentBaseState) && m_currentBaseState->CanUpdateTick)
 	{
 		m_currentBaseState->Update(DeltaTime);
 	}

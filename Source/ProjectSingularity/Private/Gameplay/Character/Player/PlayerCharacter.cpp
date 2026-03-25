@@ -119,7 +119,7 @@ void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
 
 void APlayerCharacter::JumpAction()
 {
-  Jump();
+  RequestChangeState(UJumpingState::StaticClass());
 }
 
 void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
@@ -159,19 +159,18 @@ void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
 
 void APlayerCharacter::DashAction()
 {
-  if (IsValid(m_ActionsFilterComponent) && m_bCanDash)
+  if (m_bCanDash)
   {
-    m_ActionsFilterComponent->SetCurrentState(UDashingState::StaticClass());
+    RequestChangeState(UDashingState::StaticClass());
   }
 }
 
 void APlayerCharacter::DashEnd()
 {
   GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
-  if (IsValid(m_ActionsFilterComponent))
-  {
-    m_ActionsFilterComponent->SetCurrentState(UGroundMovementState::StaticClass());
-  }
+
+  GetCharacterMovement()->IsFalling() ? RequestChangeState(UFallingState::StaticClass())
+                                      : RequestChangeState(UGroundMovementState::StaticClass());
 }
 
 void APlayerCharacter::Dash()
@@ -232,6 +231,20 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* Othe
   {
     DashEnd();
   }
+}
+
+void APlayerCharacter::RequestChangeState(const TSubclassOf<UStates> _state)
+{
+  if (IsValid(m_ActionsFilterComponent))
+  {
+    m_ActionsFilterComponent->SetCurrentState(_state);
+  }
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+  Super::Landed(Hit);
+  RequestChangeState(UGroundMovementState::StaticClass());
 }
 
 USkeletalMeshComponent* APlayerCharacter::GetArmsMesh()
