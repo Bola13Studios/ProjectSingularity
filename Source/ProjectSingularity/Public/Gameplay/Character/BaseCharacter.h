@@ -1,5 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 /************************************************************************
  * @description: This class serves as the base character for all characters in the game, including both player and
  *enemy characters. It provides common functionality and properties that can be shared among different character types.
