@@ -5,19 +5,21 @@
 #include "ProjectSingularity/Public/Data/ChaserEnemyDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationSystem.h"
+#include <Systems/BaseGameInstance.h>
 
 void AChaserEnemy::BeginPlay()
 {
   Super::BeginPlay();
 
-	m_pChaserDataAsset = Cast<UChaserEnemyDataAsset>(m_pCharacterDataAsset);
+  UBaseGameInstance* pGameInstance = Cast<UBaseGameInstance>(GetWorld()->GetGameInstance());
+
   UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 	if (IsValid(m_pChaserDataAsset))
 	{
-    m_timeStager = m_pChaserDataAsset->timeStager;
-    m_timePause = m_pChaserDataAsset->timePause;
-    m_attackRange = m_pChaserDataAsset->attackRange;
-    m_distancetraveled = m_pChaserDataAsset->distancetraveled;
+    m_timeStager = pGameInstance->m_pChaserDataAsset->timeStager;
+    m_timePause = pGameInstance->m_pChaserDataAsset->timePause;
+    m_attackRange = pGameInstance->m_pChaserDataAsset->attackRange;
+    m_distancetraveled = pGameInstance->m_pChaserDataAsset->distancetraveled;
 
 	}
  
