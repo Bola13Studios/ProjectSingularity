@@ -3,6 +3,7 @@
 
 #include "Gameplay/Character/Enemy/ChildEnemies/ChaserEnemy.h"
 #include "ProjectSingularity/Public/Data/ChaserEnemyDataAsset.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationSystem.h"
 
 void AChaserEnemy::BeginPlay()
@@ -10,12 +11,7 @@ void AChaserEnemy::BeginPlay()
   Super::BeginPlay();
 
 	m_pChaserDataAsset = Cast<UChaserEnemyDataAsset>(m_pCharacterDataAsset);
-  UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-  if (NavSystem)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("Nav mesh valido"));
-  }
-
+  UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 	if (IsValid(m_pChaserDataAsset))
 	{
     m_timeStager = m_pChaserDataAsset->timeStager;
@@ -24,4 +20,5 @@ void AChaserEnemy::BeginPlay()
     m_distancetraveled = m_pChaserDataAsset->distancetraveled;
 
 	}
+ 
 }

@@ -5,6 +5,7 @@
 #include "Components/ActionStateFilter.h"
 #include "Utils/State Machine/States.h"
 #include "Components/Hype/HypeSourceComponent.h"
+#include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "Components/Hype/HypeReceiverComponent.h"
 
 AWeaponBase::AWeaponBase()
@@ -136,6 +137,7 @@ bool AWeaponBase::Fire()
 
                 if (hitActor)
                 {
+                  UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
                   UHypeSourceComponent* hypeComp = hitActor->FindComponentByClass<UHypeSourceComponent>();
                   if (hypeComp)
                   {
@@ -145,6 +147,10 @@ bool AWeaponBase::Fire()
                     {
                       receiverComp->AddHype(hypeComp->GetHype());
                     }
+                  }
+                  if (healthComp)
+                  {
+                    healthComp->ChangeHealth(-m_currentWeaponMode->GetModeData().bulletDamage, GetOwner());
                   }
                 }
 
