@@ -1,5 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+/************************************************************************
+ * @description: This class defines a chaser enemy data asset that inherits from the UEnemyConfigDataAsset class. The
+ *chaser enemy data asset
+ * @author: Lucia Fernandez
+ * @date: 25/02/2026
+ * @edited_by: <co editor>
+ *             <co editor>
+ ************************************************************************/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,6 +23,7 @@ class PROJECTSINGULARITY_API UChaserEnemyDataAsset : public UEnemyConfigDataAsse
 	GENERATED_BODY()
 public:
 
+	// Properties specific to the chaser enemy character
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Stager Timer"))
 	float timeStager;
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pause Time"))
