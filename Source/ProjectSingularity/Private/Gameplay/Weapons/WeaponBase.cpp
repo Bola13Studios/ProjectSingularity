@@ -4,6 +4,8 @@
 #include <Gameplay/Animation/BaseAnimInstance.h>
 #include "Components/ActionStateFilter.h"
 #include "Utils/State Machine/States.h"
+#include "Components/Hype/HypeSourceComponent.h"
+#include "Components/Hype/HypeReceiverComponent.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -120,7 +122,8 @@ bool AWeaponBase::Fire()
         {
             for (const FHitResult& hit : hits)
             {
-                if (!hit.GetActor())
+              AActor* hitActor = hit.GetActor();
+                if (!hitActor)
                 {
                     continue;
                 }
@@ -129,6 +132,20 @@ bool AWeaponBase::Fire()
                 if (m_player->GetDebugWeapon())
                 {
                     DrawDebugSphere(GetWorld(), hit.ImpactPoint, 5.f, 12, FColor::Green, false, 2.f);
+                }
+
+                if (hitActor)
+                {
+                  UHypeSourceComponent* hypeComp = hitActor->FindComponentByClass<UHypeSourceComponent>();
+                  if (hypeComp)
+                  {
+                    // Ora puoi usarlo
+                    hypeComp->m_onHit.Broadcast();
+                    if (UHypeReceiverComponent* receiverComp = GetOwner()->GetComponentByClass<UHypeReceiverComponent>())
+                    {
+                      receiverComp->AddHype(hypeComp->GetHype());
+                    }
+                  }
                 }
 
                 penetrationCount++;
