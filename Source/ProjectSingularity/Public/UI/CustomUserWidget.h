@@ -2,7 +2,6 @@
  * @description: Base class extending Unreal Engine's UserWidget.
  * @author: Jaime Paramo
  * @date: 10/03/2026
- * @edited_by: [Other Contributors] - [Edit Date]
  ************************************************************************/
 
 #pragma once
@@ -33,7 +32,7 @@ public:
    * @return True if the widget is visible, false otherwise.
    */
   UFUNCTION(BlueprintCallable, Category = "Project Singularity|UI|Visibility", meta = (DisplayName = "Is Widget Visible"))
-  virtual bool IsWidgetVisible();
+  virtual bool IsWidgetVisible() const;
 #pragma endregion
 
 protected:

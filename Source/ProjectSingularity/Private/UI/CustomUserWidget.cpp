@@ -27,6 +27,6 @@ void UCustomUserWidget::HideWidget() {
   }
 }
 
-bool UCustomUserWidget::IsWidgetVisible() { return m_bWidgetVisible; }
+bool UCustomUserWidget::IsWidgetVisible() const { return m_bWidgetVisible; }
 
 void UCustomUserWidget::NativeConstruct() { Super::NativeConstruct(); }

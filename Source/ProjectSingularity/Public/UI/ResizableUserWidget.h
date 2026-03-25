@@ -2,7 +2,6 @@
  * @description: UserWidget with built-in support for resizing through a configurable SizeBox.
  * @author: Jaime Paramo
  * @date: 10/03/2026
- * @edited_by: [Other Contributors] - [Edit Date]
  ************************************************************************/
 
 #pragma once
