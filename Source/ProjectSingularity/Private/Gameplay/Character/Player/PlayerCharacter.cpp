@@ -59,7 +59,7 @@ void APlayerCharacter::BeginPlay()
     capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
   }
 
-  if (m_ActionsFilterComponent)
+  if (IsValid(m_ActionsFilterComponent))
   {
     m_ActionsFilterComponent->InitializeFilter(this, m_CharacterStatesDataAsset, UGroundMovementState::StaticClass());
   }
@@ -97,7 +97,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 {
-  if (m_ActionsFilterComponent)
+  if (IsValid(m_ActionsFilterComponent))
   {
     m_ActionsFilterComponent->StateAction(_inputValue);
   }
@@ -169,8 +169,8 @@ void APlayerCharacter::DashEnd()
 {
   GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
 
-  !IsGrounded() ? RequestChangeState(UFallingState::StaticClass())
-                : RequestChangeState(UGroundMovementState::StaticClass());
+  IsGrounded() ? RequestChangeState(UGroundMovementState::StaticClass())
+               : RequestChangeState(UFallingState::StaticClass());
 }
 
 void APlayerCharacter::Dash()
@@ -188,7 +188,7 @@ void APlayerCharacter::Dash()
     FVector dashVelocity = dashDir.GetSafeNormal() * (m_PlayerDataAsset->dashDistance / m_PlayerDataAsset->dashTime);
     dashVelocity.Z       = 0.;
 
-    m_bCanDash                                = false;
+    m_bCanDash = false;
     if (UCharacterMovementComponent* charMoveComp = GetCharacterMovement())
     {
       charMoveComp->GravityScale   = 0.f;
@@ -227,7 +227,8 @@ void APlayerCharacter::ResetDash()
 void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                       FVector NormalImpulse, const FHitResult& Hit)
 {
-  if (m_ActionsFilterComponent && m_ActionsFilterComponent->GetCurrentBaseStateClass() == UDashingState::StaticClass())
+  if (IsValid(m_ActionsFilterComponent)
+      && m_ActionsFilterComponent->GetCurrentBaseStateClass() == UDashingState::StaticClass())
   {
     DashEnd();
   }
@@ -235,16 +236,19 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* Othe
 
 bool APlayerCharacter::IsGrounded() const
 {
-  FHitResult Hit;
+  FHitResult hit;
 
-  FVector Start         = GetActorLocation();
-  float   TraceDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f;
-  FVector End           = Start - FVector(0, 0, TraceDistance);
+  FVector start         = GetActorLocation();
+  float   traceDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f;
+  FVector end           = start - FVector(0, 0, traceDistance);
 
-  FCollisionQueryParams Params;
-  Params.AddIgnoredActor(this);
-
-  return GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldStatic, Params);
+  FCollisionQueryParams params;
+  params.AddIgnoredActor(this);
+  if (GetWorld())
+  {
+    return GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_WorldStatic, params);
+  }
+  return false;
 }
 
 void APlayerCharacter::RequestChangeState(const TSubclassOf<UStates> _state)

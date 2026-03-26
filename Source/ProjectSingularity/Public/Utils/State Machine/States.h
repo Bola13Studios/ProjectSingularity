@@ -88,7 +88,7 @@ class PROJECTSINGULARITY_API UJumpingState : public UCharacterBase
 public:
   virtual void Init() override;
   virtual void Update(float _DeltaTime) override;
-  virtual void HandleInput(const FInputActionValue& _inputValue) override;
+  virtual void HandleInput(const FInputActionValue& _inputValue) override; // Overriding HandleInput for air control
   virtual void Exit() override;
 };
 
@@ -100,7 +100,7 @@ class PROJECTSINGULARITY_API UFallingState : public UCharacterBase
 public:
   virtual void Init() override;
   virtual void Update(float _DeltaTime) override;
-  virtual void HandleInput(const FInputActionValue& _inputValue) override;
+  virtual void HandleInput(const FInputActionValue& _inputValue) override; // Overriding HandleInput for air control
   virtual void Exit() override;
 };
 #pragma endregion

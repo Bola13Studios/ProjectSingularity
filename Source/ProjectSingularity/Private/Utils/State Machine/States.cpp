@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Utils/State Machine/States.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Character/BaseCharacter.h"
@@ -8,34 +7,36 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-
 ABaseCharacter* UCharacterBase::GetCharacter() const
 {
-	return GetOwnerAs<ABaseCharacter>();
+  return GetOwnerAs<ABaseCharacter>();
 }
 
 AWeaponBase* UWeaponBaseState::GetWeapon() const
 {
-    return GetOwnerAs<AWeaponBase>();
+  return GetOwnerAs<AWeaponBase>();
 }
 
 #pragma region MovementStates
 
 void UGroundMovementState::Init()
 {
-  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
-                                   2.0f,          // Tiempo en segundos
-                                   FColor::Green, // Color
-                                   TEXT("Ground Movement State"));
+  //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Ground Movement State"));
+  CanUpdateTick = true;
 }
 
 void UGroundMovementState::Update(float _DeltaTime)
 {
+  Super::Update(_DeltaTime);
+  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
+  if (PlayerOwner && (PlayerOwner->GetVelocity().Z < 0. && !PlayerOwner->IsGrounded()))
+  {
+    PlayerOwner->RequestChangeState(UFallingState::StaticClass());
+  }
 }
 
 void UGroundMovementState::HandleInput(const FInputActionValue& _inputValue)
 {
-  
   if (APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>())
   {
     PlayerOwner->MoveInternal(_inputValue.Get<FVector2D>());
@@ -54,10 +55,7 @@ void UDashingState::Init()
   {
     PlayerOwner->Dash();
   }
-  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
-                                   2.0f,          // Tiempo en segundos
-                                   FColor::Green, // Color
-                                   TEXT("Dashing State"));
+  //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Dashing State"));
 }
 
 void UDashingState::Update(float _DeltaTime)
@@ -75,10 +73,7 @@ void UDashingState::Exit()
 //-----------UJumpingState
 void UJumpingState::Init()
 {
-  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
-                                   2.0f,          // Tiempo en segundos
-                                   FColor::Green, // Color
-                                   TEXT("Jumping State"));
+  //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Jumping State"));
   if (APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>())
   {
     PlayerOwner->Jump();
@@ -118,20 +113,22 @@ void UJumpingState::Exit()
 
 void UFallingState::Init()
 {
-  GEngine->AddOnScreenDebugMessage(-1,            // Key (-1 = nuevo mensaje cada vez)
-                                   2.0f,          // Tiempo en segundos
-                                   FColor::Green, // Color
-                                   TEXT("Falling State"));
+  //GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Falling State"));
+  CanUpdateTick = true;
 }
 
 void UFallingState::Update(float _DeltaTime)
 {
+  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
+  if (PlayerOwner && (PlayerOwner->IsGrounded() && PlayerOwner->GetVelocity().Z <= 0.))
+  {
+    PlayerOwner->RequestChangeState(UGroundMovementState::StaticClass());
+  }
 }
 
 void UFallingState::HandleInput(const FInputActionValue& _inputValue)
 {
-  APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>();
-  if (PlayerOwner)
+  if (APlayerCharacter* PlayerOwner = GetOwnerAs<APlayerCharacter>())
   {
     PlayerOwner->MoveInternal(_inputValue.Get<FVector2D>());
   }
@@ -143,13 +140,12 @@ void UFallingState::Exit()
 
 #pragma endregion
 
-
 #pragma region WeaponStates
 
 //-------------UWeaponReload-------------
-void UWeaponReload::Init() 
+void UWeaponReload::Init()
 {
-    GetWeapon()->Reload();
+  GetWeapon()->Reload();
 }
 
 void UWeaponReload::Update(float _DeltaTime)
@@ -163,7 +159,7 @@ void UWeaponReload::Exit()
 //-------------UWeaponChangeMode-------------
 void UWeaponChangeMode::Init()
 {
-    GetWeapon()->ChangeMode();
+  GetWeapon()->ChangeMode();
 }
 
 void UWeaponChangeMode::Update(float _DeltaTime)

@@ -39,13 +39,15 @@ public:
 
   void MoveInternal(const FVector2D& inputVector);
 
-  #pragma region Dash Functions
+#pragma region Dash Functions
 
+  // Called in DashingState Init()
   UFUNCTION(BlueprintCallable)
   void Dash();
 
   void DashEnd();
 
+  // Called in DashingState Exit()
   UFUNCTION(BlueprintCallable)
   void StopDash();
 
@@ -56,6 +58,8 @@ public:
   void RequestChangeState(const TSubclassOf<UStates> _state);
 
   virtual void Landed(const FHitResult& Hit) override;
+
+  bool IsGrounded() const;
 
 protected:
   // Called when the game starts or when spawned
@@ -94,8 +98,6 @@ private:
   UFUNCTION()
   void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                       FVector NormalImpulse, const FHitResult& Hit);
-
-  bool IsGrounded() const;
 
 public:
   USkeletalMeshComponent* GetArmsMesh();
