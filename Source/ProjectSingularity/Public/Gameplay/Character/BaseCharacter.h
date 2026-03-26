@@ -20,15 +20,15 @@ class UHealthComponent;
 UCLASS()
 class PROJECTSINGULARITY_API ABaseCharacter : public ACharacter
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
-	ABaseCharacter();
+  // Sets default values for this character's properties
+  ABaseCharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+  // Called when the game starts or when spawned
+  virtual void BeginPlay() override;
 
 	// Health component to manage the character's health
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bola13|Components")
@@ -44,5 +44,4 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };
