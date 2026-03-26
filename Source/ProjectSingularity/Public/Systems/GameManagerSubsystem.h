@@ -8,6 +8,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Systems/SessionData.h"
 #include "GameManagerSubsystem.generated.h"
 
 // Delegates
@@ -31,18 +32,11 @@ public:
 #pragma endregion
 
 private:
-#pragma region State
   /**
-   * @brief Current active game state.
+   * @brief The struct that will save the session data of the player
    */
   UPROPERTY()
-  EGameState m_eCurrentGameState;
-#pragma endregion
-
-  /**
-   * @brief Defines valid transitions between game states.
-   */
-  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
+  FSessionData m_sessionData;
 
 public:
 #pragma region Getters & Setters
@@ -59,6 +53,35 @@ public:
    */
   UFUNCTION(BlueprintCallable, Category = "Project Singularity|Game State")
   EGameState GetGameState() const;
+
+  /**
+   * @brief Returns the current stored data for the found key
+   * @param _statName The name of the stat
+   * @return The float value of the stat, will return -1 if not found
+   */
+  UFUNCTION(BlueprintCallable)
+  float GetOneStat(FName _statName) const;
+
+  /**
+   * @brief Return the stored session data
+   * @return The TMap holding the data
+   */
+  const FSessionData& GetAllData() const;
+#pragma endregion
+
+#pragma region | Session Data Methods
+  /**
+   * @brief This will add or update an existing stat for the log manager
+   * @param _statName The key name of the stat
+   * @param _value The value to add or assign
+   */
+  UFUNCTION(BlueprintCallable)
+  void AddStat(FName _statName, float _value = 1.0f);
+
+  /**
+   * @brief Will reset the session data
+   */
+  void ResetSession();
 #pragma endregion
 
 protected:
@@ -79,5 +102,18 @@ private:
    * @return True if the transition is allowed, false otherwise.
    */
   bool CanTransition(EGameState _eFrom, EGameState _eTo) const;
+
+  /**
+   * @brief Defines valid transitions between game states.
+   */
+  TMap<EGameState, TArray<EGameState>> m_mValidTransitions;
+#pragma endregion
+
+#pragma region State
+  /**
+   * @brief Current active game state.
+   */
+  UPROPERTY()
+  EGameState m_eCurrentGameState;
 #pragma endregion
 };

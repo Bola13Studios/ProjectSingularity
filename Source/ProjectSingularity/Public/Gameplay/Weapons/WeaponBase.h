@@ -17,6 +17,7 @@ class UActionStateFilter;
 class UStatesDataAsset;
 class APlayerCharacter;
 class UBaseAnimInstance;
+class UHealthComponent;
 
 #pragma region Enums
 

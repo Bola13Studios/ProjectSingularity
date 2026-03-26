@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectSingularity/Public/Data/DataAsset/PlayerConfigDataAsset.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
 #include "Kismet/GameplayStatics.h"
@@ -65,6 +67,25 @@ void APlayerCharacter::BeginPlay()
   }
 }
 
+void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+  Super::EndPlay(EndPlayReason);
+
+  float totalHype = 0.0f;
+  if (UHypeReceiverComponent* hypeComp = GetComponentByClass<UHypeReceiverComponent>())
+  {
+    totalHype = hypeComp->GetHype();
+  }
+
+  if (UGameInstance* gameInstance = GetGameInstance())
+  {
+    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+    {
+      gameManager->AddStat("totalhype", totalHype);
+    }
+  }
+}
+
 void APlayerCharacter::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
@@ -120,6 +141,14 @@ void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
 void APlayerCharacter::JumpAction()
 {
   RequestChangeState(UJumpingState::StaticClass());
+  
+  if (UGameInstance* gameInstance = GetGameInstance())
+  {
+    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+    {
+      gameManager->AddStat("jumps", 0.5f);
+    }
+  }
 }
 
 void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
@@ -155,6 +184,14 @@ void APlayerCharacter::TryToReload()
 void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
 { // only broadcasting the delegate
   m_OnInteract.Broadcast();
+
+  if (UGameInstance* gameInstance = GetGameInstance())
+  {
+    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+    {
+      gameManager->AddStat("interactions");
+    }
+  }
 }
 
 void APlayerCharacter::DashAction()
@@ -199,6 +236,14 @@ void APlayerCharacter::Dash()
 
     GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::DashEnd,
                                     m_PlayerDataAsset->dashTime);
+                                    
+    if (UGameInstance* gameInstance = GetGameInstance())
+    {
+     if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+     {
+       gameManager->AddStat("dashes", 0.5f);
+     }
+    }
   }
 }
 

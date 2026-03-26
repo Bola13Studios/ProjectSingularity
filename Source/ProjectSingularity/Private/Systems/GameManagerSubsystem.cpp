@@ -36,6 +36,28 @@ EGameState UGameManagerSubsystem::GetGameState() const
   return m_eCurrentGameState;
 }
 
+float UGameManagerSubsystem::GetOneStat(FName _statName) const
+{ // will return the value if the key has been found
+  if (const float* _found = m_sessionData.stats.Find(_statName)) return *_found;
+  // or -1 if not found
+  return -1.0f;
+}
+
+const FSessionData& UGameManagerSubsystem::GetAllData() const
+{ // will return the full struct with the saved data
+  return m_sessionData;
+}
+
+void UGameManagerSubsystem::AddStat(FName _statName, float _value)
+{ // will find and add or create and assign the value
+  m_sessionData.stats.FindOrAdd(_statName) += _value;
+}
+
+void UGameManagerSubsystem::ResetSession()
+{ // cleaning the saved TMap
+  m_sessionData.stats.Empty();
+}
+
 void UGameManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
 {
   Super::Initialize(_rCollection);

@@ -56,7 +56,7 @@ public:
    * @return a rounded int
    */
   UFUNCTION(BlueprintPure, Category = "Bola 13|Hype")
-  virtual int GetHype() const;
+  virtual int GetHype();
 
   /**
    * @brief Called to reset current points back to 0

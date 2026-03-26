@@ -12,7 +12,7 @@ void UHypeComponent::AddHype(const int& _Points)
   OnHypeChanged.Broadcast(m_CurrentHypeValue, _Points);
 }
 
-int UHypeComponent::GetHype() const
+int UHypeComponent::GetHype()
 {
   return m_CurrentHypeValue;
 }
