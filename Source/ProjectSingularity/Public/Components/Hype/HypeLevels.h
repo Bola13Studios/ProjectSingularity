@@ -21,18 +21,18 @@ struct FHypeLevels : public FTableRowBase
 	 * The level of the hype, starting from 0. Each level corresponds to a range of hype points defined by MinRequiredHype and MaxRequiredHype.
 	 */
 	UPROPERTY(EditAnywhere)
-	int32 Level = 0;
+	int32 level = 0;
 
 	/*
 	 * The minimum amount of hype required to reach this level.
 	 */
 	UPROPERTY(EditAnywhere)
-	int32 MinRequiredHype = 0;
+	int32 minRequiredHype = 0;
 
 	/**
 	 * The maximum amount of hype required to reach this level.
 	 */
 	UPROPERTY(EditAnywhere)
-	int32 MaxRequiredHype = 0;
+	int32 maxRequiredHype = 0;
 };
 //EOF
