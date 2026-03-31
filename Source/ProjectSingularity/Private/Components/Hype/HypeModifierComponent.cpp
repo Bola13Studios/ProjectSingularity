@@ -28,9 +28,19 @@ bool UHypeModifierComponent::AddModifier(FName _modifier)
   // get the gameinstance first
   if (UBaseGameInstance* gameInstance = Cast<UBaseGameInstance>(GetWorld()->GetGameInstance()))
   {
+    TArray<FHypeModifiers*> hypeModifiers;
     // check if the key name is in the data table
+    FHypeModifiers* modifierRow =
+        gameInstance->m_hypeModifiersDataTable->FindRow<FHypeModifiers>(_modifier, TEXT("Modifier"));
+
+    if (!modifierRow)
+    {
+      UE_LOG(LogTemp, Error, TEXT("Unable to find the modifier. Are you sure the row name and identifier name match?"));
+      return false;
+    }
 
     // add the values to the array
+    m_hypeModifiers.Add(modifierRow); // praying the lord this fucker doesn't get deleted here
   }
 
   return false;

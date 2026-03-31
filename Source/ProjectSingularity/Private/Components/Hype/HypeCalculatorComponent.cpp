@@ -1,4 +1,6 @@
 #include "Components/Hype/HypeCalculatorComponent.h"
+#include "Components/Hype/HypeModifierComponent.h"
+#include "Components/Hype/PopularityComponent.h"
 
 UHypeCalculatorComponent::UHypeCalculatorComponent()
 {
@@ -16,22 +18,17 @@ void UHypeCalculatorComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-int UHypeCalculatorComponent::CalculateBaseHype()
+float UHypeCalculatorComponent::ApplyModifiers(UHypeModifierComponent* _modifier)
 {
-  return 0;
+  return _modifier->GetTotalModifiers();
 }
 
-int UHypeCalculatorComponent::ApplyModifiers()
+float UHypeCalculatorComponent::ApplyPopularity(UPopularityComponent* _popularity)
 {
-  return 0;
+  return _popularity->GetMultiplier();
 }
 
-int UHypeCalculatorComponent::ApplyPopularity()
+int UHypeCalculatorComponent::ComputeFinalHype(float& _baseHype, float& _modifiers, float& _popularity)
 {
-  return 0;
-}
-
-int UHypeCalculatorComponent::ComputeFinalHype()
-{
-  return 0;
+  return _baseHype + _baseHype * (_modifiers + _popularity);
 }

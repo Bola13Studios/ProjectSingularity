@@ -10,6 +10,9 @@
 #include "Components/ActorComponent.h"
 #include "HypeCalculatorComponent.generated.h"
 
+class UPopularityComponent;
+class UHypeModifierComponent;
+
 /**
  * Calculates the final hype to add to the player
  */
@@ -22,13 +25,11 @@ public:
 	// Sets default values for this component's properties
 	UHypeCalculatorComponent();
 
-	int CalculateBaseHype();
+ 	float ApplyModifiers(UHypeModifierComponent* _modifier);
 
- 	int ApplyModifiers();
+	float ApplyPopularity(UPopularityComponent* _popularity);
 
-	int ApplyPopularity();
-
-	int ComputeFinalHype();
+	int ComputeFinalHype(float& _baseHype, float& _modifiers, float& _popularity);
 
 protected:
 	// Called when the game starts
