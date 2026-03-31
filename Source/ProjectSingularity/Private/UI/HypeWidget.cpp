@@ -15,14 +15,14 @@ void UHypeWidget::BindToHypeComponent(UHypeComponent* InHypeComp)
 
 	if (HypeComp)
 	{
-		HypeComp->OnHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
+		HypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
 	}
 
 	HypeComp = InHypeComp;
 
 	if (HypeComp)
 	{
-		HypeComp->OnHypeChanged.AddDynamic(this, &UHypeWidget::HandleHypeChanged);
+		HypeComp->onHypeChanged.AddDynamic(this, &UHypeWidget::HandleHypeChanged);
 		RefreshUI(HypeComp->GetHype());
 	}
 }
@@ -31,7 +31,7 @@ void UHypeWidget::NativeDestruct()
 {
 	if (HypeComp)
 	{
-		HypeComp->OnHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
+		HypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
 	}
 
 	Super::NativeDestruct();
