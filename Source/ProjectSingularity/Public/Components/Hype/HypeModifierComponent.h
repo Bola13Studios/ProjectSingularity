@@ -33,7 +33,7 @@ public:
    * @brief Will return all the saved modifiers
    * @return An array holding all the added modifiers at the time
    */
-  TArray<int> GetActiveModifiers() const;
+  TArray<FHypeModifiers*> GetActiveModifiers() const;
 
   /**
    * @brief Will add a new modifier
@@ -59,7 +59,7 @@ public:
    * @brief This will clear all the temporary modifiers
    * @return
    */
-  bool ClearModifiers() const;
+  bool ClearModifiers();
 
 protected:
   /**
