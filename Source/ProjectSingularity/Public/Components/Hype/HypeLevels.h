@@ -15,30 +15,32 @@
 USTRUCT(BlueprintType)
 struct FHypeLevels : public FTableRowBase
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
-	/**
-	 * The level of the hype, starting from 0. Each level corresponds to a range of hype points defined by MinRequiredHype and MaxRequiredHype.
-	 */
-	UPROPERTY(EditAnywhere)
-	int32 level = 0;
+public:
+  /**
+   * The level of the hype, starting from 0. Each level corresponds to a range of hype points defined by MinRequiredHype
+   * and MaxRequiredHype.
+   */
+  UPROPERTY(EditAnywhere)
+  int32 level = 0;
 
-	/*
-	 * The minimum amount of hype required to reach this level.
-	 */
-	UPROPERTY(EditAnywhere)
-	int32 minRequiredHype = 0;
+  /*
+   * The minimum amount of hype required to reach this level.
+   */
+  UPROPERTY(EditAnywhere)
+  int32 minRequiredHype = 0;
 
-	/**
-	 * The maximum amount of hype required to reach this level.
-	 */
-	UPROPERTY(EditAnywhere)
-	int32 maxRequiredHype = 1000;
+  /**
+   * The maximum amount of hype required to reach this level.
+   */
+  UPROPERTY(EditAnywhere)
+  int32 maxRequiredHype = 1000;
 
-	/**
-	 * The multiplier to apply to each level
-	 */
-	UPROPERTY(EditAnywhere, meta = (ToolTip = "This represents percentage in decimals", ClampMin = 0, ClampMax = 1))
-	float multiplier = 0.0f;
+  /**
+   * The multiplier to apply to each level
+   */
+  UPROPERTY(EditAnywhere, meta = (ToolTip = "This represents percentage in decimals", ClampMin = 0, ClampMax = 1))
+  float multiplier = 0.0f;
 };
-//EOF
+// EOF

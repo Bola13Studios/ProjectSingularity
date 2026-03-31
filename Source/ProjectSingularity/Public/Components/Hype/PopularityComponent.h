@@ -18,7 +18,7 @@ class PROJECTSINGULARITY_API UPopularityComponent : public UActorComponent
   GENERATED_BODY()
 
 private:
-  TObjectPtr<FHypeLevels> m_hypeLevel;
+  FHypeLevels* m_hypeLevel;
 
   float m_currentPopularity;
 

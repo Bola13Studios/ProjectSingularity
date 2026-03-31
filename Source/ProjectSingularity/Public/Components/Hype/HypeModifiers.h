@@ -7,7 +7,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HypeLevels.generated.h"
+#include "HypeModifiers.generated.h"
 
 /**
  * Represents the structure for the Hype Modifiers Table
