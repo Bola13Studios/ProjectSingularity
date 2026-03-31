@@ -1,7 +1,7 @@
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeSourceComponent.h"
-#include "ProjectSingularity/Public/Data/DataTable/HypeMultipliers.h"
-#include "ProjectSingularity/Public/Data/DataTable/HypeLevels.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeMultipliers.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeLevels.h"
 
 void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical, const int& _multiKill)
 {
@@ -14,7 +14,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
     m_hypeMultiplierTable->GetAllRows(TEXT("Multipliers"), hypeMultipliers);
     if (hypeMultipliers.IsValidIndex(0))
     {
-      AddHype(_source->GetHype() * hypeMultipliers[0]->CriticalMultiplier);
+      AddHype(_source->GetHype() * hypeMultipliers[0]->criticalMultiplier);
     }
   }
 
@@ -30,9 +30,9 @@ void UHypeReceiverComponent::UpdateHypeLevel()
     m_hypeLevelTable->GetAllRows(TEXT("Levels"), hypeLevels);
     for (const auto& level : hypeLevels)
     {
-      if (m_currentHypeValue >= level->MinRequiredHype && m_currentHypeValue <= level->MaxRequiredHype)
+      if (m_currentHypeValue >= level->minRequiredHype && m_currentHypeValue <= level->maxRequiredHype)
       {
-        m_currentHypeLevel = level->Level;
+        m_currentHypeLevel = level->level;
         break;
       }
     }

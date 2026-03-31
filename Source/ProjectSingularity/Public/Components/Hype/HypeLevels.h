@@ -33,6 +33,12 @@ struct FHypeLevels : public FTableRowBase
 	 * The maximum amount of hype required to reach this level.
 	 */
 	UPROPERTY(EditAnywhere)
-	int32 maxRequiredHype = 0;
+	int32 maxRequiredHype = 1000;
+
+	/**
+	 * The multiplier to apply to each level
+	 */
+	UPROPERTY(EditAnywhere, meta = (ToolTip = "This represents percentage in decimals", ClampMin = 0, ClampMax = 1))
+	float multiplier = 0.0f;
 };
 //EOF

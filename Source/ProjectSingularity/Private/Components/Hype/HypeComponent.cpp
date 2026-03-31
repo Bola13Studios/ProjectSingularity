@@ -22,5 +22,5 @@ void UHypeComponent::ResetHype()
   const int oldValue = m_currentHypeValue;
   m_currentHypeValue = 0;
 
-  OnHypeChanged.Broadcast(m_currentHypeValue, -oldValue);
+  onHypeChanged.Broadcast(m_currentHypeValue, -oldValue);
 }
