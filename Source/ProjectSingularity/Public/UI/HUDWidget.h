@@ -9,27 +9,43 @@
 #include "Blueprint/UserWidget.h"
 #include "HUDWidget.generated.h"
 
-/**
- * 
- */
+class UImage;
+class UHealthComponent;
+class UHypeComponent;
+
 UCLASS()
 class PROJECTSINGULARITY_API UHUDWidget : public UUserWidget
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
+
 public:
-	
-	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
-	UHealthWidget* HealthWidget;
+  UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+  UHealthWidget* HealthWidget;
 
-	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
-	UAmmoWidget* AmmoWidget;
+  UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+  UAmmoWidget* AmmoWidget;
 
-	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
-	UHypeWidget* HypeWidget;
+  UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+  UHypeWidget* HypeWidget;
 
-	UFUNCTION(BlueprintCallable)
-	void BindToHealthComponent(UHealthComponent* InHealthComp);
+  UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+  UImage* VignetteImage;
 
-	UFUNCTION(BlueprintCallable)
-	void BindToHypeComponent(UHypeComponent* InHypeComp);
+  UFUNCTION(BlueprintCallable)
+  void BindToHealthComponent(UHealthComponent* InHealthComp);
+
+  UFUNCTION(BlueprintCallable)
+  void BindToHypeComponent(UHypeComponent* InHypeComp);
+
+protected:
+  virtual void NativeDestruct() override;
+
+private:
+  UPROPERTY()
+  TObjectPtr<UHealthComponent> HealthComp;
+
+  UFUNCTION()
+  void HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor);
+
+  void UpdateVignette(float Current, float Max);
 };
