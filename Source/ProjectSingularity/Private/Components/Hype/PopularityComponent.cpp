@@ -6,11 +6,29 @@
 UPopularityComponent::UPopularityComponent()
 {
   PrimaryComponentTick.bCanEverTick = true;
+  m_currentPopularity = 0.0f;
+  m_hypeLevel = new FHypeLevels();
 }
 
 void UPopularityComponent::BeginPlay()
 {
   Super::BeginPlay();
+  if (UBaseGameInstance* gameInstance = Cast<UBaseGameInstance>(GetWorld()->GetGameInstance()))
+  {
+    if (!IsValid(gameInstance->m_hypePopularityDataTable))
+    {
+      UE_LOG(
+          LogTemp, Error,
+          TEXT("Unable to retreive the PopularityDataTable from the BaseGameInstance. Are you sure it was assigned?"));
+      return;
+    }
+    // we get the first level as default
+    TArray<FHypeLevels*> hypeLevels;
+    gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
+
+    m_hypeLevel->level = hypeLevels[0]->level;
+    m_hypeLevel->multiplier = hypeLevels[0]->multiplier;
+  }
 }
 
 void UPopularityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -89,6 +107,7 @@ void UPopularityComponent::UpdateLevel()
     {
       m_currentPopularity = maxValue;
     }
+    m_hypeLevel->level = newLevel;
   }
 }
 
