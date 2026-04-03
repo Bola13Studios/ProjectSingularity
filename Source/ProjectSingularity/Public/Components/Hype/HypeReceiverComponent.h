@@ -12,8 +12,11 @@
 #include "HypeReceiverComponent.generated.h"
 
 #pragma region | Forward Declaration
-class UHypeSourceComponent;
 class UDataTable; // struct FHypeMultipliers;
+class UHypeSourceComponent;
+class UHypeCalculatorComponent;
+class UHypeModifierComponent;
+class UPopularityComponent;
 #pragma endregion
 
 /**
@@ -23,6 +26,8 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTSINGULARITY_API UHypeReceiverComponent : public UHypeComponent
 {
   GENERATED_BODY()
+
+#pragma region | Attributes
 
 public:
   /**
@@ -50,11 +55,21 @@ private:
   UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Level Table"))
   UDataTable* m_hypeLevelTable;
 
+  UPROPERTY()
+  UHypeCalculatorComponent* m_calculatorComponent;
+
+  UPROPERTY()
+  UHypeModifierComponent* m_modifierComponent;
+
+  UPROPERTY()
+  UPopularityComponent* m_popularityComponent;
+#pragma endregion
+
 public:
   /**
    * @brief Used to register a kill
    * @param _Source the killed source
-   * @param Critical if it was a critical hit
+   * @param Critical if it was a critical hit (weakpoint)
    * @param MultiKill if it was a multi kill or not
    */
   UFUNCTION(BlueprintCallable)
@@ -73,4 +88,8 @@ public:
    */
   UFUNCTION(BlueprintCallable)
   bool IsHypeEnough(float _amount);
+
+protected:
+  // Called when the game starts
+  void BeginPlay() override;
 };

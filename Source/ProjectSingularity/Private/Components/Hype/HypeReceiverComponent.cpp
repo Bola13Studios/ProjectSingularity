@@ -1,24 +1,81 @@
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeSourceComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeCalculatorComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeModifierComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/PopularityComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeMultipliers.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeLevels.h"
+#include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
+
+void UHypeReceiverComponent::BeginPlay()
+{
+  Super::BeginPlay();
+
+  m_calculatorComponent = GetOwner()->FindComponentByClass<UHypeCalculatorComponent>();
+  if (!m_calculatorComponent)
+  {
+    UE_LOG(LogTemp, Error,
+           TEXT("Unable to retreive the HypeCalculatorComponent from the owner. Are you sure it was added?"));
+  }
+
+  m_modifierComponent = GetOwner()->FindComponentByClass<UHypeModifierComponent>();
+  if (!m_modifierComponent)
+  {
+    UE_LOG(LogTemp, Error,
+           TEXT("Unable to retreive the HypeModifierComponent from the owner. Are you sure it was added?"));
+  }
+
+  m_popularityComponent = GetOwner()->FindComponentByClass<UPopularityComponent>();
+  if (!m_popularityComponent)
+  {
+    UE_LOG(LogTemp, Error,
+           TEXT("Unable to retreive the PopularityComponent from the owner. Are you sure it was added?"));
+  }
+}
 
 void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical, const int& _multiKill)
 {
-  m_currentKillStreak++;
-
-  // basic implementation, must be improved
-  TArray<FHypeMultipliers*> hypeMultipliers;
-  if (IsValid(m_hypeMultiplierTable) && _critical)
+  if (!_source || !m_calculatorComponent || !m_modifierComponent || !m_popularityComponent)
   {
-    m_hypeMultiplierTable->GetAllRows(TEXT("Multipliers"), hypeMultipliers);
-    if (hypeMultipliers.IsValidIndex(0))
-    {
-      AddHype(_source->GetHype() * hypeMultipliers[0]->criticalMultiplier);
-    }
+    UE_LOG(LogTemp, Error, TEXT("Hype system not properly initialized"));
+    return;
   }
 
-  AddHype(_source->GetHype());
+  // incrementing the kill streak
+  m_currentKillStreak++;
+
+  // adding modifiers
+  if (_critical) m_modifierComponent->AddModifier("Critical");
+  if (_multiKill > 1) m_modifierComponent->AddModifier("MultiKill");
+  if (_source->m_isWeakPoint) m_modifierComponent->AddModifier("WeakPoint");
+
+  // airborne
+  APlayerCharacter* player = Cast<APlayerCharacter>(GetOwner());
+  if (player && !player->IsGrounded()) m_modifierComponent->AddModifier("Airborne");
+
+  // base hype
+  float baseHype = _source->GetHype();
+
+  // getting the total modifier from component
+  float totalModifier = m_calculatorComponent->ApplyModifiers(m_modifierComponent);
+
+  // getting the popularity multiplier from component
+  float popularityMultiplier = m_calculatorComponent->ApplyPopularity(m_popularityComponent);
+
+  // getting the final hype to add
+  float finalHype = m_calculatorComponent->ComputeFinalHype(baseHype, totalModifier, popularityMultiplier);
+
+  // adding final hype to the current value
+  AddHype(finalHype);
+
+  // updating the popularity index @reming > this is temporary will be changed after
+  m_popularityComponent->IncreasePopularity(10.f); // tweakable
+
+  // clearing modifiers
+  m_modifierComponent->ClearModifiers();
+
+  UE_LOG(LogTemp, Warning, TEXT("Kill → Base:%.2f Mod:%.2f Pop:%.2f Final:%.2f"), baseHype, totalModifier,
+         popularityMultiplier, finalHype);
 }
 
 void UHypeReceiverComponent::UpdateHypeLevel()
