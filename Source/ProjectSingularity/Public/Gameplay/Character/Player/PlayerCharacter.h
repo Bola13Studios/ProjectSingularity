@@ -104,7 +104,7 @@ private:
 public:
   USkeletalMeshComponent* GetArmsMesh();
 
-  UFUNCTION()
+  UFUNCTION(Exec)
   void ShowDebugsWeapon(bool value = true);
 
   bool GetDebugWeapon();

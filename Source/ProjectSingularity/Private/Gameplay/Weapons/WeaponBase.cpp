@@ -49,6 +49,7 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
   m_firstMode.Initialize(m_weaponData.firstMode);
   m_secondMode.Initialize(m_weaponData.secondMode);
   m_currentWeaponMode = &m_firstMode;
+  m_currentAmmoInReser = m_weaponData.maxAmmoInReser;
 
   // Set weapon mesh and anim instance
   if (weaponMesh && m_weaponData.skeletalMesh)
@@ -128,6 +129,8 @@ bool AWeaponBase::Fire()
         }
 
         // Dmg method - TO DO
+        //m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg
+
         if (m_player->GetDebugWeapon())
         {
           DrawDebugSphere(GetWorld(), hit.ImpactPoint, 5.f, 12, FColor::Green, false, 2.f);
@@ -188,7 +191,7 @@ void AWeaponBase::TryToReload()
 
   if (m_currentWeaponMode->currentAmmoInMag >= m_currentWeaponMode->GetModeData().maxAmmoInMag) return;
 
-  if (m_currentWeaponMode->currentAmmoInReser <= 0) return;
+  if (m_currentAmmoInReser <= 0) return;
 
   m_actionsFilterComponent->SetCurrentState(UWeaponReload::StaticClass());
 }
@@ -208,10 +211,10 @@ void AWeaponBase::Reload()
 
   int missingAmmo = maxMag - m_currentWeaponMode->currentAmmoInMag;
 
-  int ammoToReload = FMath::Min(missingAmmo, m_currentWeaponMode->currentAmmoInReser);
+  int ammoToReload = FMath::Min(missingAmmo, m_currentAmmoInReser);
 
   m_currentWeaponMode->currentAmmoInMag += ammoToReload;
-  m_currentWeaponMode->currentAmmoInReser -= ammoToReload;
+  m_currentAmmoInReser -= ammoToReload;
 }
 
 // Called by an event in the weapon's anim instance
@@ -264,5 +267,46 @@ int AWeaponBase::GetAmmoInMagazine()
 
 int AWeaponBase::GetAmmoInReserve()
 {
-  return m_currentWeaponMode->currentAmmoInReser;
+  return m_currentAmmoInReser;
+}
+
+void AWeaponBase::AddReserveAmmo(int extraAmmo)
+{
+  m_currentAmmoInReser += extraAmmo;
+}
+
+void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)
+{
+  if (firstMode)
+  {
+    m_firstMode.extraBulletDmg += extraBulletDmg;
+  }
+  else
+  {
+    m_secondMode.extraBulletDmg += extraBulletDmg;
+  }
+}
+
+void AWeaponBase::SetExtraBulletDmg(int extraBulletDmg, bool firstMode)
+{
+  if (firstMode)
+  {
+    m_firstMode.extraBulletDmg = extraBulletDmg;
+  }
+  else
+  {
+    m_secondMode.extraBulletDmg = extraBulletDmg;
+  }
+}
+
+int AWeaponBase::GetExtraBulletDmg(bool firstMode)
+{
+  if (firstMode)
+  {
+    return m_firstMode.extraBulletDmg;
+  }
+  else
+  {
+    return m_secondMode.extraBulletDmg;
+  }
 }
