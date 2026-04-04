@@ -41,6 +41,7 @@ bool UHypeModifierComponent::AddModifier(FName _modifier)
 
     // add the values to the array
     m_hypeModifiers.Add(modifierRow); // praying the lord this fucker doesn't get deleted here
+    return true;
   }
 
   return false;
@@ -75,14 +76,16 @@ float UHypeModifierComponent::GetTotalModifiers() const
 
 bool UHypeModifierComponent::ClearModifiers()
 {
-  // remove from the array only the modifiers that are set as temporary
-  for (auto& modifier : m_hypeModifiers)
+  bool removedAny = false;
+
+  for (int i = m_hypeModifiers.Num() - 1; i >= 0; i--)
   {
-    if (modifier->isTemporary)
+    if (m_hypeModifiers[i]->isTemporary)
     {
-      return RemoveModifier(modifier->id);
+      m_hypeModifiers.RemoveAt(i);
+      removedAny = true;
     }
   }
-  //@remind MISSING timer logic that removes modifiers based on their duration
-  return false;
+
+  return removedAny;
 }

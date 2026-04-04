@@ -7,7 +7,7 @@ UPopularityComponent::UPopularityComponent()
 {
   PrimaryComponentTick.bCanEverTick = true;
   m_currentPopularity = 0.0f;
-  m_hypeLevel = new FHypeLevels();
+  multiplier = 0.0f;
 }
 
 void UPopularityComponent::BeginPlay()
@@ -22,21 +22,44 @@ void UPopularityComponent::BeginPlay()
           TEXT("Unable to retreive the PopularityDataTable from the BaseGameInstance. Are you sure it was assigned?"));
       return;
     }
+
     // we get the first level as default
     TArray<FHypeLevels*> hypeLevels;
     gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
 
-    m_hypeLevel->level = hypeLevels[0]->level;
-    m_hypeLevel->multiplier = hypeLevels[0]->multiplier;
+    level = hypeLevels[0]->level;
+    multiplier = hypeLevels[0]->multiplier;
+    m_decayRate = hypeLevels[0]->decayRate;
   }
+
+  GetWorld()->GetTimerManager().SetTimer(m_decayTimerHandle, this, &UPopularityComponent::HandleDecay, m_decayInterval,
+                                         true);
 }
 
-void UPopularityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                         FActorComponentTickFunction* ThisTickFunction)
+void UPopularityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-  Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+  GetWorld()->GetTimerManager().ClearTimer(m_decayTimerHandle);
+  Super::EndPlay(EndPlayReason);
+}
 
-  // @remind decreasing the popularity value with time
+void UPopularityComponent::HandleDecay()
+{
+  if (m_currentPopularity <= 0) return;
+
+  float decayAmount = CalculateDecay();
+
+  m_currentPopularity = FMath::Clamp(m_currentPopularity - decayAmount, 0, m_maxPopularity);
+
+  UpdateLevel();
+}
+
+float UPopularityComponent::CalculateDecay() const
+{
+  float decay_ = m_decayRate;
+
+  decay_ *= (1.f + level * 0.2f);
+
+  return decay_;
 }
 
 float UPopularityComponent::GetCurrentPopularity() const
@@ -46,20 +69,25 @@ float UPopularityComponent::GetCurrentPopularity() const
 
 int UPopularityComponent::GetPopularityLevel() const
 {
-  return m_hypeLevel->level;
+  return level;
 }
 
 void UPopularityComponent::IncreasePopularity(float _value)
 {
-  m_currentPopularity += _value;
+  m_currentPopularity = FMath::Clamp(m_currentPopularity + _value, 0.f, m_maxPopularity);
 
   // we then check if we surpassed the current level max limit
   UpdateLevel();
+
+  // and reset the decay timer so that it starts counting from the moment we generated hype
+  GetWorld()->GetTimerManager().ClearTimer(m_decayTimerHandle);
+  GetWorld()->GetTimerManager().SetTimer(m_decayTimerHandle, this, &UPopularityComponent::HandleDecay, m_decayInterval,
+                                         true);
 }
 
 void UPopularityComponent::DecreasePopularity(float _value)
 {
-  m_currentPopularity -= _value;
+  m_currentPopularity = FMath::Clamp(m_currentPopularity - _value, 0.f, m_maxPopularity);
 
   // we then check if we surpassed the current level min limit
   UpdateLevel();
@@ -79,40 +107,24 @@ void UPopularityComponent::UpdateLevel()
       return;
     }
 
-    int32 newLevel = m_hypeLevel->level;
-    int32 minValue = 0;
-    int32 maxValue = 0;
     gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
-    for (const auto& level : hypeLevels)
+
+    for (const auto& row : hypeLevels)
     {
-      // we check our new level
-      if (m_currentPopularity >= level->minRequiredHype && m_currentPopularity <= level->maxRequiredHype)
+      if (!row) continue;
+
+      if (m_currentPopularity >= row->requiredValue)
       {
-        newLevel = level->level;
-        minValue = level->minRequiredHype;
-        maxValue = level->maxRequiredHype;
-        break;
+        level = row->level;
+        multiplier = row->multiplier;
+        m_decayRate = row->decayRate;
       }
     }
-
-    //@remind to change the table, it makes no sense that each level has its own min and max, should it not be the total
-    // value-duration?
-    // if the new level is greater that the current level we reset the popularity value to the min limit
-    if (newLevel > m_hypeLevel->level)
-    {
-      m_currentPopularity = minValue;
-    }
-    // if the new level is less that the current level we reset the popularity value to the max limit
-    else if (newLevel < m_hypeLevel->level)
-    {
-      m_currentPopularity = maxValue;
-    }
-    m_hypeLevel->level = newLevel;
   }
 }
 
 float UPopularityComponent::GetMultiplier() const
 {
-  return m_hypeLevel->multiplier;
+  return multiplier;
 }
 // EOF

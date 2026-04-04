@@ -44,6 +44,20 @@ public:
 
 private:
   /**
+   * @brief An integer property that stores the current multi-kill count
+   */
+  UPROPERTY()
+  int m_multiKillCount = 0;
+
+  /**
+   * @brief Time window in seconds to count multi-kills
+   */
+  UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "MultiKill Rate"))
+  float m_multiKillWindow = 2.0f;
+
+  FTimerHandle m_multiKillTimer;
+
+  /**
    * @brief Holds the reference to the data table with all the related multipliers
    */
   UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Multiplier Table"))
@@ -73,7 +87,17 @@ public:
    * @param MultiKill if it was a multi kill or not
    */
   UFUNCTION(BlueprintCallable)
-  void RegisterKill(UHypeSourceComponent* _source, const bool& critical, const int& multiKill);
+  void RegisterKill(UHypeSourceComponent* _source, const bool& critical);
+
+  /**
+   * @brief Registers a multi-kill event.
+   */
+  void RegisterMultiKill();
+
+  /**
+   * @brief Resets the multi-kill state, clearing any current multi-kill count or progress.
+   */
+  void ResetMultiKill();
 
   /**
    * @brief Used to Update the Current Hype Level

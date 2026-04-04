@@ -8,7 +8,5 @@ int UHypeSourceComponent::GetHype()
   m_onHit.Broadcast();
   m_hasBeenHit = true;
 
-  if (!m_isWeakPoint) return m_currentHypeValue;
-
-  return FMath::CeilToInt(m_currentHypeValue + (m_currentHypeValue * m_baseMultiplier));
+  return m_currentHypeValue;
 }

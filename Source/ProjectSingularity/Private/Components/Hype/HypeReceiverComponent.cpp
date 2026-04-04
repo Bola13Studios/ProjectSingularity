@@ -33,7 +33,7 @@ void UHypeReceiverComponent::BeginPlay()
   }
 }
 
-void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical, const int& _multiKill)
+void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical)
 {
   if (!_source || !m_calculatorComponent || !m_modifierComponent || !m_popularityComponent)
   {
@@ -44,9 +44,12 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   // incrementing the kill streak
   m_currentKillStreak++;
 
+  RegisterMultiKill();
+  if (m_multiKillCount > 1) m_modifierComponent->AddModifier("MultiKill");
+
+
   // adding modifiers
   if (_critical) m_modifierComponent->AddModifier("Critical");
-  if (_multiKill > 1) m_modifierComponent->AddModifier("MultiKill");
   if (_source->m_isWeakPoint) m_modifierComponent->AddModifier("WeakPoint");
 
   // airborne
@@ -68,14 +71,32 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   // adding final hype to the current value
   AddHype(finalHype);
 
-  // updating the popularity index @reming > this is temporary will be changed after
-  m_popularityComponent->IncreasePopularity(10.f); // tweakable
+  // updating the popularity index @remind > this is temporary will be changed after
+  m_popularityComponent->IncreasePopularity(100.f); // tweakable
 
   // clearing modifiers
   m_modifierComponent->ClearModifiers();
 
   UE_LOG(LogTemp, Warning, TEXT("Kill → Base:%.2f Mod:%.2f Pop:%.2f Final:%.2f"), baseHype, totalModifier,
          popularityMultiplier, finalHype);
+}
+
+void UHypeReceiverComponent::RegisterMultiKill()
+{
+  m_multiKillCount++;
+
+  // we reset the timer
+  GetWorld()->GetTimerManager().ClearTimer(m_multiKillTimer);
+
+  GetWorld()->GetTimerManager().SetTimer(m_multiKillTimer, this, &UHypeReceiverComponent::ResetMultiKill, m_multiKillWindow, false);
+
+  UE_LOG(LogTemp, Warning, TEXT("Multikill count: %d"), m_multiKillCount);
+}
+
+
+void UHypeReceiverComponent::ResetMultiKill()
+{
+  m_multiKillCount = 0;
 }
 
 void UHypeReceiverComponent::UpdateHypeLevel()
@@ -87,7 +108,7 @@ void UHypeReceiverComponent::UpdateHypeLevel()
     m_hypeLevelTable->GetAllRows(TEXT("Levels"), hypeLevels);
     for (const auto& level : hypeLevels)
     {
-      if (m_currentHypeValue >= level->minRequiredHype && m_currentHypeValue <= level->maxRequiredHype)
+      if (m_currentHypeValue >= level->requiredValue)
       {
         m_currentHypeLevel = level->level;
         break;
