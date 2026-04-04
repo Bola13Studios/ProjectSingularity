@@ -30,14 +30,14 @@ protected:
    * @brief The amount of hype this component stores
    */
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Base Hype Value"))
-  int m_CurrentHypeValue;
+  int m_currentHypeValue;
 
 public:
   /**
    * @brief Sets the delegate for the HypeChanged
    */
   UPROPERTY(BlueprintAssignable, Category = "Bola 13|Hype")
-  FOnHypeChanged OnHypeChanged;
+  FOnHypeChanged onHypeChanged;
 
   /**
    * @brief Sets default values for this component's properties
@@ -49,7 +49,7 @@ public:
    * @param _Points The amount to add to
    */
   UFUNCTION(BlueprintCallable, Category = "Bola 13|Hype")
-  virtual void AddHype(const int& _Points);
+  virtual void AddHype(const int& _points);
 
   /**
    * @brief Returns the calculated points after multiplier is applied

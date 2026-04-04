@@ -4,9 +4,7 @@
 #include <Gameplay/Animation/BaseAnimInstance.h>
 #include "Components/ActionStateFilter.h"
 #include "Utils/State Machine/States.h"
-#include "Components/Hype/HypeSourceComponent.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
-#include "Components/Hype/HypeReceiverComponent.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -141,20 +139,11 @@ bool AWeaponBase::Fire()
         if (hitActor)
         {
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
-          UHypeSourceComponent* hypeComp = hitActor->FindComponentByClass<UHypeSourceComponent>();
-          if (hypeComp)
-          {
-            // Ora puoi usarlo
-            hypeComp->m_onHit.Broadcast();
-            if (UHypeReceiverComponent* receiverComp = GetOwner()->GetComponentByClass<UHypeReceiverComponent>())
-            {
-              receiverComp->AddHype(hypeComp->GetHype());
-            }
-          }
+
+          // changing health
           if (healthComp)
           {
-            healthComp->ChangeHealth(
-                -(m_currentWeaponMode->GetModeData().bulletDamage + m_currentWeaponMode->extraBulletDmg), GetOwner());
+            healthComp->ChangeHealth(-m_currentWeaponMode->GetModeData().bulletDamage, GetOwner());
           }
         }
 

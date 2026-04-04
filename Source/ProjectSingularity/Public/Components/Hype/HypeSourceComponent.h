@@ -23,11 +23,6 @@ class PROJECTSINGULARITY_API UHypeSourceComponent : public UHypeComponent
   GENERATED_BODY()
 
 public:
-  /**
-   * @brief A Custom multiplier to apply to the base value based on percentage (from 0 to 1)
-   */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Custom Multiplier"))
-  float m_baseMultiplier;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Is it a Weakpoint?"))
   bool m_isWeakPoint;

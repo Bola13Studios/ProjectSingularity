@@ -1,6 +1,6 @@
-﻿
-
-#include "ProjectSingularity/Public/Components/HealthComponent.h"
+﻿#include "ProjectSingularity/Public/Components/HealthComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeSourceComponent.h"
 #include "GameFramework/Actor.h"
 
 UHealthComponent::UHealthComponent()
@@ -27,6 +27,14 @@ void UHealthComponent::ChangeHealth(float _Amount, AActor* InstigatorActor)
 	CurrentHealth = FMath::Clamp(CurrentHealth + _Amount, 0.0f, MaxHealth);
 	if (_Amount < 0.f && FMath::IsNearlyZero(CurrentHealth))
 	{
+		if (UHypeReceiverComponent* receiver = InstigatorActor->FindComponentByClass<UHypeReceiverComponent>())
+		{
+			if (UHypeSourceComponent* sourceHype = GetOwner()->FindComponentByClass<UHypeSourceComponent>())
+			{
+        receiver->RegisterKill(sourceHype, sourceHype->m_isWeakPoint);
+			}
+		}
+
 		OnDeath.Broadcast(InstigatorActor);
 	}
 	BroadcastChanged(Old, InstigatorActor);
