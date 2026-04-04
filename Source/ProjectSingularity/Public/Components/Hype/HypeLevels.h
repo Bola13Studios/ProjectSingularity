@@ -26,21 +26,21 @@ public:
   int32 level = 0;
 
   /*
-   * The minimum amount of hype required to reach this level.
+   * The required amount of hype to reach the level.
    */
   UPROPERTY(EditAnywhere)
-  int32 minRequiredHype = 0;
-
-  /**
-   * The maximum amount of hype required to reach this level.
-   */
-  UPROPERTY(EditAnywhere)
-  int32 maxRequiredHype = 1000;
+  int32 requiredValue = 0;
 
   /**
    * The multiplier to apply to each level
    */
-  UPROPERTY(EditAnywhere, meta = (ToolTip = "This represents percentage in decimals", ClampMin = 0, ClampMax = 1))
+  UPROPERTY(EditAnywhere)
   float multiplier = 0.0f;
+
+  /**
+   * @brief The rate at which the popularity decays over time when the player is not actively generating hype
+   */
+  UPROPERTY(EditAnywhere, meta = (DisplayName = "Decay on the popularity level", ClampMin = 0))
+  float decayRate;
 };
 // EOF
