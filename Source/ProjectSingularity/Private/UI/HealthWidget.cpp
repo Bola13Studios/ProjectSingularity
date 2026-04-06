@@ -33,7 +33,16 @@ void UHealthWidget::NativeDestruct()
 
 void UHealthWidget::HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor)
 {
-	RefreshUI(Current, Max);
+  // If damage (Delta negative)
+  if (Delta < 0.0f)
+  {
+    if (HpAnim)
+    {
+      PlayAnimation(HpAnim);
+    }
+  }
+
+  RefreshUI(Current, Max);
 }
 
 void UHealthWidget::RefreshUI(float Current, float Max)
