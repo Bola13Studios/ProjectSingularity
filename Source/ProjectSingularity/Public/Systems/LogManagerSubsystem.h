@@ -33,6 +33,8 @@ public:
 
   void SaveSession(const FSessionData& _data);
 
+  void SaveSessionJSON(const FSessionData& _data);
+
 private:
   FString GenerateFilePath(FString _folder) const;
 };

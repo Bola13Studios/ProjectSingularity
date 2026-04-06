@@ -22,4 +22,18 @@ struct FSessionData
    */
   UPROPERTY()
   TMap<FName, float> stats;
+
+  /**
+   * @brief Retrieves the value of a named statistic.
+   * @param _statName The name/identifier of the statistic to look up.
+   * @return The statistic's value as a float if found; otherwise returns 0.0f.
+   */
+  float GetStat(FName _statName) const
+  {
+    if (const float* statValue_ = stats.Find(_statName))
+    {
+      return *statValue_;
+    }
+    return 0.f; // default value if the stat is not found
+  }
 };
