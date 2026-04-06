@@ -1,5 +1,5 @@
 /************************************************************************
- * @description: 
+ * @description:
  * @author: Rubén Santos
  * @date: 17/03/2026
  * @edited_by:
@@ -10,88 +10,68 @@
 #include "Animation/AnimInstance.h"
 #include "BaseAnimInstance.generated.h"
 
-
 class ABaseCharacter;
 class UPawnMovementComponent;
 
 UCLASS()
 class PROJECTSINGULARITY_API UBaseAnimInstance : public UAnimInstance
 {
-	GENERATED_BODY()
-	
+  GENERATED_BODY()
+
 public:
-	virtual void NativeInitializeAnimation() override;
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Reference, DisplayName = "fireMontage",
+            meta = (AllowPrivateAccess = "true"))
+  UAnimMontage* fireMontage;
 
-
-	/** Function to manage ground speed variable */
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateGroundSpeed();
-
-	/** Function to manage air speed variable */
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateAirSpeed();
-
-	/** Function to manage the should move boolean variable */
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateShouldMove();
-
-	/** Function to manage the is falling boolean variable */
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateIsFalling();
-
-	/** Function to manage the is jumping boolean variable */
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateIsJumping();
-
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateDirection();
-
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void UpdateAimVertical();
-
-	UFUNCTION(BlueprintCallable, Category = "Animation Flow")
-	void Fire();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Reference, DisplayName = "fireMontage", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* fireMontage;
+protected:
+  /** Player Ground Speed when he's on the walk or run state */
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "GroundSpeed",
+            meta = (AllowPrivateAccess = "true"))
+  float m_groundSpeed;
 
 private:
+  UBaseAnimInstance* m_attachedAnimInstance;
+  TObjectPtr<ABaseCharacter> m_baseCharacter;
+  UPawnMovementComponent* m_movementComponent;
 
-	UBaseAnimInstance* m_attachedAnimInstance;
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "Direction",
+            meta = (AllowPrivateAccess = "true"))
+  FVector2D m_direction; //-1 left | 1 right
 
-	ABaseCharacter* m_baseCharacter;
-	UPawnMovementComponent* m_movementComponent;
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "Speed",
+            meta = (AllowPrivateAccess = "true"))
+  float m_speed;
 
+  /** Player Air Speed when he's in the falling, jumping or climbing state */
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "AirSpeed",
+            meta = (AllowPrivateAccess = "true"))
+  float m_airSpeed;
 
-	/** Player Ground Speed when he's on the walk or run state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "GroundSpeed", meta = (AllowPrivateAccess = "true"))
-	float m_GroundSpeed;
+  /** Check if Player is on falling state */
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "AimVertical",
+            meta = (AllowPrivateAccess = "true"))
+  float m_aimVertical;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "Direction", meta = (AllowPrivateAccess = "true"))
-	FVector2D m_Direction; //-1 left | 1 right
+public:
+  virtual void NativeInitializeAnimation() override;
+  virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "Speed", meta = (AllowPrivateAccess = "true"))
-	float m_Speed;
+  /** Function to manage ground speed variable */
+  UFUNCTION(BlueprintCallable, Category = "Animation Flow")
+  void UpdateGroundSpeed();
 
-	/** Player Air Speed when he's in the falling, jumping or climbing state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "AirSpeed", meta = (AllowPrivateAccess = "true"))
-	float m_AirSpeed;
+  /** Function to manage air speed variable */
+  UFUNCTION(BlueprintCallable, Category = "Animation Flow")
+  void UpdateAirSpeed();
 
-	/** Check if Player should move when he's on the idle state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "ShouldMove", meta = (AllowPrivateAccess = "true"))
-	bool m_ShouldMove;
+  UFUNCTION(BlueprintCallable, Category = "Animation Flow")
+  void UpdateDirection();
 
-	/** Check if Player is on falling state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "IsFalling", meta = (AllowPrivateAccess = "true"))
-	bool m_IsFalling;
+  UFUNCTION(BlueprintCallable, Category = "Animation Flow")
+  void UpdateAimVertical();
 
-	/** Check if Player is on falling state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "IsJumping", meta = (AllowPrivateAccess = "true"))
-	bool m_IsJumping;
+  UFUNCTION(BlueprintCallable, Category = "Animation Flow")
+  void Fire();
 
-	/** Check if Player is on falling state */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Reference, DisplayName = "AimVertical", meta = (AllowPrivateAccess = "true"))
-	float m_aimVertical;
-
+  TObjectPtr<ABaseCharacter> GetBaseCharacter();
 };

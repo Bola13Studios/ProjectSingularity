@@ -12,11 +12,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/ActionStateFilter.h"
+#include "Gameplay/Animation/Player/PlayerAnimInstance.h"
 
 APlayerCharacter::APlayerCharacter()
     : ABaseCharacter()
 {
-  m_Camera                 = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
+  m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
   m_ActionsFilterComponent = CreateDefaultSubobject<UActionStateFilter>(TEXT("ActionsStateFilter"));
 
   if (IsValid(m_Camera))
@@ -38,10 +39,10 @@ void APlayerCharacter::BeginPlay()
   UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
   if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
   {
-    charMoveComp->MaxWalkSpeed  = m_PlayerDataAsset->maxWalkSpeed;
+    charMoveComp->MaxWalkSpeed = m_PlayerDataAsset->maxWalkSpeed;
     charMoveComp->JumpZVelocity = m_PlayerDataAsset->jumpZVelocity;
-    charMoveComp->AirControl    = m_PlayerDataAsset->airControl;
-    charMoveComp->GravityScale  = m_PlayerDataAsset->gravityScale;
+    charMoveComp->AirControl = m_PlayerDataAsset->airControl;
+    charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
   }
 
   FActorSpawnParameters spawnParams;
@@ -132,7 +133,7 @@ void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
     const FRotator yawRotation(0, rotation.Yaw, 0);
 
     const FVector forwardDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
-    const FVector rightDirection   = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
+    const FVector rightDirection = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
     AddMovementInput(forwardDirection, _inputVector.Y);
     AddMovementInput(rightDirection, _inputVector.X);
   }
@@ -141,7 +142,7 @@ void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
 void APlayerCharacter::JumpAction()
 {
   RequestChangeState(UJumpingState::StaticClass());
-  
+
   if (UGameInstance* gameInstance = GetGameInstance())
   {
     if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
@@ -223,12 +224,12 @@ void APlayerCharacter::Dash()
     dashDir = dashDir.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 
     FVector dashVelocity = dashDir.GetSafeNormal() * (m_PlayerDataAsset->dashDistance / m_PlayerDataAsset->dashTime);
-    dashVelocity.Z       = 0.;
+    dashVelocity.Z = 0.;
 
     m_bCanDash = false;
     if (UCharacterMovementComponent* charMoveComp = GetCharacterMovement())
     {
-      charMoveComp->GravityScale   = 0.f;
+      charMoveComp->GravityScale = 0.f;
       charMoveComp->GroundFriction = 0.f;
     }
 
@@ -236,13 +237,13 @@ void APlayerCharacter::Dash()
 
     GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::DashEnd,
                                     m_PlayerDataAsset->dashTime);
-                                    
+
     if (UGameInstance* gameInstance = GetGameInstance())
     {
-     if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-     {
-       gameManager->AddStat("dashes", 0.5f);
-     }
+      if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+      {
+        gameManager->AddStat("dashes", 0.5f);
+      }
     }
   }
 }
@@ -253,7 +254,7 @@ void APlayerCharacter::StopDash()
 
   if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
   {
-    charMoveComp->GravityScale   = m_PlayerDataAsset->gravityScale;
+    charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
     charMoveComp->GroundFriction = m_PlayerDataAsset->groundFriction;
     GetWorldTimerManager().SetTimer(m_DashResetTimerHandle, this, &APlayerCharacter::ResetDash,
                                     m_PlayerDataAsset->dashCooldown);
@@ -283,9 +284,9 @@ bool APlayerCharacter::IsGrounded() const
 {
   FHitResult hit;
 
-  FVector start         = GetActorLocation();
-  float   traceDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f;
-  FVector end           = start - FVector(0, 0, traceDistance);
+  FVector start = GetActorLocation();
+  float traceDistance = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f;
+  FVector end = start - FVector(0, 0, traceDistance);
 
   FCollisionQueryParams params;
   params.AddIgnoredActor(this);
@@ -323,4 +324,14 @@ void APlayerCharacter::ShowDebugsWeapon(bool value)
 bool APlayerCharacter::GetDebugWeapon()
 {
   return m_bDebugWeapon;
+}
+
+TObjectPtr<UPlayerAnimInstance> APlayerCharacter::GetPlayerAnimInstance()
+{
+  if (m_PlayerAnimInstance == NULL)
+  {
+    m_PlayerAnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+  }
+
+  return m_PlayerAnimInstance;
 }
