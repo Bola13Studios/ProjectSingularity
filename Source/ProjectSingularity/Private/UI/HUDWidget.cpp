@@ -23,7 +23,7 @@ void UHUDWidget::BindToHealthComponent(UHealthComponent* InHealthComp)
   if (HealthComp)
   {
     HealthComp->OnHealthChanged.AddDynamic(this, &UHUDWidget::HandleHealthChanged);
-    UpdateVignette(HealthComp->GetHealth(), HealthComp->GetMaxHealth());
+    UpdateVignetteVisual();
   }
 }
 
@@ -41,33 +41,99 @@ void UHUDWidget::NativeDestruct()
   {
     HealthComp->OnHealthChanged.RemoveDynamic(this, &UHUDWidget::HandleHealthChanged);
   }
+
+  Super::NativeDestruct();
+}
+
+void UHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+  Super::NativeTick(MyGeometry, InDeltaTime);
+
+  if (bVignetteFadingIn)
+  {
+    if (VignetteFadeInTime <= 0.0f)
+    {
+      CurrentVignetteOpacity = 1.0f;
+      bVignetteFadingIn = false;
+      bVignetteHolding = true;
+      VignetteHoldTimer = VignetteHoldTime;
+    }
+    else
+    {
+      CurrentVignetteOpacity += InDeltaTime / VignetteFadeInTime;
+
+      if (CurrentVignetteOpacity >= 1.0f)
+      {
+        CurrentVignetteOpacity = 1.0f;
+        bVignetteFadingIn = false;
+        bVignetteHolding = true;
+        VignetteHoldTimer = VignetteHoldTime;
+      }
+    }
+
+    UpdateVignetteVisual();
+    return;
+  }
+
+  if (bVignetteHolding)
+  {
+    VignetteHoldTimer -= InDeltaTime;
+
+    if (VignetteHoldTimer <= 0.0f)
+    {
+      bVignetteHolding = false;
+      bVignetteFadingOut = true;
+    }
+
+    return;
+  }
+
+  if (bVignetteFadingOut)
+  {
+    if (VignetteFadeOutTime <= 0.0f)
+    {
+      CurrentVignetteOpacity = 0.0f;
+      bVignetteFadingOut = false;
+    }
+    else
+    {
+      CurrentVignetteOpacity -= InDeltaTime / VignetteFadeOutTime;
+
+      if (CurrentVignetteOpacity <= 0.0f)
+      {
+        CurrentVignetteOpacity = 0.0f;
+        bVignetteFadingOut = false;
+      }
+    }
+
+    UpdateVignetteVisual();
+  }
 }
 
 void UHUDWidget::HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor)
 {
-  UpdateVignette(Current, Max);
+  if (Delta < 0.0f)
+  {
+    StartVignetteDamageEffect();
+  }
 }
 
-void UHUDWidget::UpdateVignette(float Current, float Max)
+void UHUDWidget::StartVignetteDamageEffect()
+{
+  bVignetteFadingIn = true;
+  bVignetteHolding = false;
+  bVignetteFadingOut = false;
+  VignetteHoldTimer = 0.0f;
+}
+
+void UHUDWidget::UpdateVignetteVisual()
 {
   if (!VignetteImage)
   {
     return;
   }
 
-  const float HealthPercent = (Max > 0.0f) ? (Current / Max) : 0.0f;
-  const float Threshold = 0.5f;
-
-  float Opacity = 0.0f;
-
-  if (HealthPercent <= Threshold)
-  {
-    Opacity = (Threshold - HealthPercent) / Threshold;
-  }
-
-  Opacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
-
   FLinearColor Color = VignetteImage->GetColorAndOpacity();
-  Color.A = Opacity;
+  Color.A = FMath::Clamp(CurrentVignetteOpacity, 0.0f, VignetteOpacitty);
   VignetteImage->SetColorAndOpacity(Color);
 }

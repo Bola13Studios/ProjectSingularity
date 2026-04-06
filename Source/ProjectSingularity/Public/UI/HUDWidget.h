@@ -39,6 +39,7 @@ public:
 
 protected:
   virtual void NativeDestruct() override;
+  virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
   UPROPERTY()
@@ -47,5 +48,26 @@ private:
   UFUNCTION()
   void HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor);
 
-  void UpdateVignette(float Current, float Max);
+  void UpdateVignetteVisual();
+  void StartVignetteDamageEffect();
+
+private:
+  UPROPERTY(EditAnywhere, Category = "Vignette")
+  float VignetteFadeInTime = 0.2f;
+
+  UPROPERTY(EditAnywhere, Category = "Vignette")
+  float VignetteHoldTime = 1.0f;
+
+  UPROPERTY(EditAnywhere, Category = "Vignette")
+  float VignetteFadeOutTime = 0.6f;
+
+  UPROPERTY(EditAnywhere, Category = "Vignette")
+  float VignetteOpacitty = 1.0f;
+
+  float CurrentVignetteOpacity = 0.0f;
+  float VignetteHoldTimer = 0.0f;
+
+  bool bVignetteFadingIn = false;
+  bool bVignetteHolding = false;
+  bool bVignetteFadingOut = false;
 };
