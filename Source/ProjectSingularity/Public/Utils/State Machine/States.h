@@ -6,7 +6,7 @@
 #include "UObject/Object.h"
 #include "States.generated.h"
 
-class ABaseCharacter;
+class APlayerCharacter;
 class AWeaponBase;
 struct FInputActionValue;
 
@@ -54,7 +54,7 @@ public:
   virtual void Exit() override {};
 
 protected:
-  ABaseCharacter* GetCharacter() const;
+  APlayerCharacter* GetCharacter() const;
 };
 
 UCLASS()

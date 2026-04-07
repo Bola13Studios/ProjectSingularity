@@ -18,14 +18,14 @@ struct FHypeMultipliers : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	float CriticalMultiplier = 1.5f;
+	float criticalMultiplier = 1.5f;
 
 	UPROPERTY(EditAnywhere)
-	float StreakMultiplier = 1.2f;
+	float streakMultiplier = 1.2f;
 
 	UPROPERTY(EditAnywhere)
-	float MultiKillMultiplier = 1.3f;
+	float multiKillMultiplier = 1.3f;
 
 	UPROPERTY(EditAnywhere)
-	float RiskActionMultiplier = 2.0f;
+	float riskActionMultiplier = 2.0f;
 };

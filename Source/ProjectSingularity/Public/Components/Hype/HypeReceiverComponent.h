@@ -12,8 +12,11 @@
 #include "HypeReceiverComponent.generated.h"
 
 #pragma region | Forward Declaration
-class UHypeSourceComponent;
 class UDataTable; // struct FHypeMultipliers;
+class UHypeSourceComponent;
+class UHypeCalculatorComponent;
+class UHypeModifierComponent;
+class UPopularityComponent;
 #pragma endregion
 
 /**
@@ -24,41 +27,77 @@ class PROJECTSINGULARITY_API UHypeReceiverComponent : public UHypeComponent
 {
   GENERATED_BODY()
 
+#pragma region | Attributes
+
 public:
   /**
    * @brief Holds the current hype level for this receiver
    */
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Hype Level"))
-  int m_CurrentHypeLevel;
+  int m_currentHypeLevel;
 
   /**
    * @brief Hold the current kill streak for this receiver
    */
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Streak"))
-  int m_CurrentKillStreak;
+  int m_currentKillStreak;
 
 private:
+  /**
+   * @brief An integer property that stores the current multi-kill count
+   */
+  UPROPERTY()
+  int m_multiKillCount = 0;
+
+  /**
+   * @brief Time window in seconds to count multi-kills
+   */
+  UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "MultiKill Rate"))
+  float m_multiKillWindow = 2.0f;
+
+  FTimerHandle m_multiKillTimer;
+
   /**
    * @brief Holds the reference to the data table with all the related multipliers
    */
   UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Multiplier Table"))
-  UDataTable* m_HypeMultiplierTable;
+  UDataTable* m_hypeMultiplierTable;
 
   /**
    * @brief Holds the reference to the data table with all the related
    */
   UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Level Table"))
-  UDataTable* m_HypeLevelTable;
+  UDataTable* m_hypeLevelTable;
+
+  UPROPERTY()
+  UHypeCalculatorComponent* m_calculatorComponent;
+
+  UPROPERTY()
+  UHypeModifierComponent* m_modifierComponent;
+
+  UPROPERTY()
+  UPopularityComponent* m_popularityComponent;
+#pragma endregion
 
 public:
   /**
    * @brief Used to register a kill
    * @param _Source the killed source
-   * @param Critical if it was a critical hit
+   * @param Critical if it was a critical hit (weakpoint)
    * @param MultiKill if it was a multi kill or not
    */
   UFUNCTION(BlueprintCallable)
-  void RegisterKill(UHypeSourceComponent* _Source, const bool& Critical, const int& MultiKill);
+  void RegisterKill(UHypeSourceComponent* _source, const bool& critical);
+
+  /**
+   * @brief Registers a multi-kill event.
+   */
+  void RegisterMultiKill();
+
+  /**
+   * @brief Resets the multi-kill state, clearing any current multi-kill count or progress.
+   */
+  void ResetMultiKill();
 
   /**
    * @brief Used to Update the Current Hype Level
@@ -72,5 +111,9 @@ public:
    * @return A flag stating true if the amount is less or equal the current hype
    */
   UFUNCTION(BlueprintCallable)
-  bool IsHypeEnough(float _Amount);
+  bool IsHypeEnough(float _amount);
+
+protected:
+  // Called when the game starts
+  void BeginPlay() override;
 };

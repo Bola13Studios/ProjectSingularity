@@ -23,8 +23,22 @@ class PROJECTSINGULARITY_API UBaseGameInstance : public UGameInstance
 		public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Chaser Enemy",meta = (DisplayName = "Chaser Data Asset"))
   TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
+
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Weapon",meta = (DisplayName = "Weapon Data Asset"))
   TObjectPtr<UWeaponsDataAsset> m_WeaponDataAsset;
+
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Player",meta = (DisplayName = "Player Config Data Asset"))
   TObjectPtr<UPlayerConfigDataAsset> m_PlayerDataAsset;
+
+  /**
+   * Holds the needed points for each popularity level and its related multiplier
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table|Hype", meta = (DisplayName = "Hype Popularity Data Table"))
+  TObjectPtr<UDataTable> m_hypePopularityDataTable;
+
+  /**
+   * Hold the needed values for the appliable modifiers and its durations if needed
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Table|Hype", meta = (DisplayName = "Hype Modifiers Data Table"))
+  TObjectPtr<UDataTable> m_hypeModifiersDataTable;
 };

@@ -16,6 +16,7 @@ class AWeaponBase;
 class UWeaponsDataAsset;
 class UStatesDataAsset;
 class UStates;
+class UPlayerAnimInstance;
 #pragma endregion
 
 #pragma region | Delegates
@@ -65,7 +66,7 @@ protected:
   // Called when the game starts or when spawned
   virtual void BeginPlay() override;
 
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 #pragma region Inputs Functions
@@ -104,12 +105,14 @@ private:
 public:
   USkeletalMeshComponent* GetArmsMesh();
 
-  UFUNCTION()
+  UFUNCTION(Exec)
   void ShowDebugsWeapon(bool value = true);
 
   bool GetDebugWeapon();
 
   FOnInteract m_OnInteract;
+
+  TObjectPtr<UPlayerAnimInstance> GetPlayerAnimInstance();
 
 private:
   UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
@@ -176,4 +179,6 @@ private:
 
   UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Player", meta = (DisplayName = "Character States Data Asset"))
   TObjectPtr<UStatesDataAsset> m_CharacterStatesDataAsset;
+
+  TObjectPtr<UPlayerAnimInstance> m_PlayerAnimInstance;
 };
