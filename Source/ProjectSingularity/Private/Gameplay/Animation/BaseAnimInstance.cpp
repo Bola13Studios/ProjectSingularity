@@ -30,6 +30,7 @@ void UBaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
   }
 }
 
+// Not working for enemies because their MaxSpeed changes depending on their state
 void UBaseAnimInstance::UpdateGroundSpeed()
 {
   m_groundSpeed = UKismetMathLibrary::VSizeXY(m_baseCharacter->GetVelocity());
