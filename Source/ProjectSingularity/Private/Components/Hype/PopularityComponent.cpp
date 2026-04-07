@@ -10,6 +10,17 @@ UPopularityComponent::UPopularityComponent()
   multiplier = 0.0f;
 }
 
+float UPopularityComponent::GetNormalizedPopularity() const
+{
+  float range = m_nextLevelMin - m_currentLevelMin;
+
+  if (range <= 0.f) return 0.f;
+
+  float normalizedValue = (m_currentPopularity - m_currentLevelMin) / range;
+
+  return FMath::Clamp(normalizedValue, 0.0f, 1.0f);
+}
+
 void UPopularityComponent::BeginPlay()
 {
   Super::BeginPlay();
@@ -109,18 +120,29 @@ void UPopularityComponent::UpdateLevel()
 
     gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
 
-    for (const auto& row : hypeLevels)
+    for (int i = 0; i < hypeLevels.Num(); i++)
     {
-      if (!row) continue;
-
-      if (m_currentPopularity >= row->requiredValue)
+      if (m_currentPopularity >= hypeLevels[i]->requiredValue)
       {
-        level = row->level;
-        multiplier = row->multiplier;
-        m_decayRate = row->decayRate;
+        level = hypeLevels[i]->level;
+        multiplier = hypeLevels[i]->multiplier;
+        m_decayRate = hypeLevels[i]->decayRate;
+
+        m_currentLevelMin = hypeLevels[i]->requiredValue;
+
+        if (hypeLevels.IsValidIndex(i + 1))
+        {
+          m_nextLevelMin = hypeLevels[i + 1]->requiredValue;
+        }
+        else
+        {
+          m_nextLevelMin = m_currentLevelMin + 100.f;
+        }
       }
     }
   }
+
+  OnPopularityChanged.Broadcast();
 }
 
 float UPopularityComponent::GetMultiplier() const

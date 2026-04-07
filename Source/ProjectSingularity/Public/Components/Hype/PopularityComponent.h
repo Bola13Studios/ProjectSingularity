@@ -12,6 +12,8 @@
 
 struct FHypeLevels;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPopularityChanged);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTSINGULARITY_API UPopularityComponent : public UActorComponent
 {
@@ -20,6 +22,9 @@ class PROJECTSINGULARITY_API UPopularityComponent : public UActorComponent
 #pragma region | Variables
 
 public:
+  UPROPERTY(BlueprintAssignable)
+  FOnPopularityChanged OnPopularityChanged;
+
   /**
    * @brief A raw pointer to an FHypeLevels instance, typically used to hold or reference hype level data.
    */
@@ -61,6 +66,10 @@ private:
   UPROPERTY(EditAnywhere, Category = "Bola 13|Popularity")
   float m_decayRate = 5.0f;
 
+  float m_currentLevelMin = 0.0f;
+
+  float m_nextLevelMin = 0.0f;
+
 #pragma endregion
 
 public:
@@ -97,6 +106,12 @@ public:
    * @brief Will return the multiplier based on the current popularity level
    */
   float GetMultiplier() const;
+
+  /**
+   * @brief Returns the object's normalized popularity.
+   * @return The normalized popularity value as a float.
+   */
+  float GetNormalizedPopularity() const;
 
 protected:
   // Called when the game starts
