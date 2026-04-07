@@ -17,19 +17,19 @@
 APlayerCharacter::APlayerCharacter()
     : ABaseCharacter()
 {
-  m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
-  m_ActionsFilterComponent = CreateDefaultSubobject<UActionStateFilter>(TEXT("ActionsStateFilter"));
+  m_camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera"));
+  m_actionsFilterComponent = CreateDefaultSubobject<UActionStateFilter>(TEXT("ActionsStateFilter"));
 
-  if (IsValid(m_Camera))
+  if (IsValid(m_camera))
   {
-    m_Camera->SetupAttachment(RootComponent);
-    m_Camera->bUsePawnControlRotation = true;
+    m_camera->SetupAttachment(RootComponent);
+    m_camera->bUsePawnControlRotation = true;
   }
 
-  m_ArmsMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmsMesh"));
-  m_ArmsMesh->SetupAttachment(GetCapsuleComponent());
-  m_ArmsMesh->CastShadow = false;
-  m_ArmsMesh->SetupAttachment(m_Camera);
+  m_armsMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmsMesh"));
+  m_armsMesh->SetupAttachment(GetCapsuleComponent());
+  m_armsMesh->CastShadow = false;
+  m_armsMesh->SetupAttachment(m_camera);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -37,24 +37,24 @@ void APlayerCharacter::BeginPlay()
   Super::BeginPlay();
 
   UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
-  if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
+  if (IsValid(m_playerDataAsset) && IsValid(charMoveComp))
   {
-    charMoveComp->MaxWalkSpeed = m_PlayerDataAsset->maxWalkSpeed;
-    charMoveComp->JumpZVelocity = m_PlayerDataAsset->jumpZVelocity;
-    charMoveComp->AirControl = m_PlayerDataAsset->airControl;
-    charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
+    charMoveComp->MaxWalkSpeed = m_playerDataAsset->maxWalkSpeed;
+    charMoveComp->JumpZVelocity = m_playerDataAsset->jumpZVelocity;
+    charMoveComp->AirControl = m_playerDataAsset->airControl;
+    charMoveComp->GravityScale = m_playerDataAsset->gravityScale;
   }
 
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
 
-  m_CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(m_WeaponClass, spawnParams);
+  m_currentWeapon = GetWorld()->SpawnActor<AWeaponBase>(m_weaponClass, spawnParams);
 
-  if (IsValid(m_CurrentWeapon))
+  if (IsValid(m_currentWeapon))
   {
-    m_CurrentWeapon->AttachToComponent(m_ArmsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+    m_currentWeapon->AttachToComponent(m_armsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,
                                        TEXT("HandGrip_R"));            // Temp bone name
-    m_CurrentWeapon->SetWeaponData(m_WeaponDataAsset->weaponsData[0]); // Just for now
+    m_currentWeapon->SetWeaponData(m_weaponDataAsset->weaponsData[0]); // Just for now
   }
 
   if (UCapsuleComponent* capsuleComp = GetCapsuleComponent())
@@ -62,9 +62,9 @@ void APlayerCharacter::BeginPlay()
     capsuleComp->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
   }
 
-  if (IsValid(m_ActionsFilterComponent))
+  if (IsValid(m_actionsFilterComponent))
   {
-    m_ActionsFilterComponent->InitializeFilter(this, m_CharacterStatesDataAsset, UGroundMovementState::StaticClass());
+    m_actionsFilterComponent->InitializeFilter(this, m_characterStatesDataAsset, UGroundMovementState::StaticClass());
   }
 }
 
@@ -91,9 +91,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 
-  if (m_bFire && m_CurrentWeapon)
+  if (m_bFire && m_currentWeapon)
   {
-    m_bFire = m_CurrentWeapon->Fire();
+    m_bFire = m_currentWeapon->Fire();
   }
 }
 
@@ -103,25 +103,25 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
   if (UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
   {
-    enhancedInputComponent->BindAction(m_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
-    enhancedInputComponent->BindAction(m_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
-    enhancedInputComponent->BindAction(m_LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
-    enhancedInputComponent->BindAction(m_DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
-    enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
-    enhancedInputComponent->BindAction(m_FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
-    enhancedInputComponent->BindAction(m_ChangeWeaponModeAction, ETriggerEvent::Started, this,
+    enhancedInputComponent->BindAction(m_moveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveAction);
+    enhancedInputComponent->BindAction(m_jumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::JumpAction);
+    enhancedInputComponent->BindAction(m_lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookAction);
+    enhancedInputComponent->BindAction(m_dashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::DashAction);
+    enhancedInputComponent->BindAction(m_fireAction, ETriggerEvent::Started, this, &APlayerCharacter::StartFireAction);
+    enhancedInputComponent->BindAction(m_fireAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopFireAction);
+    enhancedInputComponent->BindAction(m_changeWeaponModeAction, ETriggerEvent::Started, this,
                                        &APlayerCharacter::ChangeWeaponMode);
-    enhancedInputComponent->BindAction(m_ReloadAction, ETriggerEvent::Started, this, &APlayerCharacter::TryToReload);
-    enhancedInputComponent->BindAction(m_InteractAcion, ETriggerEvent::Triggered, this,
+    enhancedInputComponent->BindAction(m_reloadAction, ETriggerEvent::Started, this, &APlayerCharacter::TryToReload);
+    enhancedInputComponent->BindAction(m_interactAcion, ETriggerEvent::Triggered, this,
                                        &APlayerCharacter::InteractAction);
   }
 }
 
 void APlayerCharacter::MoveAction(const FInputActionValue& _inputValue)
 {
-  if (IsValid(m_ActionsFilterComponent))
+  if (IsValid(m_actionsFilterComponent))
   {
-    m_ActionsFilterComponent->StateAction(_inputValue);
+    m_actionsFilterComponent->StateAction(_inputValue);
   }
 }
 
@@ -174,17 +174,17 @@ void APlayerCharacter::StopFireAction()
 
 void APlayerCharacter::ChangeWeaponMode()
 {
-  m_CurrentWeapon->TryToChangeMode();
+  m_currentWeapon->TryToChangeMode();
 }
 
 void APlayerCharacter::TryToReload()
 {
-  m_CurrentWeapon->TryToReload();
+  m_currentWeapon->TryToReload();
 }
 
 void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
 { // only broadcasting the delegate
-  m_OnInteract.Broadcast();
+  m_onInteract.Broadcast();
 
   if (UGameInstance* gameInstance = GetGameInstance())
   {
@@ -205,7 +205,7 @@ void APlayerCharacter::DashAction()
 
 void APlayerCharacter::DashEnd()
 {
-  GetWorldTimerManager().ClearTimer(m_DashStopTimerHandle);
+  GetWorldTimerManager().ClearTimer(m_dashStopTimerHandle);
 
   IsGrounded() ? RequestChangeState(UGroundMovementState::StaticClass())
                : RequestChangeState(UFallingState::StaticClass());
@@ -213,17 +213,17 @@ void APlayerCharacter::DashEnd()
 
 void APlayerCharacter::Dash()
 {
-  if ((m_PlayerDataAsset->dashDistance <= 0.f) || (m_PlayerDataAsset->dashTime <= 0.f))
+  if ((m_playerDataAsset->dashDistance <= 0.f) || (m_playerDataAsset->dashTime <= 0.f))
   {
     return;
   }
 
-  if (IsValid(m_PlayerDataAsset) && IsValid(m_Camera))
+  if (IsValid(m_playerDataAsset) && IsValid(m_camera))
   {
     FVector dashDir = GetVelocity() * FVector(1, 1, 0);
-    dashDir = dashDir.IsNearlyZero() ? m_Camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
+    dashDir = dashDir.IsNearlyZero() ? m_camera->GetForwardVector() : GetLastMovementInputVector().GetSafeNormal();
 
-    FVector dashVelocity = dashDir.GetSafeNormal() * (m_PlayerDataAsset->dashDistance / m_PlayerDataAsset->dashTime);
+    FVector dashVelocity = dashDir.GetSafeNormal() * (m_playerDataAsset->dashDistance / m_playerDataAsset->dashTime);
     dashVelocity.Z = 0.;
 
     m_bCanDash = false;
@@ -235,8 +235,8 @@ void APlayerCharacter::Dash()
 
     LaunchCharacter(dashVelocity, true, true);
 
-    GetWorldTimerManager().SetTimer(m_DashStopTimerHandle, this, &APlayerCharacter::DashEnd,
-                                    m_PlayerDataAsset->dashTime);
+    GetWorldTimerManager().SetTimer(m_dashStopTimerHandle, this, &APlayerCharacter::DashEnd,
+                                    m_playerDataAsset->dashTime);
 
     if (UGameInstance* gameInstance = GetGameInstance())
     {
@@ -252,12 +252,12 @@ void APlayerCharacter::StopDash()
 {
   UCharacterMovementComponent* charMoveComp = GetCharacterMovement();
 
-  if (IsValid(m_PlayerDataAsset) && IsValid(charMoveComp))
+  if (IsValid(m_playerDataAsset) && IsValid(charMoveComp))
   {
-    charMoveComp->GravityScale = m_PlayerDataAsset->gravityScale;
-    charMoveComp->GroundFriction = m_PlayerDataAsset->groundFriction;
-    GetWorldTimerManager().SetTimer(m_DashResetTimerHandle, this, &APlayerCharacter::ResetDash,
-                                    m_PlayerDataAsset->dashCooldown);
+    charMoveComp->GravityScale = m_playerDataAsset->gravityScale;
+    charMoveComp->GroundFriction = m_playerDataAsset->groundFriction;
+    GetWorldTimerManager().SetTimer(m_dashResetTimerHandle, this, &APlayerCharacter::ResetDash,
+                                    m_playerDataAsset->dashCooldown);
   }
   else
   {
@@ -273,8 +273,8 @@ void APlayerCharacter::ResetDash()
 void APlayerCharacter::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                       FVector NormalImpulse, const FHitResult& Hit)
 {
-  if (IsValid(m_ActionsFilterComponent)
-      && m_ActionsFilterComponent->GetCurrentBaseStateClass() == UDashingState::StaticClass())
+  if (IsValid(m_actionsFilterComponent)
+      && m_actionsFilterComponent->GetCurrentBaseStateClass() == UDashingState::StaticClass())
   {
     DashEnd();
   }
@@ -299,9 +299,9 @@ bool APlayerCharacter::IsGrounded() const
 
 void APlayerCharacter::RequestChangeState(const TSubclassOf<UStates> _state)
 {
-  if (IsValid(m_ActionsFilterComponent))
+  if (IsValid(m_actionsFilterComponent))
   {
-    m_ActionsFilterComponent->SetCurrentState(_state);
+    m_actionsFilterComponent->SetCurrentState(_state);
   }
 }
 
@@ -313,7 +313,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 USkeletalMeshComponent* APlayerCharacter::GetArmsMesh()
 {
-  return m_ArmsMesh;
+  return m_armsMesh;
 }
 
 void APlayerCharacter::ShowDebugsWeapon(bool value)
@@ -328,10 +328,10 @@ bool APlayerCharacter::GetDebugWeapon()
 
 TObjectPtr<UPlayerAnimInstance> APlayerCharacter::GetPlayerAnimInstance()
 {
-  if (m_PlayerAnimInstance == NULL)
+  if (m_playerAnimInstance == NULL)
   {
-    m_PlayerAnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+    m_playerAnimInstance = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
   }
 
-  return m_PlayerAnimInstance;
+  return m_playerAnimInstance;
 }

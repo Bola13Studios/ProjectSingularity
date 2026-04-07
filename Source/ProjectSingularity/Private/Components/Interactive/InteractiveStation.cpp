@@ -79,7 +79,7 @@ void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* Overlapped
     m_Player = Player;
 
     // we bind the method to the delegate
-    m_Player->m_OnInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
+    m_Player->m_onInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
   }
 }
 
@@ -90,7 +90,7 @@ void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedCo
   if (Cast<AActor>(m_Player) == OtherActor)
   {
     // we unbind the method to the delegate
-    m_Player->m_OnInteract.RemoveAll(this);
+    m_Player->m_onInteract.RemoveAll(this);
 
     m_Player = nullptr;
   }

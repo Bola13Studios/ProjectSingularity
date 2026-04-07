@@ -54,5 +54,4 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<UStates> m_currentBaseStateClass;
-
 };
