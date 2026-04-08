@@ -29,6 +29,88 @@ class PROJECTSINGULARITY_API APlayerCharacter : public ABaseCharacter
   GENERATED_BODY()
 
 public:
+  FOnInteract m_onInteract;
+
+private:
+  UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
+  TObjectPtr<UCameraComponent> m_camera;
+
+  UPROPERTY(EditAnywhere, meta = (DisplayName = "Character Actions Filter"))
+  TObjectPtr<UActionStateFilter> m_actionsFilterComponent;
+
+  UPROPERTY()
+  FTimerHandle m_dashStopTimerHandle;
+
+  UPROPERTY()
+  FTimerHandle m_dashResetTimerHandle;
+
+  bool m_bCanDash = true;
+
+#pragma region Inputs
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Move Action"))
+  TObjectPtr<UInputAction> m_moveAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Jump Action"))
+  TObjectPtr<UInputAction> m_jumpAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Look Action"))
+  TObjectPtr<UInputAction> m_lookAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Dash Action"))
+  TObjectPtr<UInputAction> m_dashAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
+  TObjectPtr<UInputAction> m_fireAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
+  TObjectPtr<UInputAction> m_changeWeaponModeAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Reload Action"))
+  TObjectPtr<UInputAction> m_reloadAction;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
+  TObjectPtr<UInputAction> m_interactAcion;
+
+#pragma endregion
+
+  UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
+  TSubclassOf<AWeaponBase> m_weaponClass;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Arms")
+  USkeletalMeshComponent* m_armsMesh;
+
+  UPROPERTY()
+  TObjectPtr<AWeaponBase> m_currentWeapon;
+
+  bool m_bFire = false;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon debugs"))
+  bool m_bDebugWeapon = false;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Weapon", meta = (DisplayName = "Weapon Data Asset"))
+  TObjectPtr<UWeaponsDataAsset> m_weaponDataAsset;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Player", meta = (DisplayName = "Player Config Data Asset"))
+  TObjectPtr<UPlayerConfigDataAsset> m_playerDataAsset;
+
+  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Player", meta = (DisplayName = "Character States Data Asset"))
+  TObjectPtr<UStatesDataAsset> m_characterStatesDataAsset;
+
+  TObjectPtr<UPlayerAnimInstance> m_playerAnimInstance;
+
+public:
+  USkeletalMeshComponent* GetArmsMesh();
+
+  UFUNCTION(Exec)
+  void ShowDebugsWeapon(bool value = true);
+
+  bool GetDebugWeapon();
+
+  TObjectPtr<UPlayerAnimInstance> GetPlayerAnimInstance();
+
+  TObjectPtr<AWeaponBase> GetWeapon() const;
+
   // Sets default values for this character's properties
   APlayerCharacter();
 
@@ -101,84 +183,4 @@ private:
   UFUNCTION()
   void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                       FVector NormalImpulse, const FHitResult& Hit);
-
-public:
-  USkeletalMeshComponent* GetArmsMesh();
-
-  UFUNCTION(Exec)
-  void ShowDebugsWeapon(bool value = true);
-
-  bool GetDebugWeapon();
-
-  FOnInteract m_OnInteract;
-
-  TObjectPtr<UPlayerAnimInstance> GetPlayerAnimInstance();
-
-private:
-  UPROPERTY(EditDefaultsOnly, Category = "Camera", meta = (DisplayName = "CameraComponent"))
-  TObjectPtr<UCameraComponent> m_Camera;
-
-  UPROPERTY(EditAnywhere, meta = (DisplayName = "Character Actions Filter"))
-  TObjectPtr<UActionStateFilter> m_ActionsFilterComponent;
-
-  UPROPERTY()
-  FTimerHandle m_DashStopTimerHandle;
-
-  UPROPERTY()
-  FTimerHandle m_DashResetTimerHandle;
-
-  bool m_bCanDash = true;
-
-#pragma region Inputs
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Move Action"))
-  TObjectPtr<UInputAction> m_MoveAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Jump Action"))
-  TObjectPtr<UInputAction> m_JumpAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Look Action"))
-  TObjectPtr<UInputAction> m_LookAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Dash Action"))
-  TObjectPtr<UInputAction> m_DashAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Fire Action"))
-  TObjectPtr<UInputAction> m_FireAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Change weapon mode Action"))
-  TObjectPtr<UInputAction> m_ChangeWeaponModeAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Reload Action"))
-  TObjectPtr<UInputAction> m_ReloadAction;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (DisplayName = "Interact Action"))
-  TObjectPtr<UInputAction> m_InteractAcion;
-
-#pragma endregion
-
-  UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon Class"))
-  TSubclassOf<AWeaponBase> m_WeaponClass;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Arms")
-  USkeletalMeshComponent* m_ArmsMesh;
-
-  UPROPERTY()
-  TObjectPtr<AWeaponBase> m_CurrentWeapon;
-
-  bool m_bFire = false;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (DisplayName = "Weapon debugs"))
-  bool m_bDebugWeapon = false;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Weapon", meta = (DisplayName = "Weapon Data Asset"))
-  TObjectPtr<UWeaponsDataAsset> m_WeaponDataAsset;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Player", meta = (DisplayName = "Player Config Data Asset"))
-  TObjectPtr<UPlayerConfigDataAsset> m_PlayerDataAsset;
-
-  UPROPERTY(EditDefaultsOnly, Category = "Data Asset|Player", meta = (DisplayName = "Character States Data Asset"))
-  TObjectPtr<UStatesDataAsset> m_CharacterStatesDataAsset;
-
-  TObjectPtr<UPlayerAnimInstance> m_PlayerAnimInstance;
 };
