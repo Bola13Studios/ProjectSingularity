@@ -1,6 +1,6 @@
-#include "Components/Hype/PopularityComponent.h"
-#include "Components/Hype/HypeLevels.h"
-#include "Systems/BaseGameInstance.h"
+#include "ProjectSingularity/Public/Components/Hype/PopularityComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeLevels.h"
+#include "ProjectSingularity/Public/Systems/BaseGameInstance.h"
 #include <Engine/World.h>
 
 UPopularityComponent::UPopularityComponent()
@@ -8,6 +8,17 @@ UPopularityComponent::UPopularityComponent()
   PrimaryComponentTick.bCanEverTick = true;
   m_currentPopularity = 0.0f;
   multiplier = 0.0f;
+}
+
+float UPopularityComponent::GetNormalizedPopularity() const
+{
+  float range = m_nextLevelMin - m_currentLevelMin;
+
+  if (range <= 0.f) return 0.f;
+
+  float normalizedValue = (m_currentPopularity - m_currentLevelMin) / range;
+
+  return FMath::Clamp(normalizedValue, 0.0f, 1.0f);
 }
 
 void UPopularityComponent::BeginPlay()
@@ -26,7 +37,7 @@ void UPopularityComponent::BeginPlay()
     // we get the first level as default
     TArray<FHypeLevels*> hypeLevels;
     gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
-
+    // saving the values of the current level, so that we can use them for calculations and comparisons later on
     level = hypeLevels[0]->level;
     multiplier = hypeLevels[0]->multiplier;
     m_decayRate = hypeLevels[0]->decayRate;
@@ -57,6 +68,7 @@ float UPopularityComponent::CalculateDecay() const
 {
   float decay_ = m_decayRate;
 
+  // we can apply the level multiplier to the decay rate, so that the higher the level, the faster the decay
   decay_ *= (1.f + level * 0.2f);
 
   return decay_;
@@ -108,23 +120,36 @@ void UPopularityComponent::UpdateLevel()
     }
 
     gameInstance->m_hypePopularityDataTable->GetAllRows(TEXT("Popularity"), hypeLevels);
-
-    for (const auto& row : hypeLevels)
+    // we loop through all the levels to find the one that corresponds to our current popularity
+    for (int i = 0; i < hypeLevels.Num(); i++)
     {
-      if (!row) continue;
-
-      if (m_currentPopularity >= row->requiredValue)
+      if (m_currentPopularity >= hypeLevels[i]->requiredValue)
       {
-        level = row->level;
-        multiplier = row->multiplier;
-        m_decayRate = row->decayRate;
+        // saving the values of the current level, so that we can use them for calculations and comparisons later on
+        level = hypeLevels[i]->level;
+        multiplier = hypeLevels[i]->multiplier;
+        m_decayRate = hypeLevels[i]->decayRate;
+
+        m_currentLevelMin = hypeLevels[i]->requiredValue;
+
+        // we also get the next level min value, so that we can use it for comparisons later on. If there is no next
+        // level, we set it to the current level min + 100 as a default value
+        if (hypeLevels.IsValidIndex(i + 1))
+        {
+          m_nextLevelMin = hypeLevels[i + 1]->requiredValue;
+        }
+        else
+        {
+          m_nextLevelMin = m_currentLevelMin + 100.f;
+        }
       }
     }
   }
+  // broadcasting that the popularity has changed so that the UI can update accordingly
+  onPopularityChanged.Broadcast();
 }
 
 float UPopularityComponent::GetMultiplier() const
 {
   return multiplier;
 }
-// EOF
