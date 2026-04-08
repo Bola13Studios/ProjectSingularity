@@ -5,6 +5,7 @@
 #include "Components/ActionStateFilter.h"
 #include "Utils/State Machine/States.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
+#include "ProjectSingularity/Public/Components/WeakPointComponent.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -129,7 +130,7 @@ bool AWeaponBase::Fire()
         }
 
         // Dmg method - TO DO
-        //m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg
+        // m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg
 
         if (m_player->GetDebugWeapon())
         {
@@ -139,11 +140,22 @@ bool AWeaponBase::Fire()
         if (hitActor)
         {
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
+          UWeakPointComponent* weakPointComp = hitActor->FindComponentByClass<UWeakPointComponent>();
 
-          // changing health
-          if (healthComp)
+          // we check if we hit the weak point first
+          if (!IsValid(weakPointComp) && IsValid(healthComp))
           {
+            // changing health normally
             healthComp->ChangeHealth(-m_currentWeaponMode->GetModeData().bulletDamage, GetOwner());
+            healthComp->hasHitBeenCritical = false;
+          }
+          else if (IsValid(weakPointComp) && IsValid(healthComp))
+          {
+            // changing health with weak point multiplier
+            float damageToApply =
+                m_currentWeaponMode->GetModeData().bulletDamage * weakPointComp->GetDamageMultiplier();
+            healthComp->ChangeHealth(-damageToApply, GetOwner());
+            healthComp->hasHitBeenCritical = true;
           }
         }
 
@@ -272,7 +284,7 @@ int AWeaponBase::GetAmmoInReserve()
 
 void AWeaponBase::AddReserveAmmo(int extraAmmo)
 {
-  m_currentAmmoInReser += extraAmmo;
+  m_currentAmmoInReser = FMath::Clamp(m_currentAmmoInReser + extraAmmo, 0, m_weaponData.maxAmmoInReser);
 }
 
 void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)

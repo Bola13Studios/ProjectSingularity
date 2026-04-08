@@ -27,5 +27,10 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (DisplayName = "Enemy Damage"))
 	float damage;
 
-
+	/**
+   * @brief The multiplier to apply to the damage when the enemy is hit in a weak point, this will be used to calculate
+   * the damage when hit in a weak point
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Weakpoint Damage Multiplier"))
+	float weakpointDmgMultiplier;
 };
