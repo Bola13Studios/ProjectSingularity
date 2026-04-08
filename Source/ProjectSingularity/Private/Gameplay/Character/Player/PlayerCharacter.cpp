@@ -335,3 +335,8 @@ TObjectPtr<UPlayerAnimInstance> APlayerCharacter::GetPlayerAnimInstance()
 
   return m_playerAnimInstance;
 }
+
+TObjectPtr<AWeaponBase> APlayerCharacter::GetWeapon() const
+{
+  return m_currentWeapon;
+}
