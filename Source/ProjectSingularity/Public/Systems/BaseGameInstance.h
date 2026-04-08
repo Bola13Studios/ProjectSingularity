@@ -28,6 +28,10 @@ public:
             meta = (DisplayName = "Chaser Data Asset"))
   TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Enemy Config",
+            meta = (DisplayName = "General Enemy Config Data Asset"))
+  TObjectPtr<UEnemyConfigDataAsset> m_EnemyConfigDataAsset;
+
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Weapon",
             meta = (DisplayName = "Weapon Data Asset"))
   TObjectPtr<UWeaponsDataAsset> m_WeaponDataAsset;
