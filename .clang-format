@@ -21,8 +21,8 @@ ColumnLimit: 120
 
 # Alignments
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: Consecutive
-AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
 AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
 AlignOperands: DontAlign

@@ -1,13 +1,17 @@
 #include "Components/Interactive/InteractiveStation.h"
 
+#include "Engine/World.h"
 #include "Components/Interactive/StationData.h"
 #include "Components/Interactive/StationStates.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
+#include "ProjectSingularity/Public/Gameplay/Weapons/WeaponBase.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 
 void UInteractiveStation::Interact()
 {
+  float totalSpent = 0.0f;
   // we check if the asset provided is valid
   TArray<FStationData*> StationData;
   if (!IsValid(m_StationData))
@@ -26,31 +30,47 @@ void UInteractiveStation::Interact()
 
   for (auto Row : StationData)
   {
-    switch (Row->m_Type)
+    if (m_stationMode == Row->m_Type)
     {
-      case EStationStates::HEALTH:
-        if (!ChangeHealth(Row->m_TypeAmount, Row->m_TypePrice))
-        {
-          UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
-        }
-        break;
+      totalSpent += Row->m_TypePrice;
 
-      case EStationStates::AMMO:
-        if (!ChangeAmmo(Row->m_TypeAmount, Row->m_TypePrice))
-        {
-          UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
-        }
-        break;
+      switch (m_stationMode)
+      {
+        case EStationStates::HEALTH:
+          if (!ChangeHealth(Row->m_TypeAmount, Row->m_TypePrice))
+          {
+            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
+          }
+          break;
 
-      default:
-        UE_LOG(LogTemp, Warning,
-               TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
-        return;
-        break;
+        case EStationStates::AMMO:
+          if (!ChangeAmmo(Row->m_TypeAmount, Row->m_TypePrice))
+          {
+            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
+          }
+          break;
+
+        default:
+          UE_LOG(LogTemp, Warning,
+                 TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
+          return;
+          break;
+      }
     }
   }
 
   OnInteract.Broadcast();
+
+  if (UWorld* World = GetWorld())
+  {
+    if (UGameInstance* gameInstance = World->GetGameInstance())
+    {
+      if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+      {
+        gameManager->AddStat("spent", totalSpent);
+      }
+    }
+  }
 }
 
 void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -63,7 +83,7 @@ void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* Overlapped
     m_Player = Player;
 
     // we bind the method to the delegate
-    m_Player->m_OnInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
+    m_Player->m_onInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
   }
 }
 
@@ -74,7 +94,7 @@ void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedCo
   if (Cast<AActor>(m_Player) == OtherActor)
   {
     // we unbind the method to the delegate
-    m_Player->m_OnInteract.RemoveAll(this);
+    m_Player->m_onInteract.RemoveAll(this);
 
     m_Player = nullptr;
   }
@@ -118,9 +138,10 @@ bool UInteractiveStation::ChangeAmmo(const float& _Amount, const float& _Cost)
   // --- ammo?            --- //
   // --- hype component   --- //
   UHypeReceiverComponent* HypeComponent = m_Player->FindComponentByClass<UHypeReceiverComponent>();
+  AWeaponBase* CurrentWeapon = m_Player->GetWeapon();
 
   // we verify if both the components are present on the player
-  if (!IsValid(HypeComponent))
+  if (!IsValid(HypeComponent) || !IsValid(CurrentWeapon))
   {
     UE_LOG(LogTemp, Error, TEXT("MISSING REQUIRED COMPONENTS ON PLAYER"));
     return false;
@@ -134,7 +155,7 @@ bool UInteractiveStation::ChangeAmmo(const float& _Amount, const float& _Cost)
   }
 
   HypeComponent->AddHype(-_Cost);
-  UE_LOG(LogTemp, Warning, TEXT("Kaching! More ammo for u!"));
+  CurrentWeapon->AddReserveAmmo(_Amount);
 
   return true;
 }

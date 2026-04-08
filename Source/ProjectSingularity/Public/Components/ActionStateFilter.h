@@ -9,6 +9,7 @@
 class ABaseCharacter;
 class UStates;
 class UStatesDataAsset;
+struct FInputActionValue;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -28,6 +29,8 @@ public:
 	bool IsStateAvailable(TSubclassOf<UStates> _state);
 
 	void SetCurrentState(const TSubclassOf<UStates> _newState);
+
+	void StateAction(const FInputActionValue& _inputValue);
 
 	void InitializeFilter(AActor* _owner, TObjectPtr<UStatesDataAsset> _statesDataAsset, const TSubclassOf<UStates> _state);
 
@@ -51,5 +54,4 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<UStates> m_currentBaseStateClass;
-
 };

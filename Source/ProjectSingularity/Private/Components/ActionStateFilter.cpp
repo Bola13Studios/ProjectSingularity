@@ -20,12 +20,12 @@ void UActionStateFilter::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (StatesDataAsset == NULL)
+	if (!IsValid(StatesDataAsset))
 	{
 		return;
 	}
 
-	if (!m_currentBaseState && m_currentBaseState->CanUpdateTick)
+	if (IsValid(m_currentBaseState) && m_currentBaseState->CanUpdateTick)
 	{
 		m_currentBaseState->Update(DeltaTime);
 	}
@@ -58,7 +58,7 @@ bool UActionStateFilter::IsStateAvailable(const TSubclassOf<UStates> _state)
 
 void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 {
-	if (!m_statesInstancesMap.Contains(_newState))
+  if (!m_statesInstancesMap.Contains(_newState) || _newState == m_currentBaseStateClass)
 	{
 		return;
 	}
@@ -77,6 +77,14 @@ void UActionStateFilter::SetCurrentState(TSubclassOf<UStates> _newState)
 			NewState->Init();
 		}
 	}
+}
+
+void UActionStateFilter::StateAction(const FInputActionValue& _inputValue)
+{
+  if (IsValid(m_currentBaseState))
+  {
+    m_currentBaseState->HandleInput(_inputValue);
+  }
 }
 
 void UActionStateFilter::InitializeFilter(AActor* _owner, TObjectPtr<UStatesDataAsset> _statesDataAsset, const TSubclassOf<UStates> _state)

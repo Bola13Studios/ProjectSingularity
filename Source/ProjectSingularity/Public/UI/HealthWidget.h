@@ -34,6 +34,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> HealthComp;
 
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+  TObjectPtr<UWidgetAnimation> HpAnim;
+
 	UFUNCTION()
 	void HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor);
 
