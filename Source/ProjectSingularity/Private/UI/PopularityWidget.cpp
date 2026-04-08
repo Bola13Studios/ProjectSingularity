@@ -1,5 +1,5 @@
-#include "UI/PopularityWidget.h"
-#include "Components/Hype/PopularityComponent.h"
+#include "ProjectSingularity/Public/UI/PopularityWidget.h"
+#include "ProjectSingularity/Public/Components/Hype/PopularityComponent.h"
 #include <Components/ProgressBar.h>
 #include <Components/TextBlock.h>
 
@@ -9,17 +9,21 @@ void UPopularityWidget::BindToPopularityComponent(UPopularityComponent* _inPopul
 
   m_popularityComponent = _inPopularityComp;
 
-  m_popularityComponent->OnPopularityChanged.AddDynamic(this, &UPopularityWidget::RefreshUI);
+  m_popularityComponent->onPopularityChanged.AddDynamic(this, &UPopularityWidget::RefreshUI);
 
   RefreshUI();
 }
 
+void UPopularityWidget::NativeConstruct()
+{
+  // setting the default values for the popularity bar and multiplier text
+  if (m_multiplierText) m_multiplierText->SetText(FText::FromString(FString::Printf(TEXT("x1.0"))));
+  if (m_popularityBar) m_popularityBar->SetPercent(0.0f);
+}
+
 void UPopularityWidget::NativeDestruct()
 {
-  if (m_popularityComponent)
-  {
-    m_popularityComponent->OnPopularityChanged.RemoveAll(this);
-  }
+  if (IsValid(m_popularityComponent)) m_popularityComponent->onPopularityChanged.RemoveAll(this);
 
   Super::NativeDestruct();
 }

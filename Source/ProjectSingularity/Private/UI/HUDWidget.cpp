@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ProjectSingularity/Public/UI/HUDWidget.h"
-
-#include "Components/Image.h"
-#include "Components/HealthComponent.h"
-#include "Components/Hype/HypeComponent.h"
+#include <Components/Image.h>
+#include "ProjectSingularity/Public/Components/HealthComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/PopularityComponent.h"
+#include "ProjectSingularity/Public/UI/PopularityWidget.h"
 
 void UHUDWidget::BindToHealthComponent(UHealthComponent* InHealthComp)
 {
@@ -32,6 +31,14 @@ void UHUDWidget::BindToHypeComponent(UHypeComponent* InHypeComp)
   if (HypeWidget)
   {
     HypeWidget->BindToHypeComponent(InHypeComp);
+  }
+}
+
+void UHUDWidget::BindToPopularityComponent(UPopularityComponent* _inPopularityComp)
+{
+  if (IsValid(popularityWidget))
+  {
+    popularityWidget->BindToPopularityComponent(_inPopularityComp);
   }
 }
 
