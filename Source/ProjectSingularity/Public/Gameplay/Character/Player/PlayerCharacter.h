@@ -109,6 +109,8 @@ public:
 
   TObjectPtr<UPlayerAnimInstance> GetPlayerAnimInstance();
 
+  TObjectPtr<AWeaponBase> GetWeapon() const;
+
   // Sets default values for this character's properties
   APlayerCharacter();
 

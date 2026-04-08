@@ -272,7 +272,7 @@ int AWeaponBase::GetAmmoInReserve()
 
 void AWeaponBase::AddReserveAmmo(int extraAmmo)
 {
-  m_currentAmmoInReser += extraAmmo;
+  m_currentAmmoInReser = FMath::Clamp(m_currentAmmoInReser + extraAmmo, 0, m_weaponData.maxAmmoInReser);
 }
 
 void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)
