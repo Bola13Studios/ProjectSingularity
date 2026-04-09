@@ -13,6 +13,9 @@ class PROJECTSINGULARITY_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	public:
+  bool hasHitBeenCritical = false;
+
 public:
 	UHealthComponent();
 

@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 /************************************************************************
  * @description: This class defines a chaser enemy data asset that inherits from the UEnemyConfigDataAsset class. The
  *chaser enemy data asset

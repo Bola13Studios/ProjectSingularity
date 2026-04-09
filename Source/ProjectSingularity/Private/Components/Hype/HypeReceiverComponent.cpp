@@ -50,7 +50,6 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
 
   // adding modifiers
   if (_critical) m_modifierComponent->AddModifier("Critical");
-  if (_source->m_isWeakPoint) m_modifierComponent->AddModifier("WeakPoint");
 
   // airborne
   APlayerCharacter* player = Cast<APlayerCharacter>(GetOwner());

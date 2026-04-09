@@ -31,7 +31,7 @@ void UHealthComponent::ChangeHealth(float _Amount, AActor* InstigatorActor)
 		{
 			if (UHypeSourceComponent* sourceHype = GetOwner()->FindComponentByClass<UHypeSourceComponent>())
 			{
-        receiver->RegisterKill(sourceHype, sourceHype->m_isWeakPoint);
+        receiver->RegisterKill(sourceHype, hasHitBeenCritical);
 			}
 		}
 
