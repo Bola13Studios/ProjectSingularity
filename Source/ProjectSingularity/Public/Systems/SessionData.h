@@ -23,6 +23,8 @@ struct FSessionData
   UPROPERTY()
   TMap<FName, float> stats;
 
+  TMap<FName, TArray<FString>> arrayStats;
+
   /**
    * @brief Retrieves the value of a named statistic.
    * @param _statName The name/identifier of the statistic to look up.
@@ -35,5 +37,18 @@ struct FSessionData
       return *statValue_;
     }
     return 0.f; // default value if the stat is not found
+  }
+
+  FString GetArrayStat(FName _statName) const
+  {
+    FString output;
+    if (const TArray<FString>* arrayValue_ = arrayStats.Find(_statName))
+    {
+      for (const FString& value : *arrayValue_)
+      {
+        output += value + TEXT("\n");
+      }
+    }
+    return output;
   }
 };

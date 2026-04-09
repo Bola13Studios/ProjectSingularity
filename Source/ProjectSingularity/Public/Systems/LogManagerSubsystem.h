@@ -37,4 +37,6 @@ public:
 
 private:
   FString GenerateFilePath(FString _folder) const;
+
+  FString GetVersion() const;
 };
