@@ -18,6 +18,7 @@ class UStatesDataAsset;
 class APlayerCharacter;
 class UBaseAnimInstance;
 class UHealthComponent;
+class ULogManagerSubsystem;
 
 #pragma region Enums
 
@@ -171,6 +172,27 @@ class PROJECTSINGULARITY_API AWeaponBase : public AActor
 {
   GENERATED_BODY()
 
+  private:
+  /**
+     * @brief Saves the ID of the current shot
+   */
+  int32 m_currentShotID = 0;
+
+  /**
+   * @brief Saves the number of hits for each actor in the current shot
+   */
+  TMap<AActor*, int32> m_actorToShotMap;
+
+  /**
+   * @brief Saves the number of kills for each shot ID, used for hype calculation in the health component
+   */
+  TMap<int32, int32> m_killCountPerShot;
+
+  /**
+   * @brief Reference to the log manager subsystem, used to log weapon events
+   */
+  TObjectPtr<ULogManagerSubsystem> m_logManager;
+
 public:
   AWeaponBase();
 
@@ -213,6 +235,8 @@ public:
   void SetExtraBulletDmg(int extraBulletDmg, bool firstMode);
 
   int GetExtraBulletDmg(bool firstMode);
+
+  void OnActorKilled(AActor* DeadActor);
 
 private:
   UPROPERTY()
