@@ -65,7 +65,9 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
   m_weaponAnimInstance = weaponMesh->GetAnimInstance();
   m_armsAnimInstance = m_player->GetArmsMesh()->GetAnimInstance();
   m_cameraComponent = m_player->FindComponentByClass<UCameraComponent>();
-  ;
+  
+  
+  BroadcastAllAmmoData();
 }
 
 bool AWeaponBase::Fire()
@@ -97,6 +99,15 @@ bool AWeaponBase::Fire()
 
   m_timeSinceLastShot = 0.f;
   m_currentWeaponMode->currentAmmoInMag--;
+  
+  if (m_currentWeaponMode == &m_firstMode)
+  {
+    BroadcastFirstModeAmmoChanged();
+  }
+  else
+  {
+    BroadcastSecondModeAmmoChanged();
+  }
 
   for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
   {
@@ -227,6 +238,17 @@ void AWeaponBase::Reload()
 
   m_currentWeaponMode->currentAmmoInMag += ammoToReload;
   m_currentAmmoInReser -= ammoToReload;
+  
+  BroadcastReserveAmmoChanged();
+
+  if (m_currentWeaponMode == &m_firstMode)
+  {
+    BroadcastFirstModeAmmoChanged();
+  }
+  else
+  {
+    BroadcastSecondModeAmmoChanged();
+  }
 }
 
 // Called by an event in the weapon's anim instance
@@ -254,6 +276,8 @@ void AWeaponBase::ChangeMode()
     m_currentWeaponMode = &m_secondMode;
     PlayAnimation(FName("Mode1_To_Mode2"));
   }
+  
+  BroadcastCurrentModeChanged();
 }
 
 // Called by an event in the weapon's anim instance
@@ -321,4 +345,74 @@ int AWeaponBase::GetExtraBulletDmg(bool firstMode)
   {
     return m_secondMode.extraBulletDmg;
   }
+}
+
+void AWeaponBase::BroadcastReserveAmmoChanged()
+{
+  OnReserveAmmoChanged.Broadcast(m_currentAmmoInReser);
+}
+
+void AWeaponBase::BroadcastFirstModeAmmoChanged()
+{
+  OnFirstModeAmmoChanged.Broadcast(m_firstMode.currentAmmoInMag, m_firstMode.GetModeData().maxAmmoInMag);
+}
+
+void AWeaponBase::BroadcastSecondModeAmmoChanged()
+{
+  OnSecondModeAmmoChanged.Broadcast(m_secondMode.currentAmmoInMag, m_secondMode.GetModeData().maxAmmoInMag);
+}
+
+void AWeaponBase::BroadcastCurrentModeChanged()
+{
+  if (m_currentWeaponMode == &m_firstMode)
+  {
+    OnCurrentWeaponModeChanged.Broadcast(EWeaponMode::ShortDistance);
+  }
+  else
+  {
+    OnCurrentWeaponModeChanged.Broadcast(EWeaponMode::LongDistance);
+  }
+}
+
+void AWeaponBase::BroadcastAllAmmoData()
+{
+  BroadcastReserveAmmoChanged();
+  BroadcastFirstModeAmmoChanged();
+  BroadcastSecondModeAmmoChanged();
+  BroadcastCurrentModeChanged();
+}
+
+int AWeaponBase::GetFirstModeAmmoInMagazine() const
+{
+  return m_firstMode.currentAmmoInMag;
+}
+
+int AWeaponBase::GetFirstModeMaxAmmoInMagazine() const
+{
+  return m_firstMode.GetModeData().maxAmmoInMag;
+}
+
+int AWeaponBase::GetSecondModeAmmoInMagazine() const
+{
+  return m_secondMode.currentAmmoInMag;
+}
+
+int AWeaponBase::GetSecondModeMaxAmmoInMagazine() const
+{
+  return m_secondMode.GetModeData().maxAmmoInMag;
+}
+
+EWeaponMode AWeaponBase::GetCurrentWeaponMode() const
+{
+  if (m_currentWeaponMode == &m_firstMode)
+  {
+    return EWeaponMode::ShortDistance;
+  }
+
+  return EWeaponMode::LongDistance;
+}
+
+FString AWeaponBase::GetWeaponName() const
+{
+  return m_currentWeaponMode->GetModeData().weaponModeName;
 }

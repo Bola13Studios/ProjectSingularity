@@ -3,6 +3,7 @@
 #include "Components/HealthComponent.h"
 #include "Components/Hype/HypeComponent.h"
 #include "Components/Hype/PopularityComponent.h"
+#include "Gameplay/Character/Player/PlayerCharacter.h"
 
 #pragma region | PROTECTED METHODS
 
@@ -31,9 +32,15 @@ void AGameHUDSetUp::BeginPlay()
 
 void AGameHUDSetUp::InitializeAllGameMenus()
 {
-  if (!m_playerController) m_playerController = GetOwningPlayerController();
+  if (!m_playerController)
+  {
+    m_playerController = GetOwningPlayerController();
+  }
 
-  if (!m_playerController) return;
+  if (!m_playerController)
+  {
+    return;
+  }
 
   // Create main HUD widget
   if (m_hudWidgetClass)
@@ -50,10 +57,16 @@ void AGameHUDSetUp::InitializeAllGameMenus()
 
 void AGameHUDSetUp::TryBindHUDToPawn() const
 {
-  if (!m_playerController || !m_hudWidget) return;
+  if (!m_playerController || !m_hudWidget)
+  {
+    return;
+  }
 
   APawn* pawn = m_playerController->GetPawn();
-  if (!pawn) return;
+  if (!pawn)
+  {
+    return;
+  }
 
   if (UHealthComponent* healthComp = pawn->FindComponentByClass<UHealthComponent>())
   {
@@ -68,6 +81,14 @@ void AGameHUDSetUp::TryBindHUDToPawn() const
   if (UPopularityComponent* popularityComp = pawn->FindComponentByClass<UPopularityComponent>())
   {
     m_hudWidget->BindToPopularityComponent(popularityComp);
+  }
+
+  if (APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(pawn))
+  {
+    if (AWeaponBase* weapon = playerCharacter->GetWeapon())
+    {
+      m_hudWidget->BindToWeapon(weapon);
+    }
   }
 }
 

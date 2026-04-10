@@ -1,6 +1,6 @@
 ï»¿/************************************************************************
  * @description: Base class for weapons
- * @author: Rubén Santos
+ * @author: Rubï¿½n Santos
  * @date: 01/03/2026
  * @edited_by:
  ************************************************************************/
@@ -41,6 +41,8 @@ enum class EWeaponMode : uint8
 
 #pragma region Structs
 
+
+
 // Weapon mode settings
 USTRUCT(BlueprintType)
 struct FWeaponModeData
@@ -51,6 +53,10 @@ public:
   // For now is just a tag
   UPROPERTY(EditAnywhere)
   EWeaponMode weaponMode = EWeaponMode::ShortDistance;
+  
+  // Mode name
+  UPROPERTY(EditAnywhere)
+  FString weaponModeName;
 
   // Fire mode
   UPROPERTY(EditAnywhere)
@@ -166,6 +172,12 @@ public:
 
 #pragma endregion
 
+// Delegates for UI
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReserveAmmoChanged, int, _currentReserveAmmo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponModeAmmoChanged, int, _currentAmmoInMag, int, _maxAmmoInMag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentWeaponModeChanged, EWeaponMode, _currentMode);
+
 UCLASS()
 class PROJECTSINGULARITY_API AWeaponBase : public AActor
 {
@@ -181,6 +193,31 @@ protected:
   USkeletalMeshComponent* weaponMesh;
 
 public:
+  
+  // Weapon delegates
+  
+  UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
+  FOnReserveAmmoChanged OnReserveAmmoChanged;
+
+  UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
+  FOnWeaponModeAmmoChanged OnFirstModeAmmoChanged;
+
+  UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
+  FOnWeaponModeAmmoChanged OnSecondModeAmmoChanged;
+
+  UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
+  FOnCurrentWeaponModeChanged OnCurrentWeaponModeChanged;
+  
+  // Getter for UI
+  int GetFirstModeAmmoInMagazine() const;
+  int GetFirstModeMaxAmmoInMagazine() const;
+
+  int GetSecondModeAmmoInMagazine() const;
+  int GetSecondModeMaxAmmoInMagazine() const;
+
+  EWeaponMode GetCurrentWeaponMode() const;
+  FString GetWeaponName() const;
+  
   virtual void Tick(float DeltaTime) override;
 
   const void SetWeaponData(FWeaponData weaponData);
@@ -215,6 +252,13 @@ public:
   int GetExtraBulletDmg(bool firstMode);
 
 private:
+  void BroadcastReserveAmmoChanged();
+  void BroadcastFirstModeAmmoChanged();
+  void BroadcastSecondModeAmmoChanged();
+  void BroadcastCurrentModeChanged();
+  void BroadcastAllAmmoData();
+  
+  
   UPROPERTY()
   TObjectPtr<UCameraComponent> m_cameraComponent;
 

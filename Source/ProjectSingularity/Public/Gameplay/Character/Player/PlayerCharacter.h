@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Gameplay/Character/BaseCharacter.h"
+#include "ProjectSingularity/Public/UI/GameHUDSetUp.h"
+#include "ProjectSingularity/Public/UI/HUDWidget.h"
 #include "PlayerCharacter.generated.h"
+
 
 #pragma region | Forward Declarations
 class UCameraComponent;

@@ -7,8 +7,10 @@
 
 #include "CoreMinimal.h"
 #include "HUDWidget.h"
+#include "Gameplay/Character/Player/PlayerCharacter.h"
 #include "GameFramework/HUD.h"
 #include "GameHUDSetUp.generated.h"
+
 
 UCLASS()
 class PROJECTSINGULARITY_API AGameHUDSetUp : public AHUD

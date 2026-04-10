@@ -56,6 +56,17 @@ void APlayerCharacter::BeginPlay()
                                        TEXT("HandGrip_R"));            // Temp bone name
     m_currentWeapon->SetWeaponData(m_weaponDataAsset->weaponsData[0]); // Just for now
   }
+  
+  if (APlayerController* playerController = Cast<APlayerController>(GetController()))
+  {
+    if (AGameHUDSetUp* hud = Cast<AGameHUDSetUp>(playerController->GetHUD()))
+    {
+      if (hud->m_hudWidget && m_currentWeapon)
+      {
+        hud->m_hudWidget->BindToWeapon(m_currentWeapon);
+      }
+    }
+  }
 
   if (UCapsuleComponent* capsuleComp = GetCapsuleComponent())
   {
