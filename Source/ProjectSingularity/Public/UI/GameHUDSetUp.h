@@ -1,5 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+/************************************************************************
+* @description: HUD setup class responsible for creating and binding HUD widgets
+ * @author: Serra
+ * @date: 10/04/2026
+ ************************************************************************/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,42 +10,67 @@
 #include "GameFramework/HUD.h"
 #include "GameHUDSetUp.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PROJECTSINGULARITY_API AGameHUDSetUp : public AHUD
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
+
+#pragma region | VARIABLES
 
 public:
-	UPROPERTY()
-	APlayerController* PlayerController = nullptr;
+  /**
+   * @brief Cached player controller reference
+   */
+  UPROPERTY()
+  APlayerController* m_playerController = nullptr;
 
-	// Runtime State
-	UPROPERTY(BlueprintReadWrite)
-	TArray<UUserWidget*> GameMenusWidgetList{};
+  /**
+   * @brief Runtime list containing active game menu widgets
+   */
+  UPROPERTY(BlueprintReadWrite)
+  TArray<UUserWidget*> m_gameMenusWidgetList{};
 
-	// Widget Classes (configured in BP)
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UHUDWidget> HUDWidgetClass{};
+  /**
+   * @brief HUD widget class configured in Blueprint
+   */
+  UPROPERTY(EditDefaultsOnly, Category = "UI")
+  TSubclassOf<UHUDWidget> m_hudWidgetClass{};
 
-	// Widget Instances
-	UPROPERTY(BlueprintReadWrite)
-	UHUDWidget* HUDWidget = nullptr;
-
-protected:
-	
-	virtual void BeginPlay() override;
+  /**
+   * @brief Runtime HUD widget instance
+   */
+  UPROPERTY(BlueprintReadWrite)
+  UHUDWidget* m_hudWidget = nullptr;
 
 private:
-	
-	UPROPERTY()
-	UGameInstance* GameInstance = nullptr;
+  /**
+   * @brief Cached game instance reference
+   */
+  UPROPERTY()
+  UGameInstance* m_gameInstance = nullptr;
 
-	UFUNCTION()
-	void InitializeAllGameMenus();
+#pragma endregion
 
-	UFUNCTION()
-	void TryBindHUDToPawn() const;
+#pragma region | METHODS
+
+protected:
+  /**
+   * @brief Called when the game starts
+   */
+  virtual void BeginPlay() override;
+
+private:
+  /**
+   * @brief Initialize all game menus used during gameplay
+   */
+  UFUNCTION()
+  void InitializeAllGameMenus();
+
+  /**
+   * @brief Attempt to bind the HUD to the current possessed pawn
+   */
+  UFUNCTION()
+  void TryBindHUDToPawn() const;
+
+#pragma endregion
 };
