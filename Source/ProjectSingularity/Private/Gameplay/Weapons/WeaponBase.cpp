@@ -379,6 +379,7 @@ int AWeaponBase::GetAmmoInReserve()
 void AWeaponBase::AddReserveAmmo(int extraAmmo)
 {
   m_currentAmmoInReser = FMath::Clamp(m_currentAmmoInReser + extraAmmo, 0, m_weaponData.maxAmmoInReser);
+  BroadcastReserveAmmoChanged();
 }
 
 void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)
@@ -415,10 +416,7 @@ int AWeaponBase::GetExtraBulletDmg(bool firstMode)
   return m_secondMode.extraBulletDmg;
 }
 
-void AWeaponBase::BroadcastReserveAmmoChanged()
-{
-  OnReserveAmmoChanged.Broadcast(m_currentAmmoInReser);
-}
+
 
 void AWeaponBase::BroadcastFirstModeAmmoChanged()
 {
@@ -428,6 +426,11 @@ void AWeaponBase::BroadcastFirstModeAmmoChanged()
 void AWeaponBase::BroadcastSecondModeAmmoChanged()
 {
   OnSecondModeAmmoChanged.Broadcast(m_secondMode.currentAmmoInMag, m_secondMode.GetModeData().maxAmmoInMag);
+}
+
+void AWeaponBase::BroadcastReserveAmmoChanged()
+{
+  OnReserveAmmoChanged.Broadcast(m_currentAmmoInReser);
 }
 
 void AWeaponBase::BroadcastCurrentModeChanged()
