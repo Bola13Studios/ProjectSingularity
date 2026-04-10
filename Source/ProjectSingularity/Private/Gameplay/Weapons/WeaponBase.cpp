@@ -6,6 +6,8 @@
 #include "Utils/State Machine/States.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/WeakPointComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
+#include "ProjectSingularity/Public/Systems/LogManagerSubsystem.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -20,6 +22,16 @@ AWeaponBase::AWeaponBase()
 void AWeaponBase::BeginPlay()
 {
   Super::BeginPlay();
+
+  if (UGameInstance* GI = GetWorld()->GetGameInstance())
+  {
+    m_logManager = GI->GetSubsystem<ULogManagerSubsystem>();
+  }
+  else
+  {
+    m_logManager = nullptr;
+    UE_LOG(LogTemp, Error, TEXT("Unable to retreive the LogManagerSubsystem. Are you sure it was added to the world?"));
+  }
 }
 
 void AWeaponBase::Tick(float DeltaTime)
@@ -70,6 +82,8 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
 
 bool AWeaponBase::Fire()
 {
+  if (IsValid(m_logManager)) m_logManager->LogEvent(TEXT("\n==== NEW FIRE ===="));
+
   // Seconds in a minute divided by the fire rate (Rounds Per Minute)
   float timeBetweenShots = 60.f / m_currentWeaponMode->GetModeData().fireRateRPM;
 
@@ -97,6 +111,13 @@ bool AWeaponBase::Fire()
 
   m_timeSinceLastShot = 0.f;
   m_currentWeaponMode->currentAmmoInMag--;
+
+  m_currentShotID++;
+  int32 shotID = m_currentShotID;
+  TSet<AActor*> hitActorsThisShot;
+
+  if (IsValid(m_logManager)) m_logManager->LogEvent(FString::Printf(TEXT("\n[WEAPON] FIRE -> ShotID: %d | Ammo: %d"), shotID,
+         m_currentWeaponMode->currentAmmoInMag));
 
   for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
   {
@@ -129,6 +150,12 @@ bool AWeaponBase::Fire()
           continue;
         }
 
+        if (IsValid(m_logManager))
+          m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] HIT -> Actor: %s"), *GetNameSafe(hitActor)));
+
+        if (hitActorsThisShot.Contains(hitActor)) continue;
+        hitActorsThisShot.Add(hitActor);
+
         // Dmg method - TO DO
         // m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg
 
@@ -139,23 +166,38 @@ bool AWeaponBase::Fire()
 
         if (hitActor)
         {
+          if (!m_actorToShotMap.Contains(hitActor))
+          {
+            m_actorToShotMap.Add(hitActor, shotID);
+            if (IsValid(m_logManager))
+              m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] MAPPING -> %s assigned to ShotID %d"), *GetNameSafe(hitActor),
+                   shotID));
+          }
+
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
           UWeakPointComponent* weakPointComp = hitActor->FindComponentByClass<UWeakPointComponent>();
 
-          // we check if we hit the weak point first
-          if (!IsValid(weakPointComp) && IsValid(healthComp))
+          if (healthComp)
           {
-            // changing health normally
-            healthComp->ChangeHealth(-m_currentWeaponMode->GetModeData().bulletDamage, GetOwner());
-            healthComp->hasHitBeenCritical = false;
-          }
-          else if (IsValid(weakPointComp) && IsValid(healthComp))
-          {
-            // changing health with weak point multiplier
-            float damageToApply =
-                m_currentWeaponMode->GetModeData().bulletDamage * weakPointComp->GetDamageMultiplier();
+            healthComp->OnDeath.RemoveAll(this);
+            healthComp->OnDeath.AddUObject(this, &AWeaponBase::OnActorKilled);
+
+            float damageToApply = m_currentWeaponMode->GetModeData().bulletDamage;
+            bool isCriticalHit = false;
+
+            // we check if we hit the weak point first
+            if (IsValid(weakPointComp))
+            {
+              damageToApply *= weakPointComp->GetDamageMultiplier();
+              isCriticalHit = true;
+            }
+
             healthComp->ChangeHealth(-damageToApply, GetOwner());
-            healthComp->hasHitBeenCritical = true;
+            healthComp->hasHitBeenCritical = isCriticalHit;
+
+            if (IsValid(m_logManager))
+              m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] DAMAGE -> %s | Damage: %.2f | Critical: %s"),
+                   *GetNameSafe(hitActor), damageToApply, isCriticalHit ? TEXT("TRUE") : TEXT("FALSE")));
           }
         }
 
@@ -320,5 +362,46 @@ int AWeaponBase::GetExtraBulletDmg(bool firstMode)
   else
   {
     return m_secondMode.extraBulletDmg;
+  }
+}
+
+void AWeaponBase::OnActorKilled(AActor* DeadActor)
+{
+  if (!m_actorToShotMap.Contains(DeadActor)) return;
+
+  if (IsValid(m_logManager))
+    m_logManager->LogEvent(FString::Printf(TEXT("\n[WEAPON] DEATH -> Actor: %s"), *GetNameSafe(DeadActor)));
+
+  int32 shotID = m_actorToShotMap[DeadActor];
+
+  int32& count = m_killCountPerShot.FindOrAdd(shotID);
+  count++;
+
+  if (count > 1)
+  {
+    if (UHypeReceiverComponent* receiver = GetOwner()->FindComponentByClass<UHypeReceiverComponent>())
+    {
+      receiver->AddExternalModifier("MultiKill");
+    }
+    UE_LOG(LogTemp, Warning, TEXT("🔥 [MULTIKILL] ShotID %d -> %d KILLS"), shotID, count);
+    if (IsValid(m_logManager))
+      m_logManager->LogEvent(FString::Printf(TEXT("🔥 [MULTIKILL] ShotID %d -> %d KILLS"), shotID, count));
+  }
+
+  UE_LOG(LogTemp, Warning, TEXT("[WEAPON] SHOTID %d -> KillCount: %d"), shotID, count);
+  if (IsValid(m_logManager))
+    m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] SHOTID %d -> KillCount: %d"), shotID, count));
+
+  // cleanup
+  if (m_killCountPerShot.Contains(shotID))
+  {
+    m_killCountPerShot.Remove(shotID);
+  }
+  if (IsValid(m_logManager))
+    m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] CLEANUP -> Removing Actor %s from ShotID %d"), *GetNameSafe(DeadActor), shotID));
+
+  if (UHealthComponent* hc = DeadActor->FindComponentByClass<UHealthComponent>())
+  {
+    hc->OnDeath.RemoveAll(this);
   }
 }

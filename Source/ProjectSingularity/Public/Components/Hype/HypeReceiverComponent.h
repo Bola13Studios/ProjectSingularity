@@ -36,26 +36,23 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Hype Level"))
   int m_currentHypeLevel;
 
-  /**
-   * @brief Hold the current kill streak for this receiver
-   */
-  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Streak"))
-  int m_currentKillStreak;
-
 private:
   /**
-   * @brief An integer property that stores the current multi-kill count
+   * @brief An integer property that stores the current kill strike count
    */
   UPROPERTY()
-  int m_multiKillCount = 0;
+  int m_killStrikeCount = 0;
 
   /**
-   * @brief Time window in seconds to count multi-kills
+   * @brief Time window in seconds to count kill strike
    */
-  UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "MultiKill Rate"))
-  float m_multiKillWindow = 2.0f;
+  UPROPERTY(EditAnywhere, Category = "Bola 13|Hype", meta = (DisplayName = "Kill Strike Rate"))
+  float m_killStrikeWindow = 2.0f;
 
-  FTimerHandle m_multiKillTimer;
+  /**
+   * @brief The timer handle used to track the kill strike window
+   */
+  FTimerHandle m_killStrikeTimer;
 
   /**
    * @brief Holds the reference to the data table with all the related multipliers
@@ -84,20 +81,25 @@ public:
    * @brief Used to register a kill
    * @param _Source the killed source
    * @param Critical if it was a critical hit (weakpoint)
-   * @param MultiKill if it was a multi kill or not
    */
   UFUNCTION(BlueprintCallable)
   void RegisterKill(UHypeSourceComponent* _source, const bool& critical);
 
   /**
-   * @brief Registers a multi-kill event.
+   * @brief Used to register a multi-kill
+   * @param _killCount 
    */
-  void RegisterMultiKill();
+  void RegisterMultiKill(int32 _killCount);
 
   /**
-   * @brief Resets the multi-kill state, clearing any current multi-kill count or progress.
+   * @brief Registers a strike-kill event.
    */
-  void ResetMultiKill();
+  void RegisterStrikeKill();
+
+  /**
+   * @brief Resets the strike-kill state, clearing any current strike-kill count or progress.
+   */
+  void ResetStrikeKill();
 
   /**
    * @brief Used to Update the Current Hype Level
@@ -112,6 +114,8 @@ public:
    */
   UFUNCTION(BlueprintCallable)
   bool IsHypeEnough(float _amount);
+
+  void AddExternalModifier(const FName _modifier);
 
 protected:
   // Called when the game starts
