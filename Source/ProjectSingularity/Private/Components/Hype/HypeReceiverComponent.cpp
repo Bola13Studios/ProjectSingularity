@@ -41,13 +41,6 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
     return;
   }
 
-  // incrementing the kill streak
-  m_currentKillStreak++;
-
-  RegisterMultiKill();
-  if (m_multiKillCount > 1) m_modifierComponent->AddModifier("MultiKill");
-
-
   // adding modifiers
   if (_critical) m_modifierComponent->AddModifier("Critical");
 
@@ -71,7 +64,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   AddHype(finalHype);
 
   // updating the popularity index @remind > this is temporary will be changed after
-  m_popularityComponent->IncreasePopularity(100.f); // tweakable
+  m_popularityComponent->IncreasePopularity(_source->popularityValue);
 
   // clearing modifiers
   m_modifierComponent->ClearModifiers();
@@ -80,22 +73,32 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
          popularityMultiplier, finalHype);
 }
 
-void UHypeReceiverComponent::RegisterMultiKill()
+void UHypeReceiverComponent::RegisterMultiKill(int32 _killCount)
 {
-  m_multiKillCount++;
+  if (_killCount > 1)
+  {
+    m_modifierComponent->AddModifier("MultiKill");
+  }
+
+  UE_LOG(LogTemp, Warning, TEXT("Multikill REAL: %d"), _killCount);
+}
+
+void UHypeReceiverComponent::RegisterStrikeKill()
+{ /// REMOVE
+  m_killStrikeCount++;
 
   // we reset the timer
-  GetWorld()->GetTimerManager().ClearTimer(m_multiKillTimer);
+  GetWorld()->GetTimerManager().ClearTimer(m_killStrikeTimer);
 
-  GetWorld()->GetTimerManager().SetTimer(m_multiKillTimer, this, &UHypeReceiverComponent::ResetMultiKill, m_multiKillWindow, false);
+  GetWorld()->GetTimerManager().SetTimer(m_killStrikeTimer, this, &UHypeReceiverComponent::ResetStrikeKill, m_killStrikeWindow, false);
 
-  UE_LOG(LogTemp, Warning, TEXT("Multikill count: %d"), m_multiKillCount);
+  UE_LOG(LogTemp, Warning, TEXT("Multikill count: %d"), m_killStrikeCount);
 }
 
 
-void UHypeReceiverComponent::ResetMultiKill()
+void UHypeReceiverComponent::ResetStrikeKill()
 {
-  m_multiKillCount = 0;
+  m_killStrikeCount = 0;
 }
 
 void UHypeReceiverComponent::UpdateHypeLevel()
@@ -120,4 +123,9 @@ bool UHypeReceiverComponent::IsHypeEnough(float _amount)
 {
   if (m_currentHypeValue >= _amount) return true;
   return false;
+}
+
+void UHypeReceiverComponent::AddExternalModifier(const FName _modifier)
+{
+  if (m_modifierComponent) m_modifierComponent->AddModifier(_modifier);
 }
