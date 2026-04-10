@@ -64,7 +64,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   AddHype(finalHype);
 
   // updating the popularity index @remind > this is temporary will be changed after
-  m_popularityComponent->IncreasePopularity(100.f); // tweakable
+  m_popularityComponent->IncreasePopularity(_source->popularityValue);
 
   // clearing modifiers
   m_modifierComponent->ClearModifiers();
