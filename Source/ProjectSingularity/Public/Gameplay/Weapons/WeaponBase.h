@@ -1,6 +1,6 @@
 ﻿/************************************************************************
  * @description: Base class for weapons
- * @author: Rub�n Santos
+ * @author: Rubén Santos
  * @date: 01/03/2026
  * @edited_by:
  ************************************************************************/
@@ -42,8 +42,6 @@ enum class EWeaponMode : uint8
 
 #pragma region Structs
 
-
-
 // Weapon mode settings
 USTRUCT(BlueprintType)
 struct FWeaponModeData
@@ -54,7 +52,7 @@ public:
   // For now is just a tag
   UPROPERTY(EditAnywhere)
   EWeaponMode weaponMode = EWeaponMode::ShortDistance;
-  
+
   // Mode name
   UPROPERTY(EditAnywhere)
   FString weaponModeName;
@@ -174,7 +172,6 @@ public:
 #pragma endregion
 
 // Delegates for UI
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReserveAmmoChanged, int, _currentReserveAmmo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponModeAmmoChanged, int, _currentAmmoInMag, int, _maxAmmoInMag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentWeaponModeChanged, EWeaponMode, _currentMode);
@@ -184,9 +181,9 @@ class PROJECTSINGULARITY_API AWeaponBase : public AActor
 {
   GENERATED_BODY()
 
-  private:
+private:
   /**
-     * @brief Saves the ID of the current shot
+   * @brief Saves the ID of the current shot
    */
   int32 m_currentShotID = 0;
 
@@ -203,7 +200,7 @@ class PROJECTSINGULARITY_API AWeaponBase : public AActor
   /**
    * @brief Reference to the log manager subsystem, used to log weapon events
    */
-  TObjectPtr<ULogManagerSubsystem> m_logManager;
+  TObjectPtr<ULogManagerSubsystem> m_logManager = nullptr;
 
 public:
   AWeaponBase();
@@ -215,9 +212,7 @@ protected:
   USkeletalMeshComponent* weaponMesh;
 
 public:
-  
   // Weapon delegates
-  
   UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
   FOnReserveAmmoChanged OnReserveAmmoChanged;
 
@@ -229,7 +224,7 @@ public:
 
   UPROPERTY(BlueprintAssignable, Category = "Weapon|Ammo")
   FOnCurrentWeaponModeChanged OnCurrentWeaponModeChanged;
-  
+
   // Getter for UI
   int GetFirstModeAmmoInMagazine() const;
   int GetFirstModeMaxAmmoInMagazine() const;
@@ -239,7 +234,7 @@ public:
 
   EWeaponMode GetCurrentWeaponMode() const;
   FString GetWeaponName() const;
-  
+
   virtual void Tick(float DeltaTime) override;
 
   const void SetWeaponData(FWeaponData weaponData);
@@ -248,29 +243,21 @@ public:
   virtual bool Fire();
 
   virtual void TryToReload();
-
   virtual void Reload();
-
   virtual void OnReloadFinished();
 
   virtual void TryToChangeMode();
-
   virtual void ChangeMode();
-
   virtual void OnChangeModeFinished();
 
   void PlayAnimation(FName name);
 
   int GetAmmoInMagazine();
-
   void AddReserveAmmo(int extraAmmo);
-
   int GetAmmoInReserve();
 
   void AddExtraBulletDmg(int extraBulletDmg, bool firstMode);
-
   void SetExtraBulletDmg(int extraBulletDmg, bool firstMode);
-
   int GetExtraBulletDmg(bool firstMode);
 
   void OnActorKilled(AActor* DeadActor);
@@ -281,8 +268,7 @@ private:
   void BroadcastSecondModeAmmoChanged();
   void BroadcastCurrentModeChanged();
   void BroadcastAllAmmoData();
-  
-  
+
   UPROPERTY()
   TObjectPtr<UCameraComponent> m_cameraComponent;
 
@@ -298,14 +284,12 @@ private:
   UPROPERTY()
   UActionStateFilter* m_actionsFilterComponent;
 
-  FWeaponModeState* m_currentWeaponMode;
+  FWeaponModeState* m_currentWeaponMode = nullptr;
 
-  float m_timeSinceLastShot = 0;
+  float m_timeSinceLastShot = 0.0f;
 
   TObjectPtr<APlayerCharacter> m_player;
-
   TObjectPtr<UAnimInstance> m_armsAnimInstance;
-
   TObjectPtr<UAnimInstance> m_weaponAnimInstance;
 
   int m_currentAmmoInReser = 0;
