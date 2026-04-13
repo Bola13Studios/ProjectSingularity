@@ -85,7 +85,7 @@ bool AWeaponBase::Fire()
 {
   if (IsValid(m_logManager))
   {
-    m_logManager->LogEvent(TEXT("\n==== NEW FIRE ===="));
+    m_logManager->LogEvent(TEXT("==== NEW FIRE ===="));
   }
 
   // Seconds in a minute divided by the fire rate (Rounds Per Minute)

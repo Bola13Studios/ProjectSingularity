@@ -13,7 +13,8 @@ class PROJECTSINGULARITY_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	public:
+public:
+  UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Health")
   bool hasHitBeenCritical = false;
 
 public:
