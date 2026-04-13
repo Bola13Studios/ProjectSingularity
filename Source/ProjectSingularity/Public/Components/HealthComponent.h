@@ -17,6 +17,10 @@ class PROJECTSINGULARITY_API UHealthComponent : public UActorComponent
   bool hasHitBeenCritical = false;
 
 public:
+  UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Health")
+  bool hasHitBeenCritical = false;
+
+public:
 	UHealthComponent();
 
 	UPROPERTY(BlueprintAssignable, Category="Health")

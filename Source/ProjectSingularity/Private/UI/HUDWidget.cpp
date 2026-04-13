@@ -1,80 +1,96 @@
 #include "ProjectSingularity/Public/UI/HUDWidget.h"
-#include <Components/Image.h>
+
+#include "Components/Image.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/PopularityComponent.h"
 #include "ProjectSingularity/Public/UI/PopularityWidget.h"
+#include "Gameplay/Weapons/WeaponBase.h"
 
-void UHUDWidget::BindToHealthComponent(UHealthComponent* InHealthComp)
+#pragma region | PUBLIC METHODS
+
+void UHUDWidget::BindToHealthComponent(UHealthComponent* _inHealthComp)
 {
-  if (HealthComp)
+  if (m_healthComp)
   {
-    HealthComp->OnHealthChanged.RemoveDynamic(this, &UHUDWidget::HandleHealthChanged);
+    m_healthComp->OnHealthChanged.RemoveDynamic(this, &UHUDWidget::HandleHealthChanged);
   }
 
-  HealthComp = InHealthComp;
+  m_healthComp = _inHealthComp;
 
-  if (HealthWidget)
+  if (m_healthWidget)
   {
-    HealthWidget->BindToHealthComponent(InHealthComp);
+    m_healthWidget->BindToHealthComponent(_inHealthComp);
   }
 
-  if (HealthComp)
+  if (m_healthComp)
   {
-    HealthComp->OnHealthChanged.AddDynamic(this, &UHUDWidget::HandleHealthChanged);
+    m_healthComp->OnHealthChanged.AddDynamic(this, &UHUDWidget::HandleHealthChanged);
     UpdateVignetteVisual();
   }
 }
 
-void UHUDWidget::BindToHypeComponent(UHypeComponent* InHypeComp)
+void UHUDWidget::BindToHypeComponent(UHypeComponent* _inHypeComp)
 {
-  if (HypeWidget)
+  if (m_hypeWidget)
   {
-    HypeWidget->BindToHypeComponent(InHypeComp);
+    m_hypeWidget->BindToHypeComponent(_inHypeComp);
   }
 }
 
 void UHUDWidget::BindToPopularityComponent(UPopularityComponent* _inPopularityComp)
 {
-  if (IsValid(popularityWidget))
+  if (m_popularityWidget)
   {
-    popularityWidget->BindToPopularityComponent(_inPopularityComp);
+    m_popularityWidget->BindToPopularityComponent(_inPopularityComp);
   }
 }
 
+void UHUDWidget::BindToWeapon(AWeaponBase* _inWeapon)
+{
+  if (m_ammoWidget)
+  {
+    m_ammoWidget->BindToWeapon(_inWeapon);
+  }
+}
+
+#pragma endregion
+
+#pragma region | PROTECTED METHODS
+
 void UHUDWidget::NativeDestruct()
 {
-  if (HealthComp)
+  if (m_healthComp)
   {
-    HealthComp->OnHealthChanged.RemoveDynamic(this, &UHUDWidget::HandleHealthChanged);
+    m_healthComp->OnHealthChanged.RemoveDynamic(this, &UHUDWidget::HandleHealthChanged);
   }
 
   Super::NativeDestruct();
 }
 
-void UHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UHUDWidget::NativeTick(const FGeometry& _myGeometry, float _inDeltaTime)
 {
-  Super::NativeTick(MyGeometry, InDeltaTime);
+  Super::NativeTick(_myGeometry, _inDeltaTime);
 
-  if (bVignetteFadingIn)
+  if (m_bVignetteFadingIn)
   {
-    if (VignetteFadeInTime <= 0.0f)
+    if (m_vignetteFadeInTime <= 0.0f)
     {
-      CurrentVignetteOpacity = 1.0f;
-      bVignetteFadingIn = false;
-      bVignetteHolding = true;
-      VignetteHoldTimer = VignetteHoldTime;
+      m_currentVignetteOpacity = 1.0f;
+      m_bVignetteFadingIn = false;
+      m_bVignetteHolding = true;
+      m_vignetteHoldTimer = m_vignetteHoldTime;
     }
     else
     {
-      CurrentVignetteOpacity += InDeltaTime / VignetteFadeInTime;
+      m_currentVignetteOpacity += _inDeltaTime / m_vignetteFadeInTime;
 
-      if (CurrentVignetteOpacity >= 1.0f)
+      if (m_currentVignetteOpacity >= 1.0f)
       {
-        CurrentVignetteOpacity = 1.0f;
-        bVignetteFadingIn = false;
-        bVignetteHolding = true;
-        VignetteHoldTimer = VignetteHoldTime;
+        m_currentVignetteOpacity = 1.0f;
+        m_bVignetteFadingIn = false;
+        m_bVignetteHolding = true;
+        m_vignetteHoldTimer = m_vignetteHoldTime;
       }
     }
 
@@ -82,34 +98,34 @@ void UHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     return;
   }
 
-  if (bVignetteHolding)
+  if (m_bVignetteHolding)
   {
-    VignetteHoldTimer -= InDeltaTime;
+    m_vignetteHoldTimer -= _inDeltaTime;
 
-    if (VignetteHoldTimer <= 0.0f)
+    if (m_vignetteHoldTimer <= 0.0f)
     {
-      bVignetteHolding = false;
-      bVignetteFadingOut = true;
+      m_bVignetteHolding = false;
+      m_bVignetteFadingOut = true;
     }
 
     return;
   }
 
-  if (bVignetteFadingOut)
+  if (m_bVignetteFadingOut)
   {
-    if (VignetteFadeOutTime <= 0.0f)
+    if (m_vignetteFadeOutTime <= 0.0f)
     {
-      CurrentVignetteOpacity = 0.0f;
-      bVignetteFadingOut = false;
+      m_currentVignetteOpacity = 0.0f;
+      m_bVignetteFadingOut = false;
     }
     else
     {
-      CurrentVignetteOpacity -= InDeltaTime / VignetteFadeOutTime;
+      m_currentVignetteOpacity -= _inDeltaTime / m_vignetteFadeOutTime;
 
-      if (CurrentVignetteOpacity <= 0.0f)
+      if (m_currentVignetteOpacity <= 0.0f)
       {
-        CurrentVignetteOpacity = 0.0f;
-        bVignetteFadingOut = false;
+        m_currentVignetteOpacity = 0.0f;
+        m_bVignetteFadingOut = false;
       }
     }
 
@@ -117,9 +133,13 @@ void UHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
   }
 }
 
-void UHUDWidget::HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor)
+#pragma endregion
+
+#pragma region | PRIVATE METHODS
+
+void UHUDWidget::HandleHealthChanged(float _current, float _max, float _delta, AActor* _instigatorActor)
 {
-  if (Delta < 0.0f)
+  if (_delta < 0.0f)
   {
     StartVignetteDamageEffect();
   }
@@ -127,20 +147,22 @@ void UHUDWidget::HandleHealthChanged(float Current, float Max, float Delta, AAct
 
 void UHUDWidget::StartVignetteDamageEffect()
 {
-  bVignetteFadingIn = true;
-  bVignetteHolding = false;
-  bVignetteFadingOut = false;
-  VignetteHoldTimer = 0.0f;
+  m_bVignetteFadingIn = true;
+  m_bVignetteHolding = false;
+  m_bVignetteFadingOut = false;
+  m_vignetteHoldTimer = 0.0f;
 }
 
 void UHUDWidget::UpdateVignetteVisual()
 {
-  if (!VignetteImage)
+  if (!m_vignetteImage)
   {
     return;
   }
 
-  FLinearColor Color = VignetteImage->GetColorAndOpacity();
-  Color.A = FMath::Clamp(CurrentVignetteOpacity, 0.0f, VignetteOpacitty);
-  VignetteImage->SetColorAndOpacity(Color);
+  FLinearColor color = m_vignetteImage->GetColorAndOpacity();
+  color.A = FMath::Clamp(m_currentVignetteOpacity, 0.0f, m_vignetteOpacity);
+  m_vignetteImage->SetColorAndOpacity(color);
 }
+
+#pragma endregion

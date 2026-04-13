@@ -27,6 +27,9 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Is it a Weakpoint?"))
   bool m_isWeakPoint;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Popularity Value"))
+  int32 popularityValue;
+
   /**
    * @brief Temporary delegate used to broadcast when the actor attached to this component has been hit
    */

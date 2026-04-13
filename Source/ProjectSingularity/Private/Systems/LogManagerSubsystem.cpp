@@ -12,20 +12,40 @@ void ULogManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
 {
   Super::Initialize(_rCollection);
 
-  UE_LOG(LogTemp, Log, TEXT("Logger Initialized"));
+  UE_LOG(LogTemp, Log, TEXT("[MICHAEL.JSON] Logger Initialized!!"));
 }
 
 void ULogManagerSubsystem::Deinitialize()
 {
-  if (UGameInstance* gameInstance = GetGameInstance())
+  UGameInstance* GI = GetGameInstance();
+  if (!GI)
   {
-    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+    Super::Deinitialize();
+    return;
+  }
+
+  UBaseGameInstance* gameInstance = Cast<UBaseGameInstance>(GI);
+  if (!gameInstance)
+  {
+    Super::Deinitialize();
+    return;
+  }
+
+  if (gameInstance->canSaveStats)
+  {
+    UE_LOG(LogTemp, Log, TEXT("[MICHAEL.JSON] Saving session stats..."));
+
+    if (UGameManagerSubsystem* gameManager = GI->GetSubsystem<UGameManagerSubsystem>())
     {
       SaveSession(gameManager->GetAllData());
     }
   }
 
-  SaveToFile(); // we automatically save to a file upon closure
+  if (gameInstance->canSaveEvents)
+  {
+    UE_LOG(LogTemp, Log, TEXT("[MICHAEL.JSON] Saving session events..."));
+    SaveToFile();
+  }
 
   Super::Deinitialize();
 }
@@ -45,7 +65,7 @@ void ULogManagerSubsystem::SaveToFile()
 
   FFileHelper::SaveStringToFile(output, *filePath);
 
-  UE_LOG(LogTemp, Log, TEXT("Saved log to: %s"), *filePath);
+  UE_LOG(LogTemp, Log, TEXT("[MICHAEL.JSON] Saved log to: %s"), *filePath);
 }
 
 void ULogManagerSubsystem::SaveSession(const FSessionData& _data)
