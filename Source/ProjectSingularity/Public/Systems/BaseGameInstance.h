@@ -23,6 +23,12 @@ public:
   
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Version"))
   FName m_version;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Can Save Events"))
+  bool canSaveEvents = true;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Can Save Stats"))
+  bool canSaveStats = true;
   
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Chaser Enemy",
             meta = (DisplayName = "Chaser Data Asset"))

@@ -1,44 +1,55 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ProjectSingularity/Public/UI/GameHUDSetUp.h"
 
 #include "Components/HealthComponent.h"
 #include "Components/Hype/HypeComponent.h"
 #include "Components/Hype/PopularityComponent.h"
+#include "Gameplay/Character/Player/PlayerCharacter.h"
+
+#pragma region | PROTECTED METHODS
 
 void AGameHUDSetUp::BeginPlay()
 {
   Super::BeginPlay();
 
-  GameInstance = Cast<UGameInstance>(GetGameInstance());
-  PlayerController = GetOwningPlayerController();
+  m_gameInstance = Cast<UGameInstance>(GetGameInstance());
+  m_playerController = GetOwningPlayerController();
 
   // Start focused on gameplay
-  if (APlayerController* PC = GetOwningPlayerController())
+  if (APlayerController* playerController = GetOwningPlayerController())
   {
-    const FInputModeGameOnly InputMode = {};
-    PC->SetInputMode(InputMode);
-    PC->bShowMouseCursor = false;
+    const FInputModeGameOnly inputMode = {};
+    playerController->SetInputMode(inputMode);
+    playerController->bShowMouseCursor = false;
   }
 
-  // Initialize all the game menus in the game
+  // Initialize all game menus
   InitializeAllGameMenus();
 }
 
+#pragma endregion
+
+#pragma region | PRIVATE METHODS
+
 void AGameHUDSetUp::InitializeAllGameMenus()
 {
-  if (!PlayerController) PlayerController = GetOwningPlayerController();
-
-  if (!PlayerController) return;
-
-  // HUD
-
-  if (HUDWidgetClass)
+  if (!m_playerController)
   {
-    HUDWidget = CreateWidget<UHUDWidget>(PlayerController, HUDWidgetClass);
-    if (HUDWidget)
+    m_playerController = GetOwningPlayerController();
+  }
+
+  if (!m_playerController)
+  {
+    return;
+  }
+
+  // Create main HUD widget
+  if (m_hudWidgetClass)
+  {
+    m_hudWidget = CreateWidget<UHUDWidget>(m_playerController, m_hudWidgetClass);
+
+    if (m_hudWidget)
     {
-      HUDWidget->AddToViewport();
+      m_hudWidget->AddToViewport();
       TryBindHUDToPawn();
     }
   }
@@ -46,23 +57,39 @@ void AGameHUDSetUp::InitializeAllGameMenus()
 
 void AGameHUDSetUp::TryBindHUDToPawn() const
 {
-  if (!PlayerController || !HUDWidget) return;
-
-  APawn* Pawn = PlayerController->GetPawn();
-  if (!Pawn) return;
-
-  if (UHealthComponent* HealthComp = Pawn->FindComponentByClass<UHealthComponent>())
+  if (!m_playerController || !m_hudWidget)
   {
-    HUDWidget->BindToHealthComponent(HealthComp);
+    return;
   }
 
-  if (UHypeComponent* HypeComp = Pawn->FindComponentByClass<UHypeComponent>())
+  APawn* pawn = m_playerController->GetPawn();
+  if (!pawn)
   {
-    HUDWidget->BindToHypeComponent(HypeComp);
+    return;
   }
 
-  if (UPopularityComponent* popularityComponent = Pawn->FindComponentByClass<UPopularityComponent>())
+  if (UHealthComponent* healthComp = pawn->FindComponentByClass<UHealthComponent>())
   {
-    HUDWidget->BindToPopularityComponent(popularityComponent);
+    m_hudWidget->BindToHealthComponent(healthComp);
+  }
+
+  if (UHypeComponent* hypeComp = pawn->FindComponentByClass<UHypeComponent>())
+  {
+    m_hudWidget->BindToHypeComponent(hypeComp);
+  }
+
+  if (UPopularityComponent* popularityComp = pawn->FindComponentByClass<UPopularityComponent>())
+  {
+    m_hudWidget->BindToPopularityComponent(popularityComp);
+  }
+
+  if (APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(pawn))
+  {
+    if (AWeaponBase* weapon = playerCharacter->GetWeapon())
+    {
+      m_hudWidget->BindToWeapon(weapon);
+    }
   }
 }
+
+#pragma endregion

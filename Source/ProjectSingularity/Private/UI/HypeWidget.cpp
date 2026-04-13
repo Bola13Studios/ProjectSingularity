@@ -1,51 +1,60 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ProjectSingularity/Public/UI/HypeWidget.h"
 
 #include "Components/TextBlock.h"
 #include "Components/Hype/HypeComponent.h"
 
-void UHypeWidget::BindToHypeComponent(UHypeComponent* InHypeComp)
+#pragma region | PUBLIC METHODS
+
+void UHypeWidget::BindToHypeComponent(UHypeComponent* _inHypeComp)
 {
-	if (HypeComp == InHypeComp)
-	{
-		return;
-	}
+  if (m_hypeComp == _inHypeComp)
+  {
+    return;
+  }
 
-	if (HypeComp)
-	{
-		HypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
-	}
+  if (m_hypeComp)
+  {
+    m_hypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
+  }
 
-	HypeComp = InHypeComp;
+  m_hypeComp = _inHypeComp;
 
-	if (HypeComp)
-	{
-		HypeComp->onHypeChanged.AddDynamic(this, &UHypeWidget::HandleHypeChanged);
-		RefreshUI(HypeComp->GetHype());
-	}
+  if (m_hypeComp)
+  {
+    m_hypeComp->onHypeChanged.AddDynamic(this, &UHypeWidget::HandleHypeChanged);
+    RefreshUI(m_hypeComp->GetHype());
+  }
 }
+
+#pragma endregion
+
+#pragma region | PROTECTED METHODS
 
 void UHypeWidget::NativeDestruct()
 {
-	if (HypeComp)
-	{
-		HypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
-	}
+  if (m_hypeComp)
+  {
+    m_hypeComp->onHypeChanged.RemoveDynamic(this, &UHypeWidget::HandleHypeChanged);
+  }
 
-	Super::NativeDestruct();
+  Super::NativeDestruct();
 }
 
-void UHypeWidget::HandleHypeChanged(int CurrentHype, int Delta)
+#pragma endregion
+
+#pragma region | PRIVATE METHODS
+
+void UHypeWidget::HandleHypeChanged(int _currentHype, int _delta)
 {
-	RefreshUI(CurrentHype);
+  RefreshUI(_currentHype);
 }
 
-void UHypeWidget::RefreshUI(int CurrentHype)
+void UHypeWidget::RefreshUI(int _currentHype)
 {
-	if (HypeText)
-	{
-		HypeText->SetText(FText::AsNumber(CurrentHype));
-	}
+  if (m_hypeText)
+  {
+    m_hypeText->SetText(FText::AsNumber(_currentHype));
+  }
 }
+
+#pragma endregion
