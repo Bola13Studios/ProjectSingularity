@@ -19,7 +19,7 @@ void AChaserEnemy::BeginPlay()
     m_timeStager = pGameInstance->m_pChaserDataAsset->m_timeStager;
     m_timePause = pGameInstance->m_pChaserDataAsset->m_timePause;
     m_attackRange = pGameInstance->m_pChaserDataAsset->m_attackRange;
-    m_distancetraveled = pGameInstance->m_pChaserDataAsset->m_distancetraveled;
+    m_dashForce = pGameInstance->m_pChaserDataAsset->m_dashForce;
 
 	}
  

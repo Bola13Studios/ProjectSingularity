@@ -36,8 +36,8 @@ protected:
 	float m_timePause;
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Attack Range"))
 	float m_attackRange;
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Distance Traveled"))
-	float m_distancetraveled;
+	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Dash Force"))
+  float m_dashForce;
 
 	UPROPERTY(EditAnywhere, Category = "Colliders" ,meta = (DisplayName = "Attack Collider Position"))
   FVector m_attackCollider;
