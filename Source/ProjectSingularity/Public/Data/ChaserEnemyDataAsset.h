@@ -24,12 +24,15 @@ public:
 
 	// Properties specific to the chaser enemy character
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Stager Timer"))
-	float timeStager;
+	float m_timeStager;
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pause Time"))
-	float timePause;
+	float m_timePause;
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Attack Range"))
-	float attackRange;
+	float m_attackRange;
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance Traveled"))
-	float distancetraveled;
+	float m_distancetraveled;
+
+  UPROPERTY(EditAnywhere, meta = (DisplayName = "Attack Collider Position"))
+  FVector m_attackCollider;
 
 };

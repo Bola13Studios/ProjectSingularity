@@ -39,6 +39,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (DisplayName = "Distance Traveled"))
 	float m_distancetraveled;
 
+	UPROPERTY(EditAnywhere, Category = "Colliders" ,meta = (DisplayName = "Attack Collider Position"))
+  FVector m_attackCollider;
+
 	private:
   // Reference to a chaser enemy data asset for storing chaser-specific data
   TObjectPtr<UChaserEnemyDataAsset> m_pChaserDataAsset;
