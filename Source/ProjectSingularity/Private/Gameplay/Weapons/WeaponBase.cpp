@@ -131,9 +131,8 @@ bool AWeaponBase::Fire()
 
   if (IsValid(m_logManager))
   {
-    m_logManager->LogEvent(
-      FString::Printf(TEXT("\n[WEAPON] FIRE -> ShotID: %d | Ammo: %d"), shotID, m_currentWeaponMode->currentAmmoInMag)
-    );
+    m_logManager->LogEvent(FString::Printf(TEXT("\n[WEAPON] FIRE -> ShotID: %d | Ammo: %d"), shotID,
+                                           m_currentWeaponMode->currentAmmoInMag));
   }
 
   for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
@@ -195,14 +194,12 @@ bool AWeaponBase::Fire()
 
             if (IsValid(m_logManager))
             {
-              m_logManager->LogEvent(
-                FString::Printf(TEXT("[WEAPON] MAPPING -> %s assigned to ShotID %d"), *GetNameSafe(hitActor), shotID)
-              );
+              m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] MAPPING -> %s assigned to ShotID %d"),
+                                                     *GetNameSafe(hitActor), shotID));
             }
           }
 
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
-          UWeakPointComponent* weakPointComp = hitActor->FindComponentByClass<UWeakPointComponent>();
 
           if (healthComp)
           {
@@ -213,10 +210,19 @@ bool AWeaponBase::Fire()
             bool isCriticalHit = false;
 
             // we check if we hit the weak point first
-            if (IsValid(weakPointComp))
+            UActorComponent* hitComp = hit.GetComponent();
+
+            if (hitComp)
             {
-              damageToApply *= weakPointComp->GetDamageMultiplier();
-              isCriticalHit = true;
+              UWeakPointComponent* weakPointComp = Cast<UWeakPointComponent>(hitComp);
+
+              if (weakPointComp)
+              {
+                damageToApply *= weakPointComp->GetDamageMultiplier();
+                isCriticalHit = true;
+                if (IsValid(m_logManager))
+                  m_logManager->LogEvent(FString::Printf(TEXT("Hit Component: %s"), *GetNameSafe(hit.GetComponent())));
+              }
             }
 
             healthComp->ChangeHealth(-damageToApply, GetOwner());
@@ -224,14 +230,9 @@ bool AWeaponBase::Fire()
 
             if (IsValid(m_logManager))
             {
-              m_logManager->LogEvent(
-                FString::Printf(
-                  TEXT("[WEAPON] DAMAGE -> %s | Damage: %.2f | Critical: %s"),
-                  *GetNameSafe(hitActor),
-                  damageToApply,
-                  isCriticalHit ? TEXT("TRUE") : TEXT("FALSE")
-                )
-              );
+              m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] DAMAGE -> %s | Damage: %.2f | Critical: %s"),
+                                                     *GetNameSafe(hitActor), damageToApply,
+                                                     isCriticalHit ? TEXT("TRUE") : TEXT("FALSE")));
             }
           }
         }
@@ -416,8 +417,6 @@ int AWeaponBase::GetExtraBulletDmg(bool firstMode)
   return m_secondMode.extraBulletDmg;
 }
 
-
-
 void AWeaponBase::BroadcastFirstModeAmmoChanged()
 {
   OnFirstModeAmmoChanged.Broadcast(m_firstMode.currentAmmoInMag, m_firstMode.GetModeData().maxAmmoInMag);
@@ -532,8 +531,7 @@ void AWeaponBase::OnActorKilled(AActor* DeadActor)
   if (IsValid(m_logManager))
   {
     m_logManager->LogEvent(
-      FString::Printf(TEXT("[WEAPON] CLEANUP -> Removing Actor %s from ShotID %d"), *GetNameSafe(DeadActor), shotID)
-    );
+        FString::Printf(TEXT("[WEAPON] CLEANUP -> Removing Actor %s from ShotID %d"), *GetNameSafe(DeadActor), shotID));
   }
 
   m_actorToShotMap.Remove(DeadActor);
