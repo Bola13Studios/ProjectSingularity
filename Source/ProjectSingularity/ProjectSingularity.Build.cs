@@ -18,5 +18,10 @@ public class ProjectSingularity : ModuleRules {
       "Slate",
       "SlateCore"
     });
+
+    if (Target.bBuildEditor)
+    {
+      PrivateDependencyModuleNames.Add("ToolMenus");
+    }
   }
 }

@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "HUDWidget.h"
+#include "PlayerNameWidget.h"
 #include "Gameplay/Character/Player/PlayerCharacter.h"
 #include "GameFramework/HUD.h"
 #include "GameHUDSetUp.generated.h"
@@ -44,6 +45,18 @@ public:
   UPROPERTY(BlueprintReadWrite)
   UHUDWidget* m_hudWidget = nullptr;
 
+  /**
+   * @brief Player name entry widget class configured in Blueprint
+   */
+  UPROPERTY(EditDefaultsOnly, Category = "UI")
+  TSubclassOf<UPlayerNameWidget> m_playerNameWidgetClass{};
+
+  /**
+   * @brief Runtime player name entry widget instance
+   */
+  UPROPERTY(BlueprintReadWrite)
+  UPlayerNameWidget* m_playerNameWidget = nullptr;
+
 private:
   /**
    * @brief Cached game instance reference
@@ -63,16 +76,22 @@ protected:
 
 private:
   /**
-   * @brief Initialize all game menus used during gameplay
+   * @brief Initialize all game menus used during gameplay.
+   * @param _bShowNameEntry Whether to show the player name entry widget.
    */
-  UFUNCTION()
-  void InitializeAllGameMenus();
+  void InitializeAllGameMenus(bool _bShowNameEntry);
 
   /**
    * @brief Attempt to bind the HUD to the current possessed pawn
    */
   UFUNCTION()
   void TryBindHUDToPawn() const;
+
+  /**
+   * @brief Called when the player confirms their name. Shows the HUD and switches to game input.
+   */
+  UFUNCTION()
+  void OnPlayerNameConfirmed(const FString& sPlayerName);
 
 #pragma endregion
 };

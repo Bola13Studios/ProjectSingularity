@@ -12,7 +12,7 @@
 /**
  * Holds the base structure of the statistics to save
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSessionData
 {
   GENERATED_BODY()
@@ -22,4 +22,10 @@ struct FSessionData
    */
   UPROPERTY()
   TMap<FName, float> stats;
+
+  /**
+   * @brief The player's display name entered at the start of the session.
+   */
+  UPROPERTY()
+  FString m_sPlayerName;
 };
