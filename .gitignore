@@ -92,6 +92,9 @@ Plugins/FMODStudio/Binaries/Win64/**
 !Plugins/FMODStudio/Binaries/Win64/fmodstudioL_vc.lib
 !Plugins/FMODStudio/Binaries/Win64/resonanceaudio.dll
 
+# Rider IDE plugin (auto-generated, should not be tracked)
+Plugins/Developer/RiderLink/
+
 # Others
 UpgradeLog.htm
 Content/Debug/*
