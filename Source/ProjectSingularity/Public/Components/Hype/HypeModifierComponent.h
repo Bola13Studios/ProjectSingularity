@@ -36,6 +36,13 @@ public:
   TArray<FHypeModifiers*> GetActiveModifiers() const;
 
   /**
+   * @brief Returns the value of a specific modifier
+   * @param _modifier 
+   * @return 
+   */
+  float GetModifierValue(FName _modifier) const;
+
+  /**
    * @brief Will add a new modifier
    * @param _modifier The key name of the modifier to add
    * @return A flag stating if the modifier was found in the related data table and addded (true)
