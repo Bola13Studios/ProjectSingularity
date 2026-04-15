@@ -35,6 +35,9 @@ void AWeaponBase::BeginPlay()
     m_logManager = nullptr;
     UE_LOG(LogTemp, Error, TEXT("Unable to retreive the LogManagerSubsystem. Are you sure it was added to the world?"));
   }
+
+  // guardamos el valor actual de la munición para las estadísticas
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_gained_ammo), m_currentAmmoInReser);
 }
 
 void AWeaponBase::Tick(float DeltaTime)
@@ -86,13 +89,14 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
 
 bool AWeaponBase::Fire()
 {
+  EWeaponMode shotMode = GetCurrentWeaponMode();
+
   UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots), 1);
-  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_used_ammo), -1);
-  if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+  if (shotMode == EWeaponMode::LongDistance)
   {
     UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_short_range), 1);
   }
-  else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+  else if (shotMode == EWeaponMode::ShortDistance)
   {
     UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_long_range), 1);
   }
@@ -124,6 +128,8 @@ bool AWeaponBase::Fire()
 
   m_timeSinceLastShot = 0.f;
   m_currentWeaponMode->currentAmmoInMag--;
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_used_ammo), 1);
 
   if (m_currentWeaponMode == &m_firstMode)
   {
@@ -201,9 +207,11 @@ bool AWeaponBase::Fire()
               if (weakPointComp)
               {
                 UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits), 1);
+                UGameManagerSubsystem::AddStat(this, STAT_PATH(enemy.chaser.enemy_total_critical_hits), 1);
                 if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
                 {
-                  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_short_range), 1);
+                  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_short_range),
+                                                 1);
                 }
                 else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
                 {
@@ -221,13 +229,13 @@ bool AWeaponBase::Fire()
             // only saving the stat if the hit actor has a health component
             UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits), 1);
             UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage), damageToApply);
-            if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+            if (shotMode == EWeaponMode::LongDistance)
             {
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_short_range),
                                              damageToApply);
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_short_range), 1);
             }
-            else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+            else if (shotMode == EWeaponMode::ShortDistance)
             {
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_long_range),
                                              damageToApply);
@@ -381,7 +389,7 @@ void AWeaponBase::AddReserveAmmo(int extraAmmo)
   m_currentAmmoInReser = FMath::Clamp(m_currentAmmoInReser + extraAmmo, 0, m_weaponData.maxAmmoInReser);
   BroadcastReserveAmmoChanged();
 
-  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_gained_ammo), m_currentAmmoInReser);
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_gained_ammo), extraAmmo);
 }
 
 void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)
