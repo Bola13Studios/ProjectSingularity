@@ -7,7 +7,10 @@
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/WeakPointComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
+#include "ProjectSingularity/Public/Components/Hype/HypeSourceComponent.h"
 #include "ProjectSingularity/Public/Systems/LogManagerSubsystem.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Utils/StatHelpers.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -32,6 +35,9 @@ void AWeaponBase::BeginPlay()
     m_logManager = nullptr;
     UE_LOG(LogTemp, Error, TEXT("Unable to retreive the LogManagerSubsystem. Are you sure it was added to the world?"));
   }
+
+  // guardamos el valor actual de la munición para las estadísticas
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_gained_ammo), m_currentAmmoInReser);
 }
 
 void AWeaponBase::Tick(float DeltaTime)
@@ -83,9 +89,16 @@ const void AWeaponBase::SetWeaponData(FWeaponData weaponData)
 
 bool AWeaponBase::Fire()
 {
-  if (IsValid(m_logManager))
+  EWeaponMode shotMode = GetCurrentWeaponMode();
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots), 1);
+  if (shotMode == EWeaponMode::LongDistance)
   {
-    m_logManager->LogEvent(TEXT("\n==== NEW FIRE ===="));
+    UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_short_range), 1);
+  }
+  else if (shotMode == EWeaponMode::ShortDistance)
+  {
+    UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_long_range), 1);
   }
 
   // Seconds in a minute divided by the fire rate (Rounds Per Minute)
@@ -116,6 +129,8 @@ bool AWeaponBase::Fire()
   m_timeSinceLastShot = 0.f;
   m_currentWeaponMode->currentAmmoInMag--;
 
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_used_ammo), 1);
+
   if (m_currentWeaponMode == &m_firstMode)
   {
     BroadcastFirstModeAmmoChanged();
@@ -128,13 +143,6 @@ bool AWeaponBase::Fire()
   m_currentShotID++;
   int32 shotID = m_currentShotID;
   TSet<AActor*> hitActorsThisShot;
-
-  if (IsValid(m_logManager))
-  {
-    m_logManager->LogEvent(
-      FString::Printf(TEXT("\n[WEAPON] FIRE -> ShotID: %d | Ammo: %d"), shotID, m_currentWeaponMode->currentAmmoInMag)
-    );
-  }
 
   for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
   {
@@ -162,20 +170,8 @@ bool AWeaponBase::Fire()
       for (const FHitResult& hit : hits)
       {
         AActor* hitActor = hit.GetActor();
-        if (!hitActor)
-        {
-          continue;
-        }
-
-        if (IsValid(m_logManager))
-        {
-          m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] HIT -> Actor: %s"), *GetNameSafe(hitActor)));
-        }
-
-        if (hitActorsThisShot.Contains(hitActor))
-        {
-          continue;
-        }
+        if (!hitActor) continue;
+        if (hitActorsThisShot.Contains(hitActor)) continue;
 
         hitActorsThisShot.Add(hitActor);
 
@@ -189,20 +185,9 @@ bool AWeaponBase::Fire()
 
         if (hitActor)
         {
-          if (!m_actorToShotMap.Contains(hitActor))
-          {
-            m_actorToShotMap.Add(hitActor, shotID);
-
-            if (IsValid(m_logManager))
-            {
-              m_logManager->LogEvent(
-                FString::Printf(TEXT("[WEAPON] MAPPING -> %s assigned to ShotID %d"), *GetNameSafe(hitActor), shotID)
-              );
-            }
-          }
+          if (!m_actorToShotMap.Contains(hitActor)) m_actorToShotMap.Add(hitActor, shotID);
 
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
-          UWeakPointComponent* weakPointComp = hitActor->FindComponentByClass<UWeakPointComponent>();
 
           if (healthComp)
           {
@@ -213,25 +198,48 @@ bool AWeaponBase::Fire()
             bool isCriticalHit = false;
 
             // we check if we hit the weak point first
-            if (IsValid(weakPointComp))
+            UActorComponent* hitComp = hit.GetComponent();
+
+            if (hitComp)
             {
-              damageToApply *= weakPointComp->GetDamageMultiplier();
-              isCriticalHit = true;
+              UWeakPointComponent* weakPointComp = Cast<UWeakPointComponent>(hitComp);
+
+              if (weakPointComp)
+              {
+                UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits), 1);
+                UGameManagerSubsystem::AddStat(this, STAT_PATH(enemy.chaser.enemy_total_critical_hits), 1);
+                if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+                {
+                  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_short_range),
+                                                 1);
+                }
+                else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+                {
+                  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_long_range),
+                                                 1);
+                }
+                damageToApply *= weakPointComp->GetDamageMultiplier();
+                isCriticalHit = true;
+              }
             }
 
             healthComp->ChangeHealth(-damageToApply, GetOwner());
             healthComp->hasHitBeenCritical = isCriticalHit;
 
-            if (IsValid(m_logManager))
+            // only saving the stat if the hit actor has a health component
+            UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits), 1);
+            UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage), damageToApply);
+            if (shotMode == EWeaponMode::LongDistance)
             {
-              m_logManager->LogEvent(
-                FString::Printf(
-                  TEXT("[WEAPON] DAMAGE -> %s | Damage: %.2f | Critical: %s"),
-                  *GetNameSafe(hitActor),
-                  damageToApply,
-                  isCriticalHit ? TEXT("TRUE") : TEXT("FALSE")
-                )
-              );
+              UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_short_range),
+                                             damageToApply);
+              UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_short_range), 1);
+            }
+            else if (shotMode == EWeaponMode::ShortDistance)
+            {
+              UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_long_range),
+                                             damageToApply);
+              UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_long_range), 1);
             }
           }
         }
@@ -380,6 +388,8 @@ void AWeaponBase::AddReserveAmmo(int extraAmmo)
 {
   m_currentAmmoInReser = FMath::Clamp(m_currentAmmoInReser + extraAmmo, 0, m_weaponData.maxAmmoInReser);
   BroadcastReserveAmmoChanged();
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_gained_ammo), extraAmmo);
 }
 
 void AWeaponBase::AddExtraBulletDmg(int extraBulletDmg, bool firstMode)
@@ -415,8 +425,6 @@ int AWeaponBase::GetExtraBulletDmg(bool firstMode)
 
   return m_secondMode.extraBulletDmg;
 }
-
-
 
 void AWeaponBase::BroadcastFirstModeAmmoChanged()
 {
@@ -532,8 +540,7 @@ void AWeaponBase::OnActorKilled(AActor* DeadActor)
   if (IsValid(m_logManager))
   {
     m_logManager->LogEvent(
-      FString::Printf(TEXT("[WEAPON] CLEANUP -> Removing Actor %s from ShotID %d"), *GetNameSafe(DeadActor), shotID)
-    );
+        FString::Printf(TEXT("[WEAPON] CLEANUP -> Removing Actor %s from ShotID %d"), *GetNameSafe(DeadActor), shotID));
   }
 
   m_actorToShotMap.Remove(DeadActor);

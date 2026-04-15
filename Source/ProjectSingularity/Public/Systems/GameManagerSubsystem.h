@@ -9,6 +9,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Systems/SessionData.h"
+#include "Utils/StatHelpers.h"
 #include "GameManagerSubsystem.generated.h"
 
 // Delegates
@@ -39,6 +40,9 @@ private:
   FSessionData m_sessionData;
 
 public:
+
+  static void AddStat(UObject* _worldContext, const FStatAccessor& _accessor, int32 _value);
+
 #pragma region Getters & Setters
   /**
    * @brief Sets the current game state.
@@ -55,34 +59,20 @@ public:
   EGameState GetGameState() const;
 
   /**
-   * @brief Returns the current stored data for the found key
-   * @param _statName The name of the stat
-   * @return The float value of the stat, will return -1 if not found
-   */
-  UFUNCTION(BlueprintCallable)
-  float GetOneStat(FName _statName) const;
-
-  /**
    * @brief Return the stored session data
    * @return The TMap holding the data
    */
   const FSessionData& GetAllData() const;
-#pragma endregion
-
-#pragma region | Session Data Methods
-  /**
-   * @brief This will add or update an existing stat for the log manager
-   * @param _statName The key name of the stat
-   * @param _value The value to add or assign
-   */
-  UFUNCTION(BlueprintCallable)
-  void AddStat(FName _statName, float _value = 1.0f);
 
   /**
-   * @brief Will reset the session data
+   * @brief Return the stored session data
    */
-  void ResetSession();
+  FSessionData& GetSessionData();
 #pragma endregion
+
+  template <typename T> void AddStat(T& Field, const T& Value);
+
+  template <typename T> void AddToArray(TArray<T>& Array, const T& Value);
 
 protected:
 #pragma region Native Overrides
@@ -117,3 +107,13 @@ private:
   EGameState m_eCurrentGameState;
 #pragma endregion
 };
+
+template <typename T> void UGameManagerSubsystem::AddStat(T& Field, const T& Value)
+{
+  Field += Value;
+}
+
+template <typename T> void UGameManagerSubsystem::AddToArray(TArray<T>& Array, const T& Value)
+{
+  Array.Add(Value);
+}
