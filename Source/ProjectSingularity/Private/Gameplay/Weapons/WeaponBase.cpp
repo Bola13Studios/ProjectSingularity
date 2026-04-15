@@ -88,11 +88,11 @@ bool AWeaponBase::Fire()
 {
   UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots), 1);
   UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.ammo.combat_total_used_ammo), -1);
-  if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+  if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
   {
     UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_short_range), 1);
   }
-  else if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+  else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
   {
     UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots_long_range), 1);
   }
@@ -211,11 +211,11 @@ bool AWeaponBase::Fire()
               if (weakPointComp)
               {
                 UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits), 1);
-                if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+                if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
                 {
                   UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_short_range), 1);
                 }
-                else if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+                else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
                 {
                   UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.crits.combat_total_critical_hits_long_range),
                                                  1);
@@ -231,14 +231,13 @@ bool AWeaponBase::Fire()
             // only saving the stat if the hit actor has a health component
             UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits), 1);
             UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage), damageToApply);
-            if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+            if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
             {
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_short_range),
                                              damageToApply);
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_short_range), 1);
-              UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_short_range), 1);
             }
-            else if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+            else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
             {
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_long_range),
                                              damageToApply);
@@ -247,11 +246,11 @@ bool AWeaponBase::Fire()
 
             if (UHypeSourceComponent* hypeSource = hitActor->FindComponentByClass<UHypeSourceComponent>())
             {
-              if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
+              if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
               {
                 UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_short_range), (int32)hypeSource->GetHype());
               }
-              else if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
+              else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
               {
                 UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_long_range),
                                                (int32)hypeSource->GetHype());
