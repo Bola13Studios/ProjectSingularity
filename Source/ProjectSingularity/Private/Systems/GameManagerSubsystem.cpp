@@ -76,6 +76,10 @@ void UGameManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
 
   // This acts as a terminal state unless explicitly extended.
   m_mValidTransitions.Add(EGameState::GAMEOVER, {});
+
+  m_sessionData = FSessionData(); // Initialize session data with default values
+  m_sessionData.playerName = FName("Player1"); // Default player name, can be set later
+  m_sessionData.version = "v0.0.5"; // Initial version for session data
 }
 
 bool UGameManagerSubsystem::CanTransition(EGameState _eFrom, EGameState _eTo) const

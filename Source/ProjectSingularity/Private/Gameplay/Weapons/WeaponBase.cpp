@@ -138,12 +138,6 @@ bool AWeaponBase::Fire()
   int32 shotID = m_currentShotID;
   TSet<AActor*> hitActorsThisShot;
 
-  if (IsValid(m_logManager))
-  {
-    m_logManager->LogEvent(FString::Printf(TEXT("\n[WEAPON] FIRE -> ShotID: %d | Ammo: %d"), shotID,
-                                           m_currentWeaponMode->currentAmmoInMag));
-  }
-
   for (int i = 0; i < m_currentWeaponMode->GetModeData().bulletsPerShot; ++i)
   {
     FVector forward = m_cameraComponent->GetForwardVector();
@@ -175,11 +169,6 @@ bool AWeaponBase::Fire()
           continue;
         }
 
-        if (IsValid(m_logManager))
-        {
-          m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] HIT -> Actor: %s"), *GetNameSafe(hitActor)));
-        }
-
         if (hitActorsThisShot.Contains(hitActor))
         {
           continue;
@@ -200,12 +189,6 @@ bool AWeaponBase::Fire()
           if (!m_actorToShotMap.Contains(hitActor))
           {
             m_actorToShotMap.Add(hitActor, shotID);
-
-            if (IsValid(m_logManager))
-            {
-              m_logManager->LogEvent(FString::Printf(TEXT("[WEAPON] MAPPING -> %s assigned to ShotID %d"),
-                                                     *GetNameSafe(hitActor), shotID));
-            }
           }
 
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
@@ -239,8 +222,6 @@ bool AWeaponBase::Fire()
                 }
                 damageToApply *= weakPointComp->GetDamageMultiplier();
                 isCriticalHit = true;
-                if (IsValid(m_logManager))
-                  m_logManager->LogEvent(FString::Printf(TEXT("Hit Component: %s"), *GetNameSafe(hit.GetComponent())));
               }
             }
 
