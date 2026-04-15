@@ -23,6 +23,18 @@ TArray<FHypeModifiers*> UHypeModifierComponent::GetActiveModifiers() const
   return m_hypeModifiers;
 }
 
+float UHypeModifierComponent::GetModifierValue(FName _modifier) const
+{
+  for (const auto& modifier : m_hypeModifiers)
+  {
+    if (modifier->id == _modifier)
+    {
+      return modifier->value;
+    }
+  }
+  return 0.0f;
+}
+
 bool UHypeModifierComponent::AddModifier(FName _modifier)
 {
   // get the gameinstance first
@@ -73,6 +85,8 @@ float UHypeModifierComponent::GetTotalModifiers() const
   }
   return totalModifiers;
 }
+
+
 
 bool UHypeModifierComponent::ClearModifiers()
 {

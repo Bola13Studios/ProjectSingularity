@@ -1,5 +1,4 @@
 #include "Components/Interactive/InteractiveStation.h"
-
 #include "Engine/World.h"
 #include "Components/Interactive/StationData.h"
 #include "Components/Interactive/StationStates.h"
@@ -8,6 +7,8 @@
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
 #include "ProjectSingularity/Public/Gameplay/Weapons/WeaponBase.h"
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Utils/StatHelpers.h"
 
 void UInteractiveStation::Interact()
 {
@@ -60,17 +61,6 @@ void UInteractiveStation::Interact()
   }
 
   OnInteract.Broadcast();
-
-  if (UWorld* World = GetWorld())
-  {
-    if (UGameInstance* gameInstance = World->GetGameInstance())
-    {
-      if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-      {
-        gameManager->AddStat("spent", totalSpent);
-      }
-    }
-  }
 }
 
 void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -126,6 +116,7 @@ bool UInteractiveStation::ChangeHealth(const float& _Amount, const float& _Cost)
 
   HypeComponent->AddHype(-_Cost);
   HealthComponent->ChangeHealth(_Amount, GetOwner());
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onhealth), _Cost);
 
   return true;
 }
@@ -156,6 +147,8 @@ bool UInteractiveStation::ChangeAmmo(const float& _Amount, const float& _Cost)
 
   HypeComponent->AddHype(-_Cost);
   CurrentWeapon->AddReserveAmmo(_Amount);
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onammo), _Cost);
 
   return true;
 }

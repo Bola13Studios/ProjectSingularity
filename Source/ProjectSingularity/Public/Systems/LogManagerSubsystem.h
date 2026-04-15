@@ -27,11 +27,11 @@ public:
 
   virtual void Deinitialize() override;
 
+  static void Log(UObject* _worldContext, const TCHAR* _msg);
+
   void LogEvent(const FString& _event);
 
   void SaveToFile();
-
-  void SaveSession(const FSessionData& _data);
 
   void SaveSessionJSON(const FSessionData& _data);
 
