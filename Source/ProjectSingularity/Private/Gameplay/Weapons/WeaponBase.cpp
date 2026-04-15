@@ -164,15 +164,8 @@ bool AWeaponBase::Fire()
       for (const FHitResult& hit : hits)
       {
         AActor* hitActor = hit.GetActor();
-        if (!hitActor)
-        {
-          continue;
-        }
-
-        if (hitActorsThisShot.Contains(hitActor))
-        {
-          continue;
-        }
+        if (!hitActor) continue;
+        if (hitActorsThisShot.Contains(hitActor)) continue;
 
         hitActorsThisShot.Add(hitActor);
 
@@ -186,10 +179,7 @@ bool AWeaponBase::Fire()
 
         if (hitActor)
         {
-          if (!m_actorToShotMap.Contains(hitActor))
-          {
-            m_actorToShotMap.Add(hitActor, shotID);
-          }
+          if (!m_actorToShotMap.Contains(hitActor)) m_actorToShotMap.Add(hitActor, shotID);
 
           UHealthComponent* healthComp = hitActor->FindComponentByClass<UHealthComponent>();
 
@@ -242,19 +232,6 @@ bool AWeaponBase::Fire()
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.damage.combat_total_damage_long_range),
                                              damageToApply);
               UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.hits.combat_total_hits_long_range), 1);
-            }
-
-            if (UHypeSourceComponent* hypeSource = hitActor->FindComponentByClass<UHypeSourceComponent>())
-            {
-              if (GetCurrentWeaponMode() == EWeaponMode::LongDistance)
-              {
-                UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_short_range), (int32)hypeSource->GetHype());
-              }
-              else if (GetCurrentWeaponMode() == EWeaponMode::ShortDistance)
-              {
-                UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_long_range),
-                                               (int32)hypeSource->GetHype());
-              }
             }
           }
         }

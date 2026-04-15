@@ -89,8 +89,6 @@ void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
   {
     totalHype = hypeComp->GetHype();
   }
-
-  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype), (int32)totalHype);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

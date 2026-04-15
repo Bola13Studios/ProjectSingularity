@@ -33,6 +33,8 @@ void UHypeReceiverComponent::BeginPlay()
     UE_LOG(LogTemp, Error,
            TEXT("Unable to retreive the PopularityComponent from the owner. Are you sure it was added?"));
   }
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype), m_currentHypeValue);
 }
 
 void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical)
@@ -58,7 +60,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
 
   if (m_modifierComponent->GetModifierValue("MultiKill") > 0.0f)
   {
-    UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.shots.combat_total_shots),
+    UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_multikill),
                                    m_modifierComponent->GetModifierValue("MultiKill") * baseHype);
   }
 
