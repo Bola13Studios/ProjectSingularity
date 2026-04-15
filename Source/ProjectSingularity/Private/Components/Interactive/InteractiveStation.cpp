@@ -7,7 +7,6 @@
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
 #include "ProjectSingularity/Public/Gameplay/Weapons/WeaponBase.h"
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
-#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 #include "ProjectSingularity/Public/Utils/StatHelpers.h"
 
 void UInteractiveStation::Interact()
