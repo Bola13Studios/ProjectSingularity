@@ -2,10 +2,11 @@
  * @description: Game-wide manager implemented as a GameInstance Subsystem.
  * @author: Jaime Paramo
  * @date: 17/03/2026
- * @edited_by: [Other Contributors] - [Edit Date]
+ * @edited_by: Josephine - 17/04/2026
  ************************************************************************/
 
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Components/Interactive/StationStates.h"
 
 // Enums
 #include "ProjectSingularity/Public/Utils/Types/GameStateEnum.h"
@@ -23,6 +24,26 @@ void UGameManagerSubsystem::AddStat(UObject* _worldContext, const FStatAccessor&
   if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
   {
     _accessor(gameManager->m_sessionData) += _value;
+  }
+}
+
+void UGameManagerSubsystem::AddMapStat(UObject* _worldContext,
+                                       const TFunction<TMap<EStationStates, int32>&(FSessionData&)>& _accessor,
+                                       EStationStates _key, int32 _value)
+{
+  if (!_worldContext) return;
+  UWorld* world = _worldContext->GetWorld();
+  if (!world) return;
+
+  UGameInstance* gameInstance = world->GetGameInstance();
+  if (!gameInstance) return;
+
+  if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+  {
+    TMap<EStationStates, int32>& map = _accessor(gameManager->m_sessionData);
+
+    int32& count = map.FindOrAdd(_key);
+    count += _value;
   }
 }
 

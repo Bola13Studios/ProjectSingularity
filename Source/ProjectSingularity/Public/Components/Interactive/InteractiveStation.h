@@ -24,8 +24,8 @@ public:
   /**
    * @brief This holds all the prices and amount to add to the related categories
    */
-  UPROPERTY(EditAnywhere, Category = "Bola 13|Data", meta = (DisplayName = "Data Table"))
-  UDataTable* m_StationData;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Data", meta = (DisplayName = "Data Table"))
+  UDataTable* m_stationData;
 
   UPROPERTY(EditAnywhere, meta = (DisplayName = "Station Mode"))
   EStationStates m_stationMode;
@@ -60,7 +60,11 @@ public:
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
 
 private:
-  bool ChangeHealth(const float& _Amount, const float& _Cost);
+  bool ChangeHealth(const float& _amount, const float& _cost);
 
-  bool ChangeAmmo(const float& _Amount, const float& _Cost);
+  bool ChangeAmmo(const float& _amount, const float& _cost);
+
+  bool ChangeMaxHealth(const float& _amount, const float& _cost);
+
+  bool ChangeDamage(const float& _amount, const float& _cost);
 };

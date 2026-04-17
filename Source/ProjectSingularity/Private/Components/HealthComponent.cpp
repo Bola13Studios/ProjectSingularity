@@ -20,6 +20,12 @@ void UHealthComponent::BeginPlay()
   OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, 0.0f, GetOwner());
 }
 
+void UHealthComponent::SetMaxHealth(float _maxHealth)
+{
+  MaxHealth = _maxHealth;
+  BroadcastChanged(CurrentHealth, GetOwner());
+}
+
 void UHealthComponent::ChangeHealth(float _Amount, AActor* InstigatorActor)
 {
   if ((_Amount > 0.f && CurrentHealth >= MaxHealth) || (_Amount < 0.f && CurrentHealth <= 0.f))
