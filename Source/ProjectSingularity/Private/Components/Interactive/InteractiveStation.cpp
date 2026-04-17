@@ -13,40 +13,54 @@ void UInteractiveStation::Interact()
 {
   float totalSpent = 0.0f;
   // we check if the asset provided is valid
-  TArray<FStationData*> StationData;
-  if (!IsValid(m_StationData))
+  TArray<FStationData*> stationData;
+  if (!IsValid(m_stationData))
   {
     UE_LOG(LogTemp, Warning, TEXT("Invalid Station Data Table added in InteractiveStation BP. Unable to procede."));
     return;
   }
   // we check if the asset has elements
-  m_StationData->GetAllRows(TEXT("Station"), StationData);
-  if (!StationData.IsValidIndex(0))
+  m_stationData->GetAllRows(TEXT("Station"), stationData);
+  if (!stationData.IsValidIndex(0))
   {
     UE_LOG(LogTemp, Warning,
            TEXT("The provided Station Data Table is empty or an error occurred while trying to access it."));
     return;
   }
 
-  for (auto Row : StationData)
+  for (auto row : stationData)
   {
-    if (m_stationMode == Row->m_Type)
+    if (m_stationMode == row->m_Type)
     {
-      totalSpent += Row->m_TypePrice;
+      totalSpent += row->m_TypePrice;
 
       switch (m_stationMode)
       {
         case EStationStates::HEALTH:
-          if (!ChangeHealth(Row->m_TypeAmount, Row->m_TypePrice))
+          if (!ChangeHealth(row->m_TypeAmount, row->m_TypePrice))
           {
             UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
           }
           break;
 
         case EStationStates::AMMO:
-          if (!ChangeAmmo(Row->m_TypeAmount, Row->m_TypePrice))
+          if (!ChangeAmmo(row->m_TypeAmount, row->m_TypePrice))
           {
             UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
+          }
+          break;
+
+        case EStationStates::MAX_HEALTH:
+          if (!ChangeMaxHealth(row->m_TypeAmount, row->m_TypePrice))
+          {
+            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change max health value."));
+          }
+          break;
+
+        case EStationStates::DAMAGE:
+          if (!ChangeDamage(row->m_TypeAmount, row->m_TypePrice))
+          {
+            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change damage value."));
           }
           break;
 
@@ -67,12 +81,12 @@ void UInteractiveStation::OnInteractBeginOverlap(UPrimitiveComponent* Overlapped
                                                  const FHitResult& SweepResult)
 {
   // we check if the ovelap was with the player
-  if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
+  if (APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor))
   {
-    m_Player = Player;
+    m_player = player;
 
     // we bind the method to the delegate
-    m_Player->m_onInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
+    m_player->m_onInteract.AddUObject(this, &UBaseInteractiveComponent::Interact);
   }
 }
 
@@ -80,74 +94,149 @@ void UInteractiveStation::OnInteractEndOverlap(UPrimitiveComponent* OverlappedCo
                                                UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
   // we check if the overlap was with the player
-  if (Cast<AActor>(m_Player) == OtherActor)
+  if (Cast<AActor>(m_player) == OtherActor)
   {
     // we unbind the method to the delegate
-    m_Player->m_onInteract.RemoveAll(this);
+    m_player->m_onInteract.RemoveAll(this);
 
-    m_Player = nullptr;
+    m_player = nullptr;
   }
 }
 
-bool UInteractiveStation::ChangeHealth(const float& _Amount, const float& _Cost)
+bool UInteractiveStation::ChangeHealth(const float& _amount, const float& _cost)
 {
   // we check if player object is valid
-  if (!IsValid(m_Player)) return false;
+  if (!IsValid(m_player)) return false;
 
   // --- health component --- //
-  UHealthComponent* HealthComponent = m_Player->FindComponentByClass<UHealthComponent>();
+  UHealthComponent* healthComponent = m_player->FindComponentByClass<UHealthComponent>();
   // --- hype component   --- //
-  UHypeReceiverComponent* HypeComponent = m_Player->FindComponentByClass<UHypeReceiverComponent>();
+  UHypeReceiverComponent* hypeComponent = m_player->FindComponentByClass<UHypeReceiverComponent>();
 
   // we verify if both the components are present on the player
-  if (!IsValid(HealthComponent) || !IsValid(HypeComponent))
+  if (!IsValid(healthComponent) || !IsValid(hypeComponent))
   {
     UE_LOG(LogTemp, Error, TEXT("MISSING REQUIRED COMPONENTS ON PLAYER"));
     return false;
   }
 
+  // we check if the player is trying to heal more than his max health
+  if (healthComponent->GetHealth() + _amount > healthComponent->GetMaxHealth())
+  {
+    UE_LOG(LogTemp, Warning, TEXT("Trying to heal more than max health. Unable to proceed."));
+    return false;
+  }
+
   // we check if the player has enough hype
-  if (!HypeComponent->IsHypeEnough(_Cost))
+  if (!hypeComponent->IsHypeEnough(_cost))
   {
     UE_LOG(LogTemp, Warning, TEXT("Not enough Hype :("));
     return false;
   }
 
-  HypeComponent->AddHype(-_Cost);
-  HealthComponent->ChangeHealth(_Amount, GetOwner());
-  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onhealth), _Cost);
+  hypeComponent->AddHype(-_cost);
+  healthComponent->ChangeHealth(_amount, GetOwner());
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onhealth), _cost);
 
   return true;
 }
 
-bool UInteractiveStation::ChangeAmmo(const float& _Amount, const float& _Cost)
+bool UInteractiveStation::ChangeAmmo(const float& _amount, const float& _cost)
 {
   // we check if player object is valid
-  if (!IsValid(m_Player)) return false;
+  if (!IsValid(m_player)) return false;
 
-  // --- ammo?            --- //
+  // --- ammo             --- //
   // --- hype component   --- //
-  UHypeReceiverComponent* HypeComponent = m_Player->FindComponentByClass<UHypeReceiverComponent>();
-  AWeaponBase* CurrentWeapon = m_Player->GetWeapon();
+  UHypeReceiverComponent* hypeComponent = m_player->FindComponentByClass<UHypeReceiverComponent>();
+  AWeaponBase* currentWeapon = m_player->GetWeapon();
 
   // we verify if both the components are present on the player
-  if (!IsValid(HypeComponent) || !IsValid(CurrentWeapon))
+  if (!IsValid(hypeComponent) || !IsValid(currentWeapon))
   {
     UE_LOG(LogTemp, Error, TEXT("MISSING REQUIRED COMPONENTS ON PLAYER"));
     return false;
   }
 
   // we check if the player has enough hype
-  if (!HypeComponent->IsHypeEnough(_Cost))
+  if (!hypeComponent->IsHypeEnough(_cost))
   {
     UE_LOG(LogTemp, Warning, TEXT("Not enough Hype :("));
     return false;
   }
 
-  HypeComponent->AddHype(-_Cost);
-  CurrentWeapon->AddReserveAmmo(_Amount);
+  hypeComponent->AddHype(-_cost);
+  currentWeapon->AddReserveAmmo(_amount);
 
-  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onammo), _Cost);
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onammo), _cost);
+
+  return true;
+}
+
+bool UInteractiveStation::ChangeMaxHealth(const float& _amount, const float& _cost)
+{
+  // we check if player object is valid
+  if (!IsValid(m_player)) return false;
+
+  // --- health component --- //
+  UHealthComponent* healthComponent = m_player->FindComponentByClass<UHealthComponent>();
+  // --- hype component   --- //
+  UHypeReceiverComponent* hypeComponent = m_player->FindComponentByClass<UHypeReceiverComponent>();
+
+  // we verify if both the components are present on the player
+  if (!IsValid(healthComponent) || !IsValid(hypeComponent))
+  {
+    UE_LOG(LogTemp, Error, TEXT("MISSING REQUIRED COMPONENTS ON PLAYER"));
+    return false;
+  }
+
+  // we check if the player has enough hype
+  if (!hypeComponent->IsHypeEnough(_cost))
+  {
+    UE_LOG(LogTemp, Warning, TEXT("Not enough Hype :("));
+    return false;
+  }
+
+  hypeComponent->AddHype(-_cost);
+  healthComponent->SetMaxHealth(healthComponent->GetMaxHealth() + _amount);
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_onhealth), _cost);
+  UGameManagerSubsystem::AddMapStat(this, STAT_MAP(combat.upgrades.combat_end_upgrades), EStationStates::MAX_HEALTH);
+
+  return true;
+}
+
+bool UInteractiveStation::ChangeDamage(const float& _amount, const float& _cost)
+{
+  // we check if player object is valid
+  if (!IsValid(m_player)) return false;
+
+  // --- damage           --- //
+  // --- hype component   --- //
+  UHypeReceiverComponent* hypeComponent = m_player->FindComponentByClass<UHypeReceiverComponent>();
+  AWeaponBase* currentWeapon = m_player->GetWeapon();
+
+  // we verify if both the components are present on the player
+  if (!IsValid(hypeComponent) || !IsValid(currentWeapon))
+  {
+    UE_LOG(LogTemp, Error, TEXT("MISSING REQUIRED COMPONENTS ON PLAYER"));
+    return false;
+  }
+
+  // we check if the player has enough hype
+  if (!hypeComponent->IsHypeEnough(_cost))
+  {
+    UE_LOG(LogTemp, Warning, TEXT("Not enough Hype :("));
+    return false;
+  }
+
+  hypeComponent->AddHype(-_cost);
+  // we add the damage to both modes
+  currentWeapon->AddExtraBulletDmg(_amount, true);
+  currentWeapon->AddExtraBulletDmg(_amount, false);
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_used_hype_ondamage), _cost);
+  UGameManagerSubsystem::AddMapStat(this, STAT_MAP(combat.upgrades.combat_end_upgrades), EStationStates::DAMAGE);
 
   return true;
 }

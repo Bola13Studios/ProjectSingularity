@@ -16,3 +16,9 @@ using FStatAccessor = TFunction<int32&(FSessionData&)>;
   {                               \
     return Data.Path;             \
   }
+
+#define STAT_MAP(Path)                                   \
+  [](FSessionData& Data) -> TMap<EStationStates, int32>& \
+  {                                                      \
+    return Data.Path;                                    \
+  }

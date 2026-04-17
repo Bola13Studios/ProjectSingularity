@@ -17,6 +17,10 @@ enum class EStationStates : uint8
 
   HEALTH      UMETA(DisplayName = "Health"),
 
-  AMMO        UMETA(DisplayName = "Ammo")
+  AMMO        UMETA(DisplayName = "Ammo"),
+
+  MAX_HEALTH  UMETA(DisplayName = "Max Health"),
+
+  DAMAGE      UMETA(DisplayName = "Damage"),
 
 };
