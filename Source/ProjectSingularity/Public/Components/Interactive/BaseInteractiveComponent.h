@@ -26,7 +26,7 @@ public:
 	/**
 	 * @brief A reference to the current player
 	 */
-	TObjectPtr<APlayerCharacter> m_Player;
+	TObjectPtr<APlayerCharacter> m_player;
 
 	/**
 	 * @brief Used to notify whether the player overlapped with the interactable

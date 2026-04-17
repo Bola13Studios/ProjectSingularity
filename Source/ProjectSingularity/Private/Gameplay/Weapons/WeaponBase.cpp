@@ -175,9 +175,6 @@ bool AWeaponBase::Fire()
 
         hitActorsThisShot.Add(hitActor);
 
-        // Dmg method - TO DO
-        // m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg
-
         if (m_player->GetDebugWeapon())
         {
           DrawDebugSphere(GetWorld(), hit.ImpactPoint, 5.f, 12, FColor::Green, false, 2.f);
@@ -194,7 +191,7 @@ bool AWeaponBase::Fire()
             healthComp->OnDeath.RemoveAll(this);
             healthComp->OnDeath.AddUObject(this, &AWeaponBase::OnActorKilled);
 
-            float damageToApply = m_currentWeaponMode->GetModeData().bulletDamage;
+            float damageToApply = GetBulletDamage();
             bool isCriticalHit = false;
 
             // we check if we hit the weak point first
@@ -372,6 +369,11 @@ void AWeaponBase::PlayAnimation(FName name)
 
   m_armsAnimInstance->Montage_Play(m_weaponData.armsAnimMontage);
   m_armsAnimInstance->Montage_JumpToSection(name, m_weaponData.armsAnimMontage);
+}
+
+float AWeaponBase::GetBulletDamage() const
+{
+  return m_currentWeaponMode->bulletDmg + m_currentWeaponMode->extraBulletDmg;
 }
 
 int AWeaponBase::GetAmmoInMagazine()

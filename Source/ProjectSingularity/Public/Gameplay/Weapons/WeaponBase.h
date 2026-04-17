@@ -252,6 +252,7 @@ public:
 
   void PlayAnimation(FName name);
 
+  float GetBulletDamage() const;
   int GetAmmoInMagazine();
   void AddReserveAmmo(int extraAmmo);
   int GetAmmoInReserve();

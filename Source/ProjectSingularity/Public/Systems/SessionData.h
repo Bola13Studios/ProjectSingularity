@@ -9,6 +9,8 @@
 #include "CoreMinimal.h"
 #include "SessionData.generated.h"
 
+enum class EStationStates : uint8;
+
 #pragma region | Combat Stats |
 
 USTRUCT(BlueprintType)
@@ -17,9 +19,9 @@ struct FCombatUpgrades
   GENERATED_BODY()
 
   UPROPERTY()
-  TArray<FString> combat_start_upgrades;
+  TMap<EStationStates, int32> combat_start_upgrades;
   UPROPERTY()
-  TArray<FString> combat_end_upgrades;
+  TMap<EStationStates, int32> combat_end_upgrades;
 };
 
 USTRUCT(BlueprintType)
@@ -154,6 +156,8 @@ struct FHypeStats
   int32 total_used_hype_onhealth = 0;
   UPROPERTY()
   int32 total_used_hype_onammo = 0;
+  UPROPERTY()
+  int32 total_used_hype_ondamage = 0;
   UPROPERTY()
   int32 total_used_hype_onupgrades = 0;
 };

@@ -35,7 +35,7 @@ public:
 	void SetHealth(float _health) { CurrentHealth = _health; }
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	void SetMaxHealth(float _maxHealth) { MaxHealth = _maxHealth; }
+  void SetMaxHealth(float _maxHealth);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	float GetHealthPercent() const
