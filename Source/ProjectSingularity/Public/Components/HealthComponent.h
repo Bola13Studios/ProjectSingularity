@@ -46,6 +46,12 @@ public:
 	//Negative _Amount damages the character, positive _Amount heals him
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void ChangeHealth(float _Amount, AActor* InstigatorActor);
+	
+	UFUNCTION(BlueprintCallable, Category = "Health")
+  void SetHasHitBeenCritcal(bool _value)
+  {
+    hasHitBeenCritical = _value;
+  }
 
 protected:
 	virtual void BeginPlay() override;
