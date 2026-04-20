@@ -21,13 +21,14 @@ class PROJECTSINGULARITY_API UInteractiveStation : public UBaseInteractiveCompon
   GENERATED_BODY()
 
 public:
-  /**
-   * @brief This holds all the prices and amount to add to the related categories
-   */
-  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Data", meta = (DisplayName = "Data Table"))
-  UDataTable* m_stationData;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Data",
+            meta = (DisplayName = "Price", ClampMin = 1))
+  float hypeCost;
 
-  UPROPERTY(EditAnywhere, meta = (DisplayName = "Station Mode"))
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Data", meta = (DisplayName = "Amount", ClampMin = 1))
+  float amount;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13|Data", meta = (DisplayName = "Station Mode"))
   EStationStates m_stationMode;
 
 public:
