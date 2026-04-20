@@ -1,76 +1,50 @@
-#include "Components/Interactive/InteractiveStation.h"
-#include "Engine/World.h"
-#include "Components/Interactive/StationData.h"
-#include "Components/Interactive/StationStates.h"
+#include "ProjectSingularity/Public/Components/Interactive/InteractiveStation.h"
+#include "ProjectSingularity/Public/Components/Interactive/StationStates.h"
 #include "ProjectSingularity/Public/Components/HealthComponent.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
 #include "ProjectSingularity/Public/Gameplay/Weapons/WeaponBase.h"
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 #include "ProjectSingularity/Public/Utils/StatHelpers.h"
+#include <Engine/World.h>
 
 void UInteractiveStation::Interact()
 {
-  float totalSpent = 0.0f;
-  // we check if the asset provided is valid
-  TArray<FStationData*> stationData;
-  if (!IsValid(m_stationData))
+  switch (m_stationMode)
   {
-    UE_LOG(LogTemp, Warning, TEXT("Invalid Station Data Table added in InteractiveStation BP. Unable to procede."));
-    return;
-  }
-  // we check if the asset has elements
-  m_stationData->GetAllRows(TEXT("Station"), stationData);
-  if (!stationData.IsValidIndex(0))
-  {
-    UE_LOG(LogTemp, Warning,
-           TEXT("The provided Station Data Table is empty or an error occurred while trying to access it."));
-    return;
-  }
-
-  for (auto row : stationData)
-  {
-    if (m_stationMode == row->m_Type)
-    {
-      totalSpent += row->m_TypePrice;
-
-      switch (m_stationMode)
+    case EStationStates::HEALTH:
+      if (!ChangeHealth(amount, hypeCost))
       {
-        case EStationStates::HEALTH:
-          if (!ChangeHealth(row->m_TypeAmount, row->m_TypePrice))
-          {
-            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
-          }
-          break;
-
-        case EStationStates::AMMO:
-          if (!ChangeAmmo(row->m_TypeAmount, row->m_TypePrice))
-          {
-            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
-          }
-          break;
-
-        case EStationStates::MAX_HEALTH:
-          if (!ChangeMaxHealth(row->m_TypeAmount, row->m_TypePrice))
-          {
-            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change max health value."));
-          }
-          break;
-
-        case EStationStates::DAMAGE:
-          if (!ChangeDamage(row->m_TypeAmount, row->m_TypePrice))
-          {
-            UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change damage value."));
-          }
-          break;
-
-        default:
-          UE_LOG(LogTemp, Warning,
-                 TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
-          return;
-          break;
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change health value."));
       }
-    }
+      break;
+
+    case EStationStates::AMMO:
+      if (!ChangeAmmo(amount, hypeCost))
+      {
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change ammo value."));
+      }
+      break;
+
+    case EStationStates::MAX_HEALTH:
+      if (!ChangeMaxHealth(amount, hypeCost))
+      {
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change max health value."));
+      }
+      break;
+
+    case EStationStates::DAMAGE:
+      if (!ChangeDamage(amount, hypeCost))
+      {
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong? Unable to change damage value."));
+      }
+      break;
+
+    default:
+      UE_LOG(LogTemp, Warning,
+              TEXT("Station State not recognized or available. Remember to add it to the InteractiveStation"));
+      return;
+      break;
   }
 
   OnInteract.Broadcast();
