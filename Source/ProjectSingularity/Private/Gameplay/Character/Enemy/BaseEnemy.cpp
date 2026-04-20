@@ -18,3 +18,6 @@ void ABaseEnemy::BeginPlay()
   }
 }
 
+void ABaseEnemy::Attack(AActor* target)
+{
+}
