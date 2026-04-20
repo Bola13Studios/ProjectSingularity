@@ -13,14 +13,17 @@ FIntVector UVoxelNavigationSubsystem::GetChunkCoord(const FVector& WorldPos) con
                     FMath::FloorToInt(WorldPos.Z / chunkWorldSize));
 }
 
-FVoxelGridChunk* UVoxelNavigationSubsystem::GetOrCreateChunk(const FIntVector& Coord, const FVector& Origin)
+FVoxelGridChunk* UVoxelNavigationSubsystem::GetOrCreateChunk(const FIntVector& Coord)
 {
   if (FVoxelGridChunk* found = gridChunks.Find(Coord)) return found;
 
   FVoxelGridChunk& chunk = gridChunks.Add(Coord);
   chunk.chunkCoord = Coord;
-  chunk.worldOrigin = Origin;
-  chunk.grid.Init(32 * 2, 32 * 2, 16 * 2, 100.f); // Temp - Need to expose this to editor
+
+  chunk.worldOrigin = FVector(Coord.X * chunkWorldSize, Coord.Y * chunkWorldSize, Coord.Z * chunkWorldSize);
+
+  chunk.grid.Init(64, 64, 32, 100.f); // Temp - Need to expose this to editor
+
   BuildChunk(chunk);
 
   return &chunk;
@@ -68,9 +71,7 @@ float UVoxelNavigationSubsystem::Heuristic(const FIntVector& A, const FIntVector
 
 FVector UVoxelNavigationSubsystem::GridToWorldInChunk(const FVoxelGridChunk& Chunk, const FIntVector& L) const
 {
-  FVector origin = Chunk.worldOrigin;
-
-  return origin
+  return Chunk.worldOrigin
       + FVector((L.X + 0.5f) * Chunk.grid.voxelSize, (L.Y + 0.5f) * Chunk.grid.voxelSize,
                 (L.Z + 0.5f) * Chunk.grid.voxelSize);
 }
@@ -127,7 +128,7 @@ TArray<FVector> UVoxelNavigationSubsystem::FindPath(FVector StartWorld, FVector 
 {
   TArray<FVector> result;
 
-  FVoxelGridChunk* chunk = GetOrCreateChunk(GetChunkCoord(StartWorld), Origin);
+  FVoxelGridChunk* chunk = GetOrCreateChunk(GetChunkCoord(StartWorld));
   if (!chunk) return result;
 
   FIntVector start = WorldToLocalVoxel(StartWorld, *chunk);
@@ -252,7 +253,7 @@ TArray<FVector> UVoxelNavigationSubsystem::OptimizePath(const TArray<FVector>& I
 
 bool UVoxelNavigationSubsystem::IsWorldOccupied(const FVector& WorldPos, const FVector& Origin)
 {
-  FVoxelGridChunk* chunk = GetOrCreateChunk(GetChunkCoord(WorldPos), Origin);
+  FVoxelGridChunk* chunk = GetOrCreateChunk(GetChunkCoord(WorldPos));
   if (!chunk)
   {
     return true;

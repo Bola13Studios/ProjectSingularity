@@ -35,7 +35,7 @@ void AVoxelNavChunk::DrawGrid()
   FVector chunkOrigin = GetGridOrigin();
 
   FIntVector chunkCoord = nav->GetChunkCoord(chunkOrigin);
-  FVoxelGridChunk* chunk = nav->GetOrCreateChunk(chunkCoord, GetGridOrigin());
+  FVoxelGridChunk* chunk = nav->GetOrCreateChunk(chunkCoord);
 
   if (!chunk)
   {
@@ -144,7 +144,7 @@ void AVoxelNavChunk::DrawPath()
   FVector startWorld = startPoint.GetLocation();
   FVector endWorld = endPoint.GetLocation();
 
-  FVoxelGridChunk* chunk = nav->GetOrCreateChunk(nav->GetChunkCoord(startWorld), GetGridOrigin());
+  FVoxelGridChunk* chunk = nav->GetOrCreateChunk(nav->GetChunkCoord(startWorld));
   if (!chunk)
   {
     return;

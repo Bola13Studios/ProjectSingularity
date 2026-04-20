@@ -94,7 +94,7 @@ class PROJECTSINGULARITY_API UVoxelNavigationSubsystem : public UWorldSubsystem
 
 public:
   FIntVector GetChunkCoord(const FVector& WorldPos) const;
-  FVoxelGridChunk* GetOrCreateChunk(const FIntVector& Coord, const FVector& Origin);
+  FVoxelGridChunk* GetOrCreateChunk(const FIntVector& Coord);
   FVector GridToWorldInChunk(const FVoxelGridChunk& Chunk, const FIntVector& L) const;
 
   FIntVector WorldToLocalVoxel(const FVector& World, const FVoxelGridChunk& Chunk) const;
