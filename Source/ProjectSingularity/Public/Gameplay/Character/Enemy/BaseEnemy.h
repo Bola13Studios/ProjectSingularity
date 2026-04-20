@@ -35,6 +35,7 @@ public:
    */
 	ABaseEnemy();
 
+	virtual void Attack(AActor* target);
 
 
 protected:
