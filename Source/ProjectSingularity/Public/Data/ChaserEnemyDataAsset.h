@@ -23,13 +23,16 @@ class PROJECTSINGULARITY_API UChaserEnemyDataAsset : public UEnemyConfigDataAsse
 public:
 
 	// Properties specific to the chaser enemy character
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Stager Timer"))
-	float timeStager;
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Pause Time"))
-	float timePause;
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Attack Range"))
-	float attackRange;
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Distance Traveled"))
-	float distancetraveled;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Stagger Timer"))
+	float m_timeStager;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Pause Time"))
+	float m_timePause;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Attack Range"))
+	float m_attackRange;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Dash Force"))
+	float m_dashForce;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "Attack Collider Position"))
+  FVector m_attackCollider;
 
 };

@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectSingularity/Public/Data/DataAsset/PlayerConfigDataAsset.h"
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Utils/StatHelpers.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeReceiverComponent.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 #include "Gameplay/Weapons/WeaponsDataAsset.h"
@@ -56,6 +57,17 @@ void APlayerCharacter::BeginPlay()
                                        TEXT("HandGrip_R"));            // Temp bone name
     m_currentWeapon->SetWeaponData(m_weaponDataAsset->weaponsData[0]); // Just for now
   }
+  
+  if (APlayerController* playerController = Cast<APlayerController>(GetController()))
+  {
+    if (AGameHUDSetUp* hud = Cast<AGameHUDSetUp>(playerController->GetHUD()))
+    {
+      if (hud->m_hudWidget && m_currentWeapon)
+      {
+        hud->m_hudWidget->BindToWeapon(m_currentWeapon);
+      }
+    }
+  }
 
   if (UCapsuleComponent* capsuleComp = GetCapsuleComponent())
   {
@@ -76,14 +88,6 @@ void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
   if (UHypeReceiverComponent* hypeComp = GetComponentByClass<UHypeReceiverComponent>())
   {
     totalHype = hypeComp->GetHype();
-  }
-
-  if (UGameInstance* gameInstance = GetGameInstance())
-  {
-    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-    {
-      gameManager->AddStat("totalhype", totalHype);
-    }
   }
 }
 
@@ -142,14 +146,6 @@ void APlayerCharacter::MoveInternal(const FVector2D& _inputVector)
 void APlayerCharacter::JumpAction()
 {
   RequestChangeState(UJumpingState::StaticClass());
-
-  if (UGameInstance* gameInstance = GetGameInstance())
-  {
-    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-    {
-      gameManager->AddStat("jumps", 0.5f);
-    }
-  }
 }
 
 void APlayerCharacter::LookAction(const FInputActionValue& _inputValue)
@@ -185,14 +181,6 @@ void APlayerCharacter::TryToReload()
 void APlayerCharacter::InteractAction(const FInputActionValue& _Value)
 { // only broadcasting the delegate
   m_onInteract.Broadcast();
-
-  if (UGameInstance* gameInstance = GetGameInstance())
-  {
-    if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-    {
-      gameManager->AddStat("interactions");
-    }
-  }
 }
 
 void APlayerCharacter::DashAction()
@@ -237,14 +225,6 @@ void APlayerCharacter::Dash()
 
     GetWorldTimerManager().SetTimer(m_dashStopTimerHandle, this, &APlayerCharacter::DashEnd,
                                     m_playerDataAsset->dashTime);
-
-    if (UGameInstance* gameInstance = GetGameInstance())
-    {
-      if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
-      {
-        gameManager->AddStat("dashes", 0.5f);
-      }
-    }
   }
 }
 

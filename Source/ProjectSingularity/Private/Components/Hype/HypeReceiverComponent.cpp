@@ -6,6 +6,8 @@
 #include "ProjectSingularity/Public/Components/Hype/HypeMultipliers.h"
 #include "ProjectSingularity/Public/Components/Hype/HypeLevels.h"
 #include "ProjectSingularity/Public/Gameplay/Character/Player/PlayerCharacter.h"
+#include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Utils/StatHelpers.h"
 
 void UHypeReceiverComponent::BeginPlay()
 {
@@ -31,6 +33,8 @@ void UHypeReceiverComponent::BeginPlay()
     UE_LOG(LogTemp, Error,
            TEXT("Unable to retreive the PopularityComponent from the owner. Are you sure it was added?"));
   }
+
+  UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype), m_currentHypeValue);
 }
 
 void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const bool& _critical)
@@ -54,6 +58,13 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   // getting the total modifier from component
   float totalModifier = m_calculatorComponent->ApplyModifiers(m_modifierComponent);
 
+  if (m_modifierComponent->GetModifierValue("MultiKill") > 0.0f)
+  {
+    UGameManagerSubsystem::AddStat(this, STAT_PATH(hype.total_gained_hype_multikill),
+                                   m_modifierComponent->GetModifierValue("MultiKill") * baseHype);
+  }
+
+
   // getting the popularity multiplier from component
   float popularityMultiplier = m_calculatorComponent->ApplyPopularity(m_popularityComponent);
 
@@ -64,7 +75,7 @@ void UHypeReceiverComponent::RegisterKill(UHypeSourceComponent* _source, const b
   AddHype(finalHype);
 
   // updating the popularity index @remind > this is temporary will be changed after
-  m_popularityComponent->IncreasePopularity(100.f); // tweakable
+  m_popularityComponent->IncreasePopularity(_source->popularityValue);
 
   // clearing modifiers
   m_modifierComponent->ClearModifiers();

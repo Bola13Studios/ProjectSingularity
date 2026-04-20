@@ -1,63 +1,74 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ProjectSingularity/Public/UI/HealthWidget.h"
+
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
-void UHealthWidget::BindToHealthComponent(UHealthComponent* InHealthComp)
+#pragma region | PUBLIC METHODS
+
+void UHealthWidget::BindToHealthComponent(UHealthComponent* _inHealthComp)
 {
-	if (HealthComp)
-	{
-		HealthComp->OnHealthChanged.RemoveDynamic(this, &UHealthWidget::HandleHealthChanged);
-	}
+  if (m_healthComp)
+  {
+    m_healthComp->OnHealthChanged.RemoveDynamic(this, &UHealthWidget::HandleHealthChanged);
+  }
 
-	HealthComp = InHealthComp;
+  m_healthComp = _inHealthComp;
 
-	if (HealthComp)
-	{
-		HealthComp->OnHealthChanged.AddDynamic(this, &UHealthWidget::HandleHealthChanged);
-		RefreshUI(HealthComp->GetHealth(), HealthComp->GetMaxHealth());
-	}
+  if (m_healthComp)
+  {
+    m_healthComp->OnHealthChanged.AddDynamic(this, &UHealthWidget::HandleHealthChanged);
+    RefreshUI(m_healthComp->GetHealth(), m_healthComp->GetMaxHealth());
+  }
 }
+
+#pragma endregion
+
+#pragma region | PROTECTED METHODS
 
 void UHealthWidget::NativeDestruct()
 {
-	if (HealthComp)
-	{
-		HealthComp->OnHealthChanged.RemoveDynamic(this, &UHealthWidget::HandleHealthChanged);
-	}
+  if (m_healthComp)
+  {
+    m_healthComp->OnHealthChanged.RemoveDynamic(this, &UHealthWidget::HandleHealthChanged);
+  }
 
-	Super::NativeDestruct();
+  Super::NativeDestruct();
 }
 
-void UHealthWidget::HandleHealthChanged(float Current, float Max, float Delta, AActor* InstigatorActor)
+#pragma endregion
+
+#pragma region | PRIVATE METHODS
+
+void UHealthWidget::HandleHealthChanged(float _current, float _max, float _delta, AActor* _instigatorActor)
 {
-  // If damage (Delta negative)
-  if (Delta < 0.0f)
+  // Play damage animation only when health is reduced
+  if (_delta < 0.0f)
   {
-    if (HpAnim)
+    if (m_hpAnim)
     {
-      PlayAnimation(HpAnim);
+      PlayAnimation(m_hpAnim);
     }
   }
 
-  RefreshUI(Current, Max);
+  RefreshUI(_current, _max);
 }
 
-void UHealthWidget::RefreshUI(float Current, float Max)
+void UHealthWidget::RefreshUI(float _current, float _max)
 {
-	const float Percent = (Max > 0.0f) ? (Current / Max) : 0.0f;
+  const float percent = (_max > 0.0f) ? (_current / _max) : 0.0f;
 
-	if (HealthBar)
-	{
-		HealthBar->SetPercent(Percent);
-	}
+  if (m_healthBar)
+  {
+    m_healthBar->SetPercent(percent);
+  }
 
-	if (HealthText)
-	{
-		const int32 C = FMath::RoundToInt(Current);
-		const int32 M = FMath::RoundToInt(Max);
-		HealthText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), C, M)));
-	}
+  if (m_healthText)
+  {
+    const int32 currentHealth = FMath::RoundToInt(_current);
+    const int32 maxHealth = FMath::RoundToInt(_max);
+
+    m_healthText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), currentHealth, maxHealth)));
+  }
 }
+
+#pragma endregion
