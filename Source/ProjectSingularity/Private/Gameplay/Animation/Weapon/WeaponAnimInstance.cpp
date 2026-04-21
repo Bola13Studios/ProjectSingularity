@@ -1,4 +1,4 @@
-#include "WeaponAnimInstance.h"
+#include "Gameplay/Animation/Weapon/WeaponAnimInstance.h"
 #include "Gameplay/Weapons/WeaponBase.h"
 
 
