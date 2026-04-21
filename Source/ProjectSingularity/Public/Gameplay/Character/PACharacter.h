@@ -15,6 +15,8 @@
 #include "Components/HealthComponent.h"
 #include "PACharacter.generated.h"
 
+class UHypeComponent;
+
 UCLASS()                  // Primetime Asset Character - Design "name"
 class PROJECTSINGULARITY_API APACharacter : public ACharacter 
 {
@@ -55,10 +57,13 @@ private:
     UFUNCTION()
     void StopFire();
 
-    // Get the Health component referenced in blueprint here
+    // Get the necesary HUD component referenced in blueprint here
 
     UFUNCTION(BlueprintCallable)
     UHealthComponent* GetHealthComponent() const;
+
+    UFUNCTION(BlueprintCallable)
+    UHypeComponent* GetHypeComponent() const;
 
     UPROPERTY()
     AWeaponBase* m_currentWeapon;
