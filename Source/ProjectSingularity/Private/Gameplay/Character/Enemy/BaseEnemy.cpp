@@ -25,7 +25,6 @@ void ABaseEnemy::BeginPlay()
   }
 }
 
-
 void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   m_healthComponent->OnDeath.RemoveAll(this);
