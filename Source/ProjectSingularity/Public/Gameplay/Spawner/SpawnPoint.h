@@ -25,6 +25,29 @@ enum class ESpawnPointState : uint8
   ISREADY UMETA(DisplayName = "Is Ready"),
   SPAWNING UMETA(DisplayName = "Spawning"),
   WAITING UMETA(DisplayName = "Waiting For Enemies To Die"),
+  FINISHED UMETA(DisplayName = "Finished all the round")
+};
+
+/**
+ * @brief The structure for the rounds
+ */
+USTRUCT(BlueprintType)
+struct FRoundSpawn
+{
+  GENERATED_BODY()
+
+public:
+  /**
+   * @brief The list of enemies to spawn
+   */
+  UPROPERTY(EditAnywhere)
+  TArray<FEnemySpawnInfo> info;
+
+  /**
+   * @brief The total number of enemies to spawn per round
+   */
+  UPROPERTY(EditAnywhere)
+  int32 totalEnemies;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSpawnPointStateChanged, ESpawnPointState, State, ASpawnPoint*,
@@ -46,6 +69,12 @@ public:
    */
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Spawn Variation"))
   FVector2D spawnVariation;
+
+  /**
+   * @brief The list of rounds to spawn
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Rounds"))
+  TArray<FRoundSpawn> rounds;
 
   /**
    * @brief Delegates that is broadcasted when the spawn point changes its state. This allows other classes to react to
@@ -107,10 +136,9 @@ public:
 
   /**
    * @brief This will setup the spawn point
-   * @param _totalEnemies The total number of enemies to spawn
-   * @param _enemyTypes The types of enemies to spawn
+   * @param _roundIndex The index of the round to spawn
    */
-  void Setup(int32 _totalEnemies, const TArray<FEnemySpawnInfo>& _enemyTypes);
+  void Setup(int32 _roundIndex);
 
   /**
    * @brief Will return a random enemy class based on the received percentages

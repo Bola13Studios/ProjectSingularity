@@ -24,28 +24,6 @@ enum class ESpawnManagerState : uint8
   WAITING UMETA(DisplayName = "Waiting")
 };
 
-/**
- * @brief The structure for the rounds
- */
-USTRUCT(BlueprintType)
-struct FRoundSpawn
-{
-  GENERATED_BODY()
-
-public:
-  /**
-   * @brief The list of enemies to spawn
-   */
-  UPROPERTY(EditAnywhere)
-  TArray<FEnemySpawnInfo> info;
-
-  /**
-   * @brief The total number of enemies to spawn per round
-   */
-  UPROPERTY(EditAnywhere)
-  int32 totalEnemies;
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnManagerStateChanged, ESpawnManagerState, currentState);
 
 /**
@@ -68,12 +46,6 @@ public:
    */
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Time between rounds"))
   float timeBetweenRounds;
-
-  /**
-   * @brief The list of rounds to spawn
-   */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Rounds"))
-  TArray<FRoundSpawn> rounds;
 
   /**
    * @brief The spawnpoint to manage
@@ -126,12 +98,6 @@ private:
   UPROPERTY()
   FTimerHandle m_roundTimerHandle;
 
-  /**
-   * @brief The list of progressive rounds to spawn
-   */
-  UPROPERTY()
-  FRoundSpawn m_generatedRound;
-
 public:
   /**
    * @brief Sets default values for this actor's properties
@@ -182,9 +148,4 @@ private:
    * @brief Will start the next round with delay
    */
   void StartNextRoundDelayed();
-
-  /**
-   * @brief Will start generating the next progressive round
-   */
-  void GenerateNextProgressiveRound();
 };

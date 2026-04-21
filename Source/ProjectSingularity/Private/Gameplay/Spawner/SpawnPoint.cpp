@@ -78,12 +78,20 @@ void ASpawnPoint::SpawnTick()
   }
 }
 
-void ASpawnPoint::Setup(int32 _totalEnemies, const TArray<FEnemySpawnInfo>& _enemyTypes)
+void ASpawnPoint::Setup(int32 _roundIndex)
 {
-  m_totalEntitiesToSpawn = _totalEnemies;
-  m_enemyTypes = _enemyTypes;
+  if (rounds.IsValidIndex(_roundIndex))
+  {
+    m_totalEntitiesToSpawn = rounds[_roundIndex].totalEnemies;
+    m_enemyTypes = rounds[_roundIndex].info;  
 
-  OnSpawnPointStateChanged.Broadcast(ESpawnPointState::ISREADY, this);
+    OnSpawnPointStateChanged.Broadcast(ESpawnPointState::ISREADY, this);
+  }
+  else
+  {
+    UE_LOG(LogTemp, Error, TEXT("SpawnPoint %s does not have a configuration for the round %d!"), *GetName(), _roundIndex);
+    OnSpawnPointStateChanged.Broadcast(ESpawnPointState::FINISHED, this);
+  }
 }
 
 TSubclassOf<ABaseEnemy> ASpawnPoint::GetRandomEnemyClass() const

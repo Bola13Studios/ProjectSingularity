@@ -7,7 +7,6 @@ ASpawnerManager::ASpawnerManager()
 
   timeBetweenRounds = 1.0f;
 
-  rounds = {};
   spawners = {};
 
   m_currentRound = 0;
@@ -54,17 +53,20 @@ void ASpawnerManager::OnRoundEnd()
   m_spawnersOnHold = 0;
   m_spawnersReady = 0;
 
-  if (m_currentRound >= rounds.Num())
+  int32 finishedSpawners = 0;
+  for (auto& spawner : spawners)
   {
-    if (isProgressive)
+    if (spawner && !spawner->rounds.IsValidIndex(m_currentRound))
     {
-      GenerateNextProgressiveRound();
+      finishedSpawners++;
     }
-    else
-    {
-      UE_LOG(LogTemp, Warning, TEXT("all rounds are completed"));
-      return;
-    }
+  }
+
+  if (finishedSpawners == spawners.Num())
+  {
+    UE_LOG(LogTemp, Warning, TEXT("All the spawners have finished their rounds"));
+    if (!isProgressive) return;
+    m_currentRound = 0;
   }
 
   GetWorld()->GetTimerManager().SetTimer(m_roundTimerHandle, this, &ASpawnerManager::StartNextRoundDelayed,
@@ -85,22 +87,6 @@ void ASpawnerManager::StartNextRoundDelayed()
       SetupSpawner(spawner);
     }
   }
-}
-
-void ASpawnerManager::GenerateNextProgressiveRound()
-{ // for now we just up the number of enemies to spawn each round
-  FRoundSpawn baseRound = (rounds.Num() > 0) ? rounds[rounds.Num() - 1] : m_generatedRound;
-
-  int32 newTotal = FMath::CeilToInt(baseRound.totalEnemies * difficultyMultiplier) + extraEnemiesPerRound;
-  // @missing upping the enemy health
-  // @missing upping the enemy damage
-
-  m_generatedRound.totalEnemies = newTotal;
-  m_generatedRound.info = baseRound.info;
-
-  rounds.Add(m_generatedRound);
-
-  UE_LOG(LogTemp, Warning, TEXT("New round generated: %d total enemies"), newTotal);
 }
 
 void ASpawnerManager::OnRoundStart()
@@ -129,10 +115,11 @@ void ASpawnerManager::SpawnPointStateChanged(ESpawnPointState _state, ASpawnPoin
       break;
 
     case ESpawnPointState::ISREADY:
+    case ESpawnPointState::FINISHED:
       if (m_spawnersReady < spawners.Num())
       {
         m_spawnersReady++;
-        UE_LOG(LogTemp, Warning, TEXT("Spawner pronto: %d/%d"), m_spawnersReady, spawners.Num());
+        UE_LOG(LogTemp, Warning, TEXT("Spawner ready: %d/%d"), m_spawnersReady, spawners.Num());
 
         if (m_spawnersReady == spawners.Num())
         {
@@ -163,24 +150,7 @@ void ASpawnerManager::SetupSpawner(TObjectPtr<ASpawnPoint> _spawner)
 {
   if (!_spawner) return;
 
-  FRoundSpawn currentRoundData;
-
-  if (rounds.IsValidIndex(m_currentRound))
-  {
-    currentRoundData = rounds[m_currentRound];
-  }
-  else if (isProgressive)
-  {
-    currentRoundData = m_generatedRound;
-    UE_LOG(LogTemp, Warning, TEXT("SetupSpawner: using progressive data (enemies: %d)"), currentRoundData.totalEnemies);
-  }
-  else
-  {
-    UE_LOG(LogTemp, Warning, TEXT("SetupSpawner: no more rounds."));
-    return;
-  }
-
-  _spawner->Setup(currentRoundData.totalEnemies, currentRoundData.info);
+  _spawner->Setup(m_currentRound);
 }
 
 void ASpawnerManager::SetupRound()
