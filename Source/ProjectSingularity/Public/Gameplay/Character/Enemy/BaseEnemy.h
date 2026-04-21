@@ -52,7 +52,9 @@ public:
    * properties and initializes any necessary components. It is called when an instance of the ABaseEnemy class is
    * created.
    */
-  ABaseEnemy();
+	ABaseEnemy();
+
+	virtual void Attack(AActor* target);
 
   /**
    * @brief Used to destroy the actor once its health reaches zero
