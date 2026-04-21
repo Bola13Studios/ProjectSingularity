@@ -92,6 +92,8 @@ void UHealthComponent::ChangeHealth(float _Amount, AActor* InstigatorActor)
       UGameManagerSubsystem::AddStat(this, STAT_PATH(combat.health.combat_total_gained_health), (int32)_Amount);
     }
   }
+
+  hasHitBeenCritical = false;
 }
 
 void UHealthComponent::BroadcastChanged(float OldHealth, AActor* InstigatorActor) const
