@@ -14,6 +14,9 @@
 
 class ASpawnPoint;
 
+/**
+ * @brief The states for the spawner manager
+ */
 UENUM(BlueprintType)
 enum class ESpawnManagerState : uint8
 {
@@ -21,6 +24,9 @@ enum class ESpawnManagerState : uint8
   WAITING UMETA(DisplayName = "Waiting")
 };
 
+/**
+ * @brief The structure for the rounds
+ */
 USTRUCT(BlueprintType)
 struct FRoundSpawn
 {
@@ -33,6 +39,9 @@ public:
   UPROPERTY(EditAnywhere)
   TArray<FEnemySpawnInfo> info;
 
+  /**
+   * @brief The total number of enemies to spawn per round
+   */
   UPROPERTY(EditAnywhere)
   int32 totalEnemies;
 };
@@ -72,6 +81,24 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Spawners"))
   TArray<TObjectPtr<ASpawnPoint>> spawners;
 
+  /**
+   * @brief Defines if this manager is progressive or not
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13", meta = (DisplayName = "Is Manager Progressive?"))
+  bool isProgressive = false;
+
+  /**
+   * @brief Defines the multiplier to use to up the difficulty
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13", meta = (DisplayName = "Difficulty Multiplier"))
+  float difficultyMultiplier = 1.2f;
+
+  /**
+   * @brief The extra enemies to add each round
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bola 13", meta = (DisplayName = "Extra Enemies Per Round"))
+  int32 extraEnemiesPerRound = 5;
+
 private:
   /**
    * @brief Stores the current round to start
@@ -88,10 +115,22 @@ private:
    */
   int32 m_spawnersReady;
 
-  TSet<ASpawnPoint*> m_initializedSpawners;
+  /**
+   * @brief Saves the initializaed spawners
+   */
+  TSet<TObjectPtr<ASpawnPoint>> m_initializedSpawners;
 
+  /**
+   * @brief Handles the timer set inbetween rounds
+   */
   UPROPERTY()
   FTimerHandle m_roundTimerHandle;
+
+  /**
+   * @brief The list of progressive rounds to spawn
+   */
+  UPROPERTY()
+  FRoundSpawn m_generatedRound;
 
 public:
   /**
@@ -125,6 +164,7 @@ private:
    * @brief Handles the state changes of the spawn points
    * @param _state the recived state
    */
+  UFUNCTION()
   void SpawnPointStateChanged(ESpawnPointState _state, ASpawnPoint* _spawner);
 
   /**
@@ -133,7 +173,18 @@ private:
    */
   void SetupSpawner(TObjectPtr<ASpawnPoint> _spawner);
 
+  /**
+   * @brief Will set up the next round
+   */
   void SetupRound();
 
+  /**
+   * @brief Will start the next round with delay
+   */
   void StartNextRoundDelayed();
+
+  /**
+   * @brief Will start generating the next progressive round
+   */
+  void GenerateNextProgressiveRound();
 };

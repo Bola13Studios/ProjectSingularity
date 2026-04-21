@@ -51,8 +51,20 @@ public:
    * @brief Delegates that is broadcasted when the spawn point changes its state. This allows other classes to react to
    * the state change
    */
-  UPROPERTY(BlueprintAssignable)
+  UPROPERTY(BlueprintAssignable, Category = "Bola 13")
   FOnSpawnPointStateChanged OnSpawnPointStateChanged;
+
+  /**
+   * @brief Defines the intervall between each spawn
+   */
+  UPROPERTY(EditAnywhere, Category = "Bola 13", meta = (DisplayName = "Spawn Interval"))
+  float spawnInterval = 0.2f;
+
+  /**
+   * @brief Defines a how many enemies to spawn per tick
+   */
+  UPROPERTY(EditAnywhere, Category = "Bola 13", meta = (DisplayName = "Spawn per tick"))
+  int32 spawnPerTick = 2;
 
 private:
   /**
@@ -72,19 +84,15 @@ private:
   TArray<FEnemySpawnInfo> m_enemyTypes;
 
   /**
-   * @brief Is this spawner has been assigned or not by a spawn manager
+   * @brief Handles the timer used to spawn enemies
    */
-  bool isAssigned;
-
+  UPROPERTY()
   FTimerHandle m_spawnTimerHandle;
 
+  /**
+   * @brief Counts how many enemies we have spawned so far
+   */
   int32 m_spawnedSoFar = 0;
-
-  UPROPERTY(EditAnywhere)
-  float spawnInterval = 0.2f;
-
-  UPROPERTY(EditAnywhere)
-  int32 spawnPerTick = 2;
 
 public:
   /**
@@ -99,11 +107,10 @@ public:
 
   /**
    * @brief This will setup the spawn point
-   * @param _id The ID of the spawn point
    * @param _totalEnemies The total number of enemies to spawn
    * @param _enemyTypes The types of enemies to spawn
    */
-  void Setup(bool _assigned, int32 _totalEnemies, const TArray<FEnemySpawnInfo>& _enemyTypes);
+  void Setup(int32 _totalEnemies, const TArray<FEnemySpawnInfo>& _enemyTypes);
 
   /**
    * @brief Will return a random enemy class based on the received percentages
@@ -122,7 +129,11 @@ private:
    * @brief This will update the array and counter everytime an enemy dies
    * @param Enemy
    */
+  UFUNCTION()
   void EnemyDied();
 
+  /**
+   * @brief Will spawn enemies after predetermined tick and not all at once
+   */
   void SpawnTick();
 };
