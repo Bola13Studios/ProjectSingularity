@@ -99,7 +99,7 @@ void UGameManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
   m_mValidTransitions.Add(EGameState::GAMEOVER, {});
 
   m_sessionData = FSessionData(); // Initialize session data with default values
-  m_sessionData.playerName = FName("Player1"); // Default player name, can be set later
+  m_sessionData.m_sPlayerName = "Player1"; // Default player name, can be set later
   m_sessionData.version = "v0.0.5"; // Initial version for session data
 }
 
