@@ -11,8 +11,6 @@
 #include "HypeComponent.h"
 #include "HypeSourceComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeakPointHit);
-
 /**
  * @brief Represents the Hype Component for the source such as
  * the enemies or other objects
@@ -29,19 +27,6 @@ public:
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13|Hype", meta = (DisplayName = "Popularity Value"))
   int32 popularityValue;
-
-  /**
-   * @brief Temporary delegate used to broadcast when the actor attached to this component has been hit
-   */
-  UPROPERTY(BlueprintAssignable, Category = "Events")
-  FOnWeakPointHit m_onHit;
-
-private:
-  /**
-   * @brief Temporary flag that will tell if the component has already been activated
-   * this is only for PoC
-   */
-  bool m_hasBeenHit;
 
 public:
   /**

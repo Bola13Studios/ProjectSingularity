@@ -2,13 +2,50 @@
  * @description: Game-wide manager implemented as a GameInstance Subsystem.
  * @author: Jaime Paramo
  * @date: 17/03/2026
- * @edited_by: [Other Contributors] - [Edit Date]
+ * @edited_by: Josephine - 17/04/2026
  ************************************************************************/
 
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
+#include "ProjectSingularity/Public/Components/Interactive/StationStates.h"
 
 // Enums
 #include "ProjectSingularity/Public/Utils/Types/GameStateEnum.h"
+
+void UGameManagerSubsystem::AddStat(UObject* _worldContext, const FStatAccessor& _accessor, int32 _value)
+{
+  if (!_worldContext) return;
+
+  UWorld* world = _worldContext->GetWorld();
+  if (!world) return;
+
+  UGameInstance* gameInstance = world->GetGameInstance();
+  if (!gameInstance) return;
+
+  if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+  {
+    _accessor(gameManager->m_sessionData) += _value;
+  }
+}
+
+void UGameManagerSubsystem::AddMapStat(UObject* _worldContext,
+                                       const TFunction<TMap<EStationStates, int32>&(FSessionData&)>& _accessor,
+                                       EStationStates _key, int32 _value)
+{
+  if (!_worldContext) return;
+  UWorld* world = _worldContext->GetWorld();
+  if (!world) return;
+
+  UGameInstance* gameInstance = world->GetGameInstance();
+  if (!gameInstance) return;
+
+  if (UGameManagerSubsystem* gameManager = gameInstance->GetSubsystem<UGameManagerSubsystem>())
+  {
+    TMap<EStationStates, int32>& map = _accessor(gameManager->m_sessionData);
+
+    int32& count = map.FindOrAdd(_key);
+    count += _value;
+  }
+}
 
 void UGameManagerSubsystem::SetGameState(EGameState _eNewState)
 {
@@ -36,26 +73,14 @@ EGameState UGameManagerSubsystem::GetGameState() const
   return m_eCurrentGameState;
 }
 
-float UGameManagerSubsystem::GetOneStat(FName _statName) const
-{ // will return the value if the key has been found
-  if (const float* _found = m_sessionData.stats.Find(_statName)) return *_found;
-  // or -1 if not found
-  return -1.0f;
-}
-
 const FSessionData& UGameManagerSubsystem::GetAllData() const
 { // will return the full struct with the saved data
   return m_sessionData;
 }
 
-void UGameManagerSubsystem::AddStat(FName _statName, float _value)
-{ // will find and add or create and assign the value
-  m_sessionData.stats.FindOrAdd(_statName) += _value;
-}
-
-void UGameManagerSubsystem::ResetSession()
-{ // cleaning the saved TMap
-  m_sessionData.stats.Empty();
+FSessionData& UGameManagerSubsystem::GetSessionData()
+{
+  return m_sessionData;
 }
 
 void UGameManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
@@ -72,6 +97,10 @@ void UGameManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
 
   // This acts as a terminal state unless explicitly extended.
   m_mValidTransitions.Add(EGameState::GAMEOVER, {});
+
+  m_sessionData = FSessionData(); // Initialize session data with default values
+  m_sessionData.playerName = FName("Player1"); // Default player name, can be set later
+  m_sessionData.version = "v0.0.5"; // Initial version for session data
 }
 
 bool UGameManagerSubsystem::CanTransition(EGameState _eFrom, EGameState _eTo) const

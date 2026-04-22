@@ -11,7 +11,9 @@ public class ProjectSingularity : ModuleRules {
       "InputCore",
       "EnhancedInput",
       "UMG",
-      "NavigationSystem"
+      "NavigationSystem",
+      "Json",
+      "JsonUtilities"
     });
 
     PrivateDependencyModuleNames.AddRange(new string[] {

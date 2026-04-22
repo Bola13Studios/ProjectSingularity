@@ -9,6 +9,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Systems/SessionData.h"
+#include "Utils/StatHelpers.h"
 #include "GameManagerSubsystem.generated.h"
 
 // Delegates
@@ -16,6 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, EGameState, eNe
 
 // Enums
 enum class EGameState : uint8;
+enum class EStationStates : uint8;
 
 UCLASS()
 class PROJECTSINGULARITY_API UGameManagerSubsystem : public UGameInstanceSubsystem
@@ -39,6 +41,25 @@ private:
   FSessionData m_sessionData;
 
 public:
+  /**
+   * @brief Used to add a value to a numeric stat, given an accessor to it and the value to add
+   * @param _worldContext The context object to retrieve the world from.
+   * @param _accessor The accessor function to retrieve the stat from the session data.
+   * @param _value The value to add to the stat.
+   */
+  static void AddStat(UObject* _worldContext, const FStatAccessor& _accessor, int32 _value);
+
+  /**
+   * @brief Used to add a value to an array stat, given an accessor to it and the value to add
+   * @param _worldContext The context object to retrieve the world from.
+   * @param _accessor The accessor function to retrieve the array stat from the session data.
+   * @param _key The key to identify the specific element in the map.
+   * @param _value The value to add to the map stat.
+   */
+  static void AddMapStat(UObject* _worldContext,
+                         const TFunction<TMap<EStationStates, int32>&(FSessionData&)>& _accessor, EStationStates _key,
+                         int32 _value = 1);
+
 #pragma region Getters & Setters
   /**
    * @brief Sets the current game state.
@@ -55,34 +76,20 @@ public:
   EGameState GetGameState() const;
 
   /**
-   * @brief Returns the current stored data for the found key
-   * @param _statName The name of the stat
-   * @return The float value of the stat, will return -1 if not found
-   */
-  UFUNCTION(BlueprintCallable)
-  float GetOneStat(FName _statName) const;
-
-  /**
    * @brief Return the stored session data
    * @return The TMap holding the data
    */
   const FSessionData& GetAllData() const;
-#pragma endregion
-
-#pragma region | Session Data Methods
-  /**
-   * @brief This will add or update an existing stat for the log manager
-   * @param _statName The key name of the stat
-   * @param _value The value to add or assign
-   */
-  UFUNCTION(BlueprintCallable)
-  void AddStat(FName _statName, float _value = 1.0f);
 
   /**
-   * @brief Will reset the session data
+   * @brief Return the stored session data
    */
-  void ResetSession();
+  FSessionData& GetSessionData();
 #pragma endregion
+
+  template <typename T> void AddStat(T& Field, const T& Value);
+
+  template <typename T> void AddToArray(TArray<T>& Array, const T& Value);
 
 protected:
 #pragma region Native Overrides
@@ -117,3 +124,13 @@ private:
   EGameState m_eCurrentGameState;
 #pragma endregion
 };
+
+template <typename T> void UGameManagerSubsystem::AddStat(T& Field, const T& Value)
+{
+  Field += Value;
+}
+
+template <typename T> void UGameManagerSubsystem::AddToArray(TArray<T>& Array, const T& Value)
+{
+  Array.Add(Value);
+}
