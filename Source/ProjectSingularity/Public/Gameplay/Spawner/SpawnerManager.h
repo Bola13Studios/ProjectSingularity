@@ -21,7 +21,8 @@ UENUM(BlueprintType)
 enum class ESpawnManagerState : uint8
 {
   ONGOING UMETA(DisplayName = "Ongoing"),
-  WAITING UMETA(DisplayName = "Waiting")
+  WAITING UMETA(DisplayName = "Waiting"),
+  FINISHED UMETA(DisplayName = "Finished")
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnManagerStateChanged, ESpawnManagerState, currentState);
