@@ -65,7 +65,11 @@ void ASpawnerManager::OnRoundEnd()
   if (finishedSpawners == spawners.Num())
   {
     UE_LOG(LogTemp, Warning, TEXT("All the spawners have finished their rounds"));
-    if (!isProgressive) return;
+    if (!isProgressive)
+    {
+      OnStateChange.Broadcast(ESpawnManagerState::FINISHED);
+      return;
+    }
     m_currentRound = 0;
   }
 
