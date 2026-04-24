@@ -1,5 +1,6 @@
 #include "Systems/SpawnManager.h"
 #include "Gameplay/Spawner/SpawnPoint.h"
+#include "Systems/BaseGameInstance.h"
 /*
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,6 +15,11 @@ void USpawnManager::Initialize(FSubsystemCollectionBase& _rCollection)
   m_currentRound = 0;
   m_spawnersOnHold = 0;
   m_currentState = ESpawnManagerState::WAITING;
+
+  if (UBaseGameInstance* gameInstance = Cast<UBaseGameInstance>(GetWorld()->GetGameInstance()))
+  {
+    timeBetweenRounds = gameInstance->timeBetweenRounds;
+  }
 
   /*
   for (TObjectPtr<ASpawnPoint> spawner : spawners)

@@ -49,11 +49,6 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Time between rounds"))
   float timeBetweenRounds;
 
-  /**
-   * @brief The spawnpoint to manage
-   */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bola 13", meta = (DisplayName = "Spawners"))
-  TArray<TObjectPtr<ASpawnPoint>> spawners;
 
   /**
    * @brief Defines if this manager is progressive or not
@@ -93,6 +88,12 @@ private:
    * @brief Saves the initializaed spawners
    */
   TSet<TObjectPtr<ASpawnPoint>> m_initializedSpawners;
+
+  /**
+   * @brief The spawnpoint to manage
+   */
+  UPROPERTY(EditAnywhere, Category = "Bola 13", meta = (DisplayName = "Spawners"))
+  TArray<TObjectPtr<ASpawnPoint>> spawners;
 
   /**
    * @brief Handles the timer set inbetween rounds
