@@ -12,6 +12,18 @@
 #include "GameFramework/SaveGame.h"
 #include "PlayerSaveGame.generated.h"
 
+USTRUCT(BlueprintType)
+struct FLeaderboardEntry
+{
+  GENERATED_BODY()
+
+  UPROPERTY()
+  FString playerName;
+
+  UPROPERTY()
+  int32 score = 0;
+};
+
 UCLASS()
 class PROJECTSINGULARITY_API UPlayerSaveGame : public USaveGame
 {
@@ -23,4 +35,10 @@ public:
    */
   UPROPERTY()
   FString m_sPlayerName;
+
+  /**
+   * @brief All leaderboard entries recorded on this machine, sorted by score descending.
+   */
+  UPROPERTY()
+  TArray<FLeaderboardEntry> m_leaderboardEntries;
 };

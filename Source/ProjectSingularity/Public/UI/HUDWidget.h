@@ -60,12 +60,6 @@ public:
   UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
   UImage* m_vignetteImage;
 
-  /**
-   * @brief Widget that displays the player's welcome message and name
-   */
-  UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-  UWelcomeWidget* m_welcomeWidget;
-
 private:
 
   /**
