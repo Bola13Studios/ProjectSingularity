@@ -1,9 +1,9 @@
 /************************************************************************
  * @description: This class defines an enemy spawner actor that is responsible
  *               for spawning enemy characters in the game.
- * @author: Lucia Fernandez
- * @date: 07/03/2026
- * @edited_by: Josephine - 17/04/2026
+ * @author: Lucia Fernandez & Josephine Esposito
+ * @date: 17/03/2026
+ * @edited_by: Josephine - 24/04/2026
  ************************************************************************/
 #pragma once
 
@@ -41,7 +41,7 @@ public:
    * @brief The list of enemies to spawn
    */
   UPROPERTY(EditAnywhere)
-  TArray<FEnemySpawnInfo> info;
+  TSubclassOf<ABaseEnemy> enemyClass;
 
   /**
    * @brief The total number of enemies to spawn per round
@@ -51,7 +51,7 @@ public:
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSpawnPointStateChanged, ESpawnPointState, State, ASpawnPoint*,
-                                            SpawnPoint);
+                                             SpawnPoint);
 
 /**
  * @brief This class defines an enemy spawner actor that is responsible
@@ -110,7 +110,7 @@ private:
   /**
    * @brief The class of enemies to spawn
    */
-  TArray<FEnemySpawnInfo> m_enemyTypes;
+  TSubclassOf<ABaseEnemy> m_enemyType;
 
   /**
    * @brief Handles the timer used to spawn enemies
@@ -139,12 +139,6 @@ public:
    * @param _roundIndex The index of the round to spawn
    */
   void Setup(int32 _roundIndex);
-
-  /**
-   * @brief Will return a random enemy class based on the received percentages
-   * @return A reference to the class to spawn
-   */
-  TSubclassOf<ABaseEnemy> GetRandomEnemyClass() const;
 
 protected:
   /**
