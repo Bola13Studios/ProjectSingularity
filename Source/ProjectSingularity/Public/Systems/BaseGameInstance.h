@@ -36,6 +36,13 @@ public:
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Can Save Stats"))
   bool canSaveStats = true;
+
+  /**
+   * @brief The wait time inbetween rounds
+   */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Project|Spawners",
+            meta = (DisplayName = "Time between rounds"))
+  float timeBetweenRounds = 10.0f;
   
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data Asset|Chaser Enemy",
             meta = (DisplayName = "Chaser Data Asset"))
