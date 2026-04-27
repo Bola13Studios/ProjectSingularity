@@ -6,10 +6,12 @@
 #include "ProjectSingularity/Public/Systems/GameManagerSubsystem.h"
 #include "ProjectSingularity/Public/Systems/PlayerSaveGame.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Components/HealthComponent.h"
 #include "Components/Hype/HypeComponent.h"
 #include "Components/Hype/PopularityComponent.h"
 #include "Gameplay/Character/Player/PlayerCharacter.h"
+#include "Systems/SpawnManager.h"
 
 #pragma region | PROTECTED METHODS
 
@@ -25,37 +27,29 @@ void AGameHUDSetUp::BeginPlay()
     gameManager->OnGameStateChanged.AddDynamic(this, &AGameHUDSetUp::OnGameStateChanged);
   }
 
-  if (ASpawnerManager* spawnerManager = Cast<ASpawnerManager>(
-    UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnerManager::StaticClass())))
+  if (m_bDebugShowLeaderboard)
+    GetWorldTimerManager().SetTimer(m_debugLeaderboardTimer, this, &AGameHUDSetUp::ShowLeaderboard, 5.0f, false);
+
+  if (USpawnManager* spawnManager = GetWorld()->GetSubsystem<USpawnManager>())
   {
-    spawnerManager->OnStateChange.AddDynamic(this, &AGameHUDSetUp::OnSpawnManagerStateChanged);
-    UE_LOG(LogTemp, Warning, TEXT("[HUD] SpawnerManager found and bound."));
+    spawnManager->OnStateChange.AddDynamic(this, &AGameHUDSetUp::OnSpawnManagerStateChanged);
+    UE_LOG(LogTemp, Warning, TEXT("[HUD] SpawnManager found and bound."));
   }
   else
   {
-    UE_LOG(LogTemp, Error, TEXT("[HUD] SpawnerManager NOT found in level."));
+    UE_LOG(LogTemp, Error, TEXT("[HUD] SpawnManager subsystem NOT found."));
   }
 
-  // Try to load a saved player name from a previous session
-  if (UGameplayStatics::DoesSaveGameExist(TEXT("PlayerData"), 0))
+  if (UBaseGameInstance* gi = Cast<UBaseGameInstance>(GetGameInstance()))
   {
-    UPlayerSaveGame* saveGame = Cast<UPlayerSaveGame>(
-      UGameplayStatics::LoadGameFromSlot(TEXT("PlayerData"), 0)
-    );
-
-    if (saveGame && !saveGame->m_sPlayerName.IsEmpty())
+    if (gi->m_bSkipNameEntry)
     {
-      if (UBaseGameInstance* gameInstance = Cast<UBaseGameInstance>(GetGameInstance()))
-      {
-        gameInstance->m_sessionData.m_sPlayerName = saveGame->m_sPlayerName;
-      }
+      gi->m_bSkipNameEntry = false;
 
-      // Name already known — skip the entry screen and go straight to gameplay
-      if (APlayerController* playerController = GetOwningPlayerController())
+      if (APlayerController* pc = GetOwningPlayerController())
       {
-        const FInputModeGameOnly inputMode = {};
-        playerController->SetInputMode(inputMode);
-        playerController->bShowMouseCursor = false;
+        pc->SetInputMode(FInputModeGameOnly());
+        pc->bShowMouseCursor = false;
       }
 
       InitializeAllGameMenus(false);
@@ -63,7 +57,6 @@ void AGameHUDSetUp::BeginPlay()
     }
   }
 
-  // No saved name — pause and show the name entry screen
   UGameplayStatics::SetGamePaused(GetWorld(), true);
 
   if (APlayerController* playerController = GetOwningPlayerController())
@@ -181,10 +174,20 @@ void AGameHUDSetUp::SaveSessionToLeaderboard(int32 score)
   }
   if (!saveGame) return;
 
-  FLeaderboardEntry entry;
-  entry.playerName = playerName;
-  entry.score = score;
-  saveGame->m_leaderboardEntries.Add(entry);
+  FLeaderboardEntry* existing = saveGame->m_leaderboardEntries.FindByPredicate(
+    [&playerName](const FLeaderboardEntry& e) { return e.playerName == playerName; });
+
+  if (existing)
+  {
+    existing->score = score;
+  }
+  else
+  {
+    FLeaderboardEntry entry;
+    entry.playerName = playerName;
+    entry.score = score;
+    saveGame->m_leaderboardEntries.Add(entry);
+  }
 
   saveGame->m_leaderboardEntries.Sort([](const FLeaderboardEntry& a, const FLeaderboardEntry& b)
   {
@@ -214,21 +217,59 @@ void AGameHUDSetUp::ShowLeaderboard()
 
   if (!m_leaderboardWidgetClass || !m_playerController) return;
 
-  constexpr int32 PlaceholderScore = 1000;
-  SaveSessionToLeaderboard(PlaceholderScore);
+  int32 score = 0;
+  if (APawn* pawn = m_playerController->GetPawn())
+  {
+    if (UHypeComponent* hypeComp = pawn->FindComponentByClass<UHypeComponent>())
+    {
+      score = hypeComp->GetHype();
+    }
+  }
+  SaveSessionToLeaderboard(score);
 
   TArray<FLeaderboardEntry> entries = LoadLeaderboard();
 
   m_leaderboardWidget = CreateWidget<ULeaderboardWidget>(m_playerController, m_leaderboardWidgetClass);
   if (!m_leaderboardWidget) return;
 
-  m_leaderboardWidget->PopulateLeaderboard(entries);
+  m_leaderboardWidget->OnQuitGame.AddDynamic(this, &AGameHUDSetUp::OnLeaderboardQuitGame);
+  m_leaderboardWidget->OnTryAgain.AddDynamic(this, &AGameHUDSetUp::OnLeaderboardTryAgain);
+  m_leaderboardWidget->OnTryAgainNewPlayer.AddDynamic(this, &AGameHUDSetUp::OnLeaderboardTryAgainNewPlayer);
+
   m_leaderboardWidget->AddToViewport();
   m_leaderboardWidget->ShowWidget();
+  m_leaderboardWidget->PopulateLeaderboard(entries);
+
+  UGameplayStatics::SetGamePaused(GetWorld(), true);
 
   const FInputModeUIOnly inputMode = {};
   m_playerController->SetInputMode(inputMode);
   m_playerController->bShowMouseCursor = true;
+}
+
+void AGameHUDSetUp::OnLeaderboardQuitGame()
+{
+  UKismetSystemLibrary::QuitGame(GetWorld(), m_playerController, EQuitPreference::Quit, false);
+}
+
+void AGameHUDSetUp::OnLeaderboardTryAgain()
+{
+  if (UBaseGameInstance* gi = Cast<UBaseGameInstance>(GetGameInstance()))
+  {
+    gi->m_bSkipNameEntry = true;
+  }
+
+  UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this, true)));
+}
+
+void AGameHUDSetUp::OnLeaderboardTryAgainNewPlayer()
+{
+  if (UBaseGameInstance* gi = Cast<UBaseGameInstance>(GetGameInstance()))
+  {
+    gi->m_bSkipNameEntry = false;
+  }
+
+  UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this, true)));
 }
 
 void AGameHUDSetUp::TryBindHUDToPawn() const

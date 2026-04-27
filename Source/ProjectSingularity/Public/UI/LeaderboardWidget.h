@@ -14,7 +14,10 @@
 #include "LeaderboardWidget.generated.h"
 
 class UScrollBox;
+class UButton;
 class ULeaderboardRowWidget;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeaderboardAction);
 
 UCLASS()
 class PROJECTSINGULARITY_API ULeaderboardWidget : public UCustomUserWidget
@@ -30,12 +33,27 @@ public:
   UPROPERTY(EditDefaultsOnly, Category = "UI")
   TSubclassOf<ULeaderboardRowWidget> m_rowWidgetClass;
 
+  UPROPERTY(BlueprintAssignable)
+  FOnLeaderboardAction OnQuitGame;
+
+  UPROPERTY(BlueprintAssignable)
+  FOnLeaderboardAction OnTryAgain;
+
+  UPROPERTY(BlueprintAssignable)
+  FOnLeaderboardAction OnTryAgainNewPlayer;
+
 private:
-  /**
-   * @brief Scroll container that holds the generated row widgets. Must be bound in UMG.
-   */
   UPROPERTY(meta = (BindWidget))
   TObjectPtr<UScrollBox> m_pEntriesBox;
+
+  UPROPERTY(meta = (BindWidget))
+  TObjectPtr<UButton> m_pQuitButton;
+
+  UPROPERTY(meta = (BindWidget))
+  TObjectPtr<UButton> m_pTryAgainButton;
+
+  UPROPERTY(meta = (BindWidget))
+  TObjectPtr<UButton> m_pTryAgainNewPlayerButton;
 
 #pragma endregion
 
@@ -47,6 +65,19 @@ public:
    * @param entries Sorted leaderboard entries to display.
    */
   void PopulateLeaderboard(const TArray<FLeaderboardEntry>& entries);
+
+protected:
+  virtual void NativeConstruct() override;
+
+private:
+  UFUNCTION()
+  void OnQuitClicked();
+
+  UFUNCTION()
+  void OnTryAgainClicked();
+
+  UFUNCTION()
+  void OnTryAgainNewPlayerClicked();
 
 #pragma endregion
 };

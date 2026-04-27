@@ -38,6 +38,11 @@ public:
   bool canSaveStats = true;
 
   /**
+   * @brief When true, BeginPlay skips the name entry screen and reuses the current session name.
+   */
+  bool m_bSkipNameEntry = false;
+
+  /**
    * @brief The wait time inbetween rounds
    */
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Project|Spawners",

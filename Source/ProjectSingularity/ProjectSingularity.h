@@ -14,5 +14,6 @@ public:
 private:
   void RegisterMenuExtensions();
   static void ClearAllSaveData();
+  static void ClearLeaderboardData();
 #endif
 };

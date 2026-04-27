@@ -12,7 +12,7 @@
 #include "Systems/PlayerSaveGame.h"
 #include "Utils/Types/GameStateEnum.h"
 #include "Gameplay/Character/Player/PlayerCharacter.h"
-#include "Gameplay/Spawner/SpawnerManager.h"
+#include "Systems/SpawnManager.h"
 #include "GameFramework/HUD.h"
 #include "GameHUDSetUp.generated.h"
 
@@ -136,6 +136,21 @@ private:
    * @brief Creates and shows the leaderboard widget populated with current entries.
    */
   void ShowLeaderboard();
+
+  UFUNCTION()
+  void OnLeaderboardQuitGame();
+
+  UFUNCTION()
+  void OnLeaderboardTryAgain();
+
+  UFUNCTION()
+  void OnLeaderboardTryAgainNewPlayer();
+
+  // DEBUG ONLY — remove before ship
+  UPROPERTY(EditDefaultsOnly, Category = "Debug")
+  bool m_bDebugShowLeaderboard = false;
+
+  FTimerHandle m_debugLeaderboardTimer;
 
 #pragma endregion
 };

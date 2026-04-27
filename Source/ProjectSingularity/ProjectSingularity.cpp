@@ -36,14 +36,30 @@ void FProjectSingularityModule::RegisterMenuExtensions()
     FSlateIcon(),
     FUIAction(FExecuteAction::CreateStatic(&FProjectSingularityModule::ClearAllSaveData))
   );
+
+  section.AddMenuEntry(
+    "ClearLeaderboardData",
+    NSLOCTEXT("ProjectSingularity", "ClearLeaderboard", "Clear Leaderboard"),
+    NSLOCTEXT("ProjectSingularity", "ClearLeaderboardTooltip", "Deletes only the leaderboard save slot."),
+    FSlateIcon(),
+    FUIAction(FExecuteAction::CreateStatic(&FProjectSingularityModule::ClearLeaderboardData))
+  );
 }
 
 void FProjectSingularityModule::ClearAllSaveData()
 {
   // Delete all save slots. Add new ones here as the game grows.
   UGameplayStatics::DeleteGameInSlot(TEXT("PlayerData"), 0);
+  UGameplayStatics::DeleteGameInSlot(TEXT("LeaderboardData"), 0);
 
   UE_LOG(LogTemp, Warning, TEXT("[SaveManager] All save data cleared."));
+}
+
+void FProjectSingularityModule::ClearLeaderboardData()
+{
+  UGameplayStatics::DeleteGameInSlot(TEXT("LeaderboardData"), 0);
+
+  UE_LOG(LogTemp, Warning, TEXT("[SaveManager] Leaderboard data cleared."));
 }
 
 #endif

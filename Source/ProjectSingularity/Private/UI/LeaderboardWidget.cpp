@@ -9,6 +9,25 @@
 #include "UI/LeaderboardWidget.h"
 #include "UI/LeaderboardRowWidget.h"
 #include "Components/ScrollBox.h"
+#include "Components/Button.h"
+
+void ULeaderboardWidget::NativeConstruct()
+{
+  Super::NativeConstruct();
+
+  if (m_pQuitButton)
+    m_pQuitButton->OnClicked.AddDynamic(this, &ULeaderboardWidget::OnQuitClicked);
+
+  if (m_pTryAgainButton)
+    m_pTryAgainButton->OnClicked.AddDynamic(this, &ULeaderboardWidget::OnTryAgainClicked);
+
+  if (m_pTryAgainNewPlayerButton)
+    m_pTryAgainNewPlayerButton->OnClicked.AddDynamic(this, &ULeaderboardWidget::OnTryAgainNewPlayerClicked);
+}
+
+void ULeaderboardWidget::OnQuitClicked()          { OnQuitGame.Broadcast(); }
+void ULeaderboardWidget::OnTryAgainClicked()      { OnTryAgain.Broadcast(); }
+void ULeaderboardWidget::OnTryAgainNewPlayerClicked() { OnTryAgainNewPlayer.Broadcast(); }
 
 void ULeaderboardWidget::PopulateLeaderboard(const TArray<FLeaderboardEntry>& entries)
 {
