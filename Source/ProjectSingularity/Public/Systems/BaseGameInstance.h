@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Systems/SessionData.h"
 #include "BaseGameInstance.generated.h"
 
 class UChaserEnemyDataAsset;
@@ -24,11 +25,22 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Version"))
   FName m_version;
 
+  /**
+   * @brief Holds the session data for the current play session.
+   */
+  UPROPERTY(BlueprintReadWrite, Category = "Session")
+  FSessionData m_sessionData;
+
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Can Save Events"))
   bool canSaveEvents = true;
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Project", meta = (DisplayName = "Can Save Stats"))
   bool canSaveStats = true;
+
+  /**
+   * @brief When true, BeginPlay skips the name entry screen and reuses the current session name.
+   */
+  bool m_bSkipNameEntry = false;
 
   /**
    * @brief The wait time inbetween rounds

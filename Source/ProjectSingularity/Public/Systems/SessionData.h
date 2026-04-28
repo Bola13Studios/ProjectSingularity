@@ -231,7 +231,14 @@ struct FSessionData
   GENERATED_BODY()
 
   UPROPERTY()
-  FName playerName;
+  TMap<FName, float> stats;
+
+  /**
+   * @brief The player's display name entered at the start of the session.
+   */
+  UPROPERTY()
+  FString m_sPlayerName;
+
   UPROPERTY()
   FName version;
 

@@ -19,6 +19,7 @@ class UHypeComponent;
 class UPopularityWidget;
 class UPopularityComponent;
 class AWeaponBase;
+class UWelcomeWidget;
 
 UCLASS()
 class PROJECTSINGULARITY_API UHUDWidget : public UUserWidget
