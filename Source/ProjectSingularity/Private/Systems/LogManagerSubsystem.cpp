@@ -8,12 +8,18 @@
 #include <Serialization/JsonWriter.h>
 #include <Serialization/JsonSerializer.h>
 #include "JsonObjectConverter.h"
+#include "Utils/Types/GameStateEnum.h"
 
 void ULogManagerSubsystem::Initialize(FSubsystemCollectionBase& _rCollection)
 {
   Super::Initialize(_rCollection);
 
   UE_LOG(LogTemp, Log, TEXT("[MICHAEL.JSON] Logger Initialized!!"));
+
+  if (auto* GameManager = GetGameInstance()->GetSubsystem<UGameManagerSubsystem>())
+  {
+    GameManager->OnGameStateChanged.AddDynamic(this, &ULogManagerSubsystem::HandleGameStateChanged);
+  }
 }
 
 void ULogManagerSubsystem::Deinitialize()
@@ -38,7 +44,8 @@ void ULogManagerSubsystem::Deinitialize()
 
     if (UGameManagerSubsystem* gameManager = GI->GetSubsystem<UGameManagerSubsystem>())
     {
-      SaveSessionJSON(gameManager->GetAllData());
+      //SaveSessionJSON(gameManager->GetAllData());
+      gameManager->OnGameStateChanged.RemoveAll(this);
     }
   }
 
@@ -89,7 +96,8 @@ void ULogManagerSubsystem::SaveSessionJSON(const FSessionData& _data)
 {
   FString output;
 
-  if (FJsonObjectConverter::UStructToJsonObjectString(FSessionData::StaticStruct(), &_data, output, 0, 0, 0, nullptr, true))
+  if (FJsonObjectConverter::UStructToJsonObjectString(FSessionData::StaticStruct(), &_data, output, 0, 0, 0, nullptr,
+                                                      true))
   {
     FString filePath = GenerateFilePath("Stats") + TEXT(".json");
 
@@ -105,6 +113,23 @@ void ULogManagerSubsystem::SaveSessionJSON(const FSessionData& _data)
   else
   {
     UE_LOG(LogTemp, Error, TEXT("[JSON] Serialization FAILED"));
+  }
+}
+
+void ULogManagerSubsystem::HandleGameStateChanged(EGameState eNewGameState)
+{
+  UE_LOG(LogTemp, Warning, TEXT("GameState changed: %d"), (int32)eNewGameState);
+
+  if (eNewGameState == EGameState::GAMEOVER)
+  {
+    UE_LOG(LogTemp, Warning, TEXT("GAME OVER -> Saving session data"));
+    if (UGameInstance* GI = GetGameInstance())
+    {
+      if (UGameManagerSubsystem* gameManager = GI->GetSubsystem<UGameManagerSubsystem>())
+      {
+        SaveSessionJSON(gameManager->GetAllData());
+      }
+    }
   }
 }
 

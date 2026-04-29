@@ -68,6 +68,11 @@ void USpawnManager::RegisterSpawnPoint(TObjectPtr<ASpawnPoint> _inSpawner)
   }
 
   UE_LOG(LogTemp, Warning, TEXT("Spawnpoint %s successfully registered!"), *_inSpawner->GetName());
+
+  if (m_currentState == ESpawnManagerState::WAITING && spawners.Num() > 0)
+  {
+    Activate(0.2f);
+  }
 }
 
 void USpawnManager::Activate(float _delay)
@@ -80,6 +85,8 @@ void USpawnManager::Activate(float _delay)
   }
   // rounds already started
   if (m_currentState == ESpawnManagerState::ONGOING) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("Activate called, spawners: %d"), spawners.Num());
 
   GetWorld()->GetTimerManager().ClearTimer(m_roundTimerHandle);
   GetWorld()->GetTimerManager().SetTimer(m_roundTimerHandle, this, &USpawnManager::SetupRound, _delay, false);

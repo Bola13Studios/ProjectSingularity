@@ -61,6 +61,9 @@ public:
    */
   void SaveSessionJSON(const FSessionData& _data);
 
+  UFUNCTION()
+  void HandleGameStateChanged(EGameState eNewGameState);
+
 private:
   /**
    * @brief Will generate the path for the file to generate
